@@ -42,3 +42,23 @@
 `.github/workflows/ci.yml` runs `make test` and `make apk` on pushes and PRs, uploads the APK as an
 artifact, and attaches it to a GitHub release when you push a `v*` tag. It uses only standard
 actions, so it should also run on Forgejo/Gitea Actions with an Ubuntu runner that has the Android SDK.
+
+## Nightly iteration (Claude Code routine)
+
+A Claude Code **routine** runs `.claude/iterate-prompt.md` on a schedule in Anthropic's cloud: it works FEEDBACK.md,
+then ROADMAP.md, writes a test first, gets `make test` green, and opens a `claude/` pull request. It never merges,
+releases, or tags; you review, merge, then `make release` and `make install` (or let CI build the APK).
+
+Setup, once:
+1. Push this repo to a **private** GitHub repo and install the Claude GitHub app on it.
+2. claude.ai/code/routines → New routine (or `/schedule` in Claude Code):
+   - Prompt: the contents of `.claude/iterate-prompt.md`
+   - Repository: this repo
+   - Environment: a new environment whose **Setup script** is `tools/cloud-setup.sh`. If the Playwright download is
+     blocked, add `cdn.playwright.dev` and `playwright.download.prss.microsoft.com` to its allowed hosts.
+     No secrets needed: tests use a fake Azure.
+   - Trigger: Schedule → Daily (e.g. 2:30 AM)
+3. Each morning: read the PR, try it with `make dev` or the CI APK artifact, merge or comment.
+
+Prefer your own hardware? `tools/iterate-local.sh` does the same with `claude -p` from cron.
+Runs count against your Claude plan's usage.
