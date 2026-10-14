@@ -283,6 +283,19 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .preview-wrap.painting::after{content:"🪄 Painting with magic…";position:absolute;inset:0;display:grid;place-items:center;background:rgba(43,22,80,.72);color:#fff;font-size:20px;font-weight:700;border-radius:18px;animation:glow 1.4s ease-in-out infinite}
 @keyframes glow{50%{background:rgba(123,75,224,.72)}}
 .voiceset input{font-family:inherit;font-size:15px;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:var(--chip);color:var(--ink);width:100%;margin:4px 0;user-select:text;-webkit-user-select:text}
+.speedrow{display:flex;gap:8px;justify-content:center;margin-top:10px}
+.speedrow button{padding:10px 16px;border-radius:99px;background:var(--surface);box-shadow:0 3px 0 var(--line);font-size:17px;font-weight:600}
+.speedrow button.on{background:var(--violet);color:#fff}
+.nt-p.turn{box-shadow:0 0 0 5px var(--gold),0 0 26px rgba(255,201,74,.7)}
+.nt-banner{background:var(--surface);border-radius:22px;padding:12px 14px;margin:0 0 10px;box-shadow:0 4px 0 var(--line);text-align:center}
+.nt-banner .ntwho{font-size:24px;font-weight:700}
+.nt-steps{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:8px 0}
+.nt-steps span{padding:6px 10px;border-radius:99px;background:var(--chip);font-size:15px;font-weight:600;color:var(--muted)}
+.nt-steps span.now{background:var(--gold);color:#2B1650}
+.nt-steps span.past{opacity:.45;text-decoration:line-through}
+.nt-turnbtns{display:flex;gap:10px;justify-content:center}
+.nt-turnbtns button{padding:12px 18px;border-radius:99px;font-size:18px;font-weight:700;background:var(--violet);color:#fff}
+.nt-turnbtns button.alt{background:var(--chip);color:var(--ink)}
 /* celebration */
 .celebrate{position:fixed;inset:0;background:rgba(20,8,48,.82);display:grid;place-items:center;z-index:20;padding:24px}
 .celebrate .box{background:var(--surface);border-radius:30px;padding:18px;max-width:420px;width:100%;text-align:center;animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
@@ -346,6 +359,7 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
           <button id="cloudVoiceTest">🔊 Test</button></div>
       </div>
       <div class="voiceset"><b>Reading voice</b>
+        <div class="rowbtns"><button data-quiet="0">🔔 Chimes on</button><button data-quiet="1">🤫 Quiet car (voice only)</button></div>
         <div class="rowbtns"><button data-rate="0.8">Slower</button><button data-rate="1">Normal</button><button data-rate="1.15">Faster</button></div>
         <div class="rowbtns"><select id="voiceSel" aria-label="Voice"></select><button id="voiceTest">🔊 Test</button><button id="ttsSettings" class="hidden">Tablet voice settings</button></div>
       </div>
@@ -470,6 +484,7 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
     <div class="stage bub-top"><img id="bbArt" alt=""><div><div class="bb-name" id="bbName"></div><div class="slots" id="bbSlots"></div></div></div>
     <div class="bubfield" id="bubField"></div>
     <div class="hint" id="bbHint"></div>
+    <div class="speedrow"><button data-bspeed="slow">🐢 Slow</button><button data-bspeed="normal">🐇 Normal</button><button data-bspeed="fast">⚡ Fast</button></div>
     <div style="text-align:center"><button class="next hidden" id="bbNext">Next spell ✨</button></div>
   </section>
 
@@ -482,6 +497,11 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
       <button class="save" id="ntStart">Start the game ❤️</button>
     </div>
     <div id="ntGame" class="hidden">
+      <div class="nt-banner" id="ntBanner">
+        <div class="ntwho" id="ntWho">Tap "Next turn" to start!</div>
+        <div class="nt-steps" id="ntSteps"></div>
+        <div class="nt-turnbtns"><button class="alt" id="ntNextStep">Next step ▶</button><button id="ntNextTurn">Next turn ⏭</button></div>
+      </div>
       <div class="nt-board" id="ntBoard"></div>
       <div class="nt-roll" id="ntRoll"></div>
       <div class="nt-tools">
@@ -624,7 +644,10 @@ $("voiceBtn").onclick = () => { voiceOn = !voiceOn; if (!voiceOn) stopSpeech(); 
 updVoiceBtn();
 
 let ac = null;
+let quietCar = load("luna_quiet", false), tonesPlayed = 0;
 function tone(freqs, dur = 0.12, type = "triangle", gap = 0.09, vol = 0.18){
+  if (quietCar) return;
+  tonesPlayed++;
   try {
     ac = ac || new (window.AudioContext || window.webkitAudioContext)();
     if (ac.state === "suspended") ac.resume();
@@ -642,6 +665,9 @@ const plink = c => tone([c === "U" ? 660 : c === "R" ? 523 : 587], 0.08, "sine")
 const boop = () => tone([330, 262], 0.12, "sine", 0.12);
 const tick = n => tone([440 + n * 70], 0.06, "sine", 0.05, 0.14);
 
+function renderQuiet(){ document.querySelectorAll("[data-quiet]").forEach(b => b.classList.toggle("on", (b.dataset.quiet === "1") === !!quietCar)); }
+document.querySelectorAll("[data-quiet]").forEach(b => b.onclick = () => { quietCar = b.dataset.quiet === "1"; store("luna_quiet", quietCar); renderQuiet(); say(quietCar ? "Quiet car. Just my voice now." : "Chimes are back!"); if (!quietCar) chime(); });
+renderQuiet();
 document.querySelectorAll("[data-rate]").forEach(b => b.onclick = () => { rateMul = +b.dataset.rate; store("luna_rate", rateMul); renderVoiceSettings(); say("This is how fast I'll read."); });
 document.getElementById("voiceSel").onchange = e => { voicePref = e.target.value; store("luna_voicename", voicePref); pickVoice(); say("Hi Luna! This is my new voice."); };
 document.getElementById("voiceTest").onclick = () => say("Hi Luna! Sparkle sparkle! Let's cast a spell.");
@@ -1521,6 +1547,14 @@ $("stNew").onclick = () => openStudioPaint(null);
 
 /* ---------- MANA BUBBLES ---------- */
 const bb = { card: null, slots: [], timer: null, on: false, nagAt: 0, last: null };
+const BUB_SPEEDS = { slow: { min: 9.5, spread: 2.5, every: 1150, say: "Slow and floaty." }, normal: { min: 6.2, spread: 2.4, every: 820, say: "Normal speed." }, fast: { min: 4.2, spread: 1.6, every: 620, say: "Super fast bubbles!" } };
+let bubSpeed = load("luna_bubspeed", "normal"); if (!BUB_SPEEDS[bubSpeed]) bubSpeed = "normal";
+function renderBubSpeed(){ document.querySelectorAll("[data-bspeed]").forEach(b => b.classList.toggle("on", b.dataset.bspeed === bubSpeed)); }
+document.querySelectorAll("[data-bspeed]").forEach(b => b.onclick = () => {
+  bubSpeed = b.dataset.bspeed; store("luna_bubspeed", bubSpeed); renderBubSpeed(); say(BUB_SPEEDS[bubSpeed].say);
+  if (bb.on){ clearInterval(bb.timer); $("bubField").innerHTML = ""; spawnBubble(); bb.timer = setInterval(spawnBubble, BUB_SPEEDS[bubSpeed].every); }
+});
+renderBubSpeed();
 const BUB_SVG = { U: `<svg viewBox="0 0 24 24"><path d="${SYM_PATH.U}" fill="#fff"/></svg>`, R: `<svg viewBox="0 0 24 24"><path d="${SYM_PATH.R}" fill="#fff"/></svg>` };
 function stopBubbles(){ bb.on = false; clearInterval(bb.timer); bb.timer = null; $("bubField").innerHTML = ""; }
 function renderSlots(){
@@ -1537,7 +1571,7 @@ function newBubbles(){
   bb.slots = []; for (let i = 0; i < bb.card.u; i++) bb.slots.push({ k: "U" }); for (let i = 0; i < bb.card.r; i++) bb.slots.push({ k: "R" }); for (let i = 0; i < bb.card.g; i++) bb.slots.push({ k: "N" });
   $("bbArt").src = bb.card.img; $("bbName").textContent = bb.card.name; renderSlots();
   $("bbHint").textContent = "Pop the bubbles to fill the circles!";
-  bb.on = true; spawnBubble(); bb.timer = setInterval(spawnBubble, 820);
+  bb.on = true; spawnBubble(); bb.timer = setInterval(spawnBubble, BUB_SPEEDS[bubSpeed].every);
   say(`Pop bubbles to cast ${bb.card.say}! You need ${needWords()}.`);
 }
 function spawnBubble(){
@@ -1549,7 +1583,7 @@ function spawnBubble(){
   const b = document.createElement("button"); b.className = "bub " + k; b.innerHTML = BUB_SVG[k];
   b.setAttribute("aria-label", k === "U" ? "Blue bubble" : "Red bubble");
   b.style.left = Math.round(8 + Math.random() * Math.max(10, W_ - 100)) + "px";
-  b.style.setProperty("--d", (6.2 + Math.random() * 2.4).toFixed(2) + "s"); b.style.setProperty("--h", (H_ + 200) + "px");
+  const sp = BUB_SPEEDS[bubSpeed]; b.style.setProperty("--d", (sp.min + Math.random() * sp.spread).toFixed(2) + "s"); b.style.setProperty("--h", (H_ + 200) + "px");
   b.addEventListener("animationend", ev => { if (ev.animationName === "rise" || ev.animationName === "popout") b.remove(); });
   b.addEventListener("pointerdown", ev => { ev.preventDefault(); popBubble(b, k); });
   f.appendChild(b);
@@ -1579,7 +1613,7 @@ let night = load("luna_night", { count: 2, life: 20, names: ["Luna", "Dad", "Pla
 let ntSpeak = {};
 function saveNight(){ store("luna_night", night); }
 function openNight(){
-  if (night.players){ $("ntSetup").classList.add("hidden"); $("ntGame").classList.remove("hidden"); renderBoard(); say("Game night! Tap plus or minus to change life."); }
+  if (night.players){ $("ntSetup").classList.add("hidden"); $("ntGame").classList.remove("hidden"); renderBoard(); renderTurn(); say("Game night! Tap plus or minus to change life."); }
   else { $("ntSetup").classList.remove("hidden"); $("ntGame").classList.add("hidden"); renderNightSetup(); say("Game night! How many players?"); }
 }
 function renderNightSetup(){
@@ -1595,9 +1629,31 @@ function renderNightSetup(){
     nm.appendChild(inp);
   }
 }
+const NT_STEPS = [
+  ["Untap", "Untap! Turn all your cards straight."], ["Draw", "Draw a card."], ["Land", "Play a land, if you have one."],
+  ["Cast spells", "Cast spells! Count your mana."], ["Attack!", "Attack! Pick who to attack, then block and count damage."], ["Done", "Say done! Next player's turn."]
+];
+function renderTurn(){
+  const has = night.players && night.turn != null && night.players[night.turn];
+  $("ntWho").textContent = has ? `🌟 ${night.players[night.turn].name}'s turn` : "Tap \"Next turn\" to start!";
+  $("ntSteps").innerHTML = NT_STEPS.map((st, i) => `<span class="${has && i === night.step ? "now" : has && i < night.step ? "past" : ""}">${st[0]}</span>`).join("");
+  $("ntNextStep").classList.toggle("hidden", !has);
+}
+$("ntNextTurn").onclick = () => {
+  const n = night.players.length; let t = night.turn == null ? -1 : night.turn;
+  for (let k = 0; k < n; k++){ t = (t + 1) % n; if (night.players[t].life > 0) break; }
+  night.turn = t; night.step = 0; saveNight(); renderBoard(); renderTurn(); tone([523, 784], 0.1);
+  say(`${night.players[t].name}'s turn! ${NT_STEPS[0][1]}`);
+};
+$("ntNextStep").onclick = () => {
+  if (night.turn == null) return;
+  night.step = Math.min(NT_STEPS.length - 1, (night.step || 0) + 1); saveNight(); renderTurn(); tick(night.step + 2);
+  say(NT_STEPS[night.step][1]);
+};
 $("ntStart").onclick = () => {
   night.players = Array.from({ length: night.count }, (_, i) => ({ name: (night.names[i] || `Player ${i + 1}`).trim() || `Player ${i + 1}`, life: night.life, out: false }));
-  saveNight(); $("ntSetup").classList.add("hidden"); $("ntGame").classList.remove("hidden"); $("ntRoll").textContent = ""; renderBoard();
+  night.turn = null; night.step = 0;
+  saveNight(); $("ntSetup").classList.add("hidden"); $("ntGame").classList.remove("hidden"); $("ntRoll").textContent = ""; renderBoard(); renderTurn();
   fanfare(); say(`Let's play! Everyone starts with ${night.life} life.`);
 };
 function renderBoard(){
@@ -1605,7 +1661,7 @@ function renderBoard(){
   night.players.forEach((pl, i) => {
     const d = document.createElement("div");
     const flip = night.flip && (night.players.length === 2 ? i === 0 : i < 2);
-    d.className = "nt-p" + (flip ? " flip" : "") + (pl.life <= 0 ? " out" : ""); d.style.background = NT_COLORS[i];
+    d.className = "nt-p" + (flip ? " flip" : "") + (pl.life <= 0 ? " out" : "") + (night.turn === i ? " turn" : ""); d.style.background = NT_COLORS[i];
     d.innerHTML = `<div class="nm"></div><button class="tap" aria-label="Lose 1 life">−</button><div class="life">${pl.life <= 0 ? "💤" : pl.life}</div><button class="tap" aria-label="Gain 1 life">+</button>
       <div class="delta"></div><div class="five"><button>−5</button><button>+5</button></div>`;
     d.querySelector(".nm").textContent = pl.name;
@@ -1632,7 +1688,7 @@ $("ntCoin").onclick = () => { const h = Math.random() < 0.5, r = $("ntRoll"); r.
 $("ntFirst").onclick = () => {
   const r = $("ntRoll"), names = night.players.map(p => p.name); let k = 0;
   const spin = setInterval(() => { r.textContent = "👑 " + names[k++ % names.length]; tick(k % 8); }, 110);
-  setTimeout(() => { clearInterval(spin); const w = rnd(names); r.classList.remove("spin"); void r.offsetWidth; r.classList.add("spin"); r.textContent = `👑 ${w} goes first!`; fanfare(); say(`${w} goes first!`); }, 1500);
+  setTimeout(() => { clearInterval(spin); const w = rnd(names); night.turn = names.indexOf(w); night.step = 0; saveNight(); renderBoard(); renderTurn(); r.classList.remove("spin"); void r.offsetWidth; r.classList.add("spin"); r.textContent = `👑 ${w} goes first!`; fanfare(); say(`${w} goes first!`); }, 1500);
 };
 $("ntFlip").onclick = () => { night.flip = !night.flip; saveNight(); renderBoard(); tick(3); };
 $("ntNew").onclick = () => { if (!confirm("Start a new game?")) return; night.players = null; saveNight(); openNight(); };

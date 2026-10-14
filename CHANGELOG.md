@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- Mana Bubbles: 🐢 Slow / 🐇 Normal / ⚡ Fast speed, remembered; switching restarts the bubbles at the new speed.
+- Game Night: turn helper. "Next turn" passes to the next player who's still in, highlights their panel, and reads the turn steps (Untap, Draw, Land, Cast spells, Attack!, Done); "Who goes first?" starts the first turn.
+- Quiet car mode in For grown-ups: voice only, no chimes.
+- Nightly iteration setup: CLAUDE.md, routine prompt, cloud setup script, FEEDBACK.md inbox.
 
 ## 1.3.0 (2026-10-14)
 - Spell Car server (`server/`): self-hosted, stdlib-only bridge to Azure OpenAI and Azure AI Speech. Keys stay on the server; endpoints accept only structured input; daily caps; Docker Compose.

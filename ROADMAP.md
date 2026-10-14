@@ -4,11 +4,11 @@ The nightly routine (see DEVELOPMENT.md) takes the top unchecked item under **Ne
 Reorder freely; each item should be small enough for one PR, with a clear "done when".
 
 ## Next
-- [ ] **Mana Bubbles speed setting** (slow / normal). Done when: a toggle on the Mana Bubbles screen, saved, tested.
-- [ ] **Turn helper in Game Night**: "whose turn" banner + the turn steps read aloud. Done when: a Next turn button cycles players and speaks the step list.
-- [ ] **Quiet car mode**: voice only, no chimes, saved in For grown-ups. Done when: tone() is silent in quiet mode, tested.
-- [ ] **Second-deck edition**: a build flavor around a second First Flight deck (white-blue flyers), with his own
-      deck art, Wing Commander stickers, and harder math (bigger costs, combat with flying/reach). Split into slices.
+- [ ] **Second-deck edition, slice 1: deck switcher.** Add First Flight card data (white/blue, with art) and a "Whose deck?"
+      picker so every game can use the second deck's cards. Done when: switching decks changes Window Magic, Count, Who Wins, and Memory; tested.
+- [ ] **Second-deck edition, slice 2: flying & reach in Who Wins.** Flyers can only be blocked by flying/reach; harder questions for older kids.
+- [ ] **Sticker book page**: drag earned stickers onto a scene (castle, sky, meadow) and save it. Done when: placements persist and back up.
+- [ ] **Cloud voice cache**: keep recent neural-voice clips on the device so repeated phrases work offline in the car.
 - [ ] **Coloring pages**: outline versions of her deck's art to color in Art Studio.
 - [ ] **Turn helper for real games**: in Game Night, a big "whose turn" banner with the 6 turn steps read aloud.
 

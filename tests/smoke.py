@@ -171,6 +171,41 @@ async def android_tts_bridge(pg, mode):
     assert spoken and spoken[-1]["v"] == "en-gb-b", "voice choice not passed to native TTS"
     assert await pg.evaluate("document.fonts.check('700 20px Fredoka')"), "bundled font not loaded"
 
+@test
+async def bubbles_speed(pg, mode):
+    await pg.click("[data-go=bubbles]")
+    await pg.click("[data-bspeed=slow]")
+    assert await pg.evaluate("load('luna_bubspeed', 'normal')") == "slow", "speed not saved"
+    await pg.wait_for_timeout(1300)
+    ds = await pg.evaluate("[...document.querySelectorAll('.bub')].map(b => parseFloat(b.style.getPropertyValue('--d')))")
+    assert ds and min(ds) >= 9, f"slow bubbles too fast: {ds}"
+    await pg.click("[data-bspeed=normal]"); await home(pg)
+
+@test
+async def quiet_car_mode(pg, mode):
+    await pg.evaluate("document.querySelector('.grownup').open = true")
+    await pg.click("[data-quiet='1']")
+    n0 = await pg.evaluate("tonesPlayed"); await pg.evaluate("chime(); boop(); plink('U')")
+    assert await pg.evaluate("tonesPlayed") == n0, "chimes played in quiet car mode"
+    await pg.click("[data-quiet='0']"); await pg.evaluate("chime()")
+    assert await pg.evaluate("tonesPlayed") > n0, "chimes not restored"
+
+@test
+async def game_night_turns(pg, mode):
+    await pg.click("[data-go=night]")
+    if await pg.is_visible("#ntStart"): await pg.click("#ntStart")
+    await pg.click("#ntNextTurn"); t1 = await pg.evaluate("night.turn")
+    name = await pg.evaluate("night.players[night.turn].name")
+    assert name in await pg.inner_text("#ntBanner"), "banner doesn't name the player"
+    w = await pg.evaluate("[document.getElementById('ntWho').offsetWidth, document.getElementById('ntBanner').offsetWidth]")
+    assert w[0] > w[1] * 0.8, f"turn banner text is squashed ({w})"
+    assert await pg.locator(".nt-p.turn").count() == 1, "current player not highlighted"
+    s0 = await pg.evaluate("night.step"); await pg.click("#ntNextStep")
+    assert await pg.evaluate("night.step") == s0 + 1, "step didn't advance"
+    await pg.click("#ntNextTurn")
+    assert await pg.evaluate("night.turn") != t1 and await pg.evaluate("night.step") == 0, "turn didn't pass"
+    await home(pg)
+
 STACK = None
 
 @test
