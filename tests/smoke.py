@@ -3,6 +3,8 @@
 runtime) and the Android build (fake AndroidBridge), and fails on any assertion or console error.
 Run: make test      Screenshots of failures land in build/test-shots/."""
 import asyncio, json, os, sys, traceback
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from stack import Stack, TOKEN, FakeAzure
 from playwright.async_api import async_playwright
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WEB = "file://" + os.path.join(ROOT, "dist", "web", "index.html")
@@ -169,12 +171,50 @@ async def android_tts_bridge(pg, mode):
     assert spoken and spoken[-1]["v"] == "en-gb-b", "voice choice not passed to native TTS"
     assert await pg.evaluate("document.fonts.check('700 20px Fredoka')"), "bundled font not loaded"
 
+STACK = None
+
+@test
+async def cloud_connect(pg, mode):
+    if mode != "android": return
+    await pg.evaluate("document.querySelector('.grownup').open = true")
+    assert await pg.is_visible("#cloudSet"), "server settings hidden on Android"
+    await pg.fill("#cloudUrl", STACK.url); await pg.fill("#cloudToken", "wrong-token"); await pg.click("#cloudConnect")
+    await pg.wait_for_function("document.getElementById('cloudStatus').textContent.includes('token')", timeout=5000)
+    await pg.fill("#cloudToken", TOKEN); await pg.click("#cloudConnect")
+    await pg.wait_for_function("document.getElementById('cloudStatus').textContent.includes('Connected')", timeout=5000)
+    assert await pg.is_visible("#storyTile"), "Story Time tile not shown after connecting"
+
+@test
+async def cloud_story(pg, mode):
+    if mode != "android": return
+    await pg.click("[data-go=story]"); await pg.click("#storyGo")
+    await pg.wait_for_function("document.getElementById('storyTitle').textContent === 'The Sparkle Parade'", timeout=8000)
+    await home(pg)
+
+@test
+async def cloud_ai_picture(pg, mode):
+    if mode != "android": return
+    await pg.click("[data-go=maker]"); assert await pg.is_visible("#artAI"), "AI picture button missing"
+    await pg.click("#artAI"); await pg.wait_for_function("draft.artBy === 'ai' && draft.art.startsWith('data:image/jpeg')", timeout=8000)
+    await home(pg)
+
+@test
+async def cloud_voice(pg, mode):
+    if mode != "android": return
+    n0 = len([x for x in FakeAzure.seen if "cognitive" in x[0]])
+    await pg.evaluate("document.querySelector('.grownup').open = true")
+    await pg.click("[data-cv=all]"); await pg.evaluate("say('Hello from the cloud')"); await pg.wait_for_timeout(1500)
+    assert len([x for x in FakeAzure.seen if "cognitive" in x[0]]) > n0, "cloud voice never requested"
+    await pg.click("[data-cv=off]"); calls0 = await pg.evaluate("window.__calls.length")
+    await pg.evaluate("say('Back to the tablet voice')"); await pg.wait_for_timeout(200)
+    assert await pg.evaluate(f"window.__calls.slice({calls0}).some(c => c && c.t === 'Back to the tablet voice')"), "tablet voice not used when cloud voice is off"
+
 async def run_mode(browser, mode):
     ctx = await browser.new_context(viewport={"width": 400, "height": 860}, has_touch=True)
     await ctx.add_init_script((FAKE_CLAUDE if mode == "web" else FAKE_ANDROID) + "if(!localStorage.getItem('luna_pets')){" + SEED_PETS + "}")
     pg = await ctx.new_page(); errors = []
     pg.on("pageerror", lambda e: errors.append(str(e)))
-    pg.on("console", lambda m: errors.append(m.text) if m.type == "error" and "fonts.g" not in m.text and "ERR_" not in m.text else None)
+    pg.on("console", lambda m: errors.append(m.text) if m.type == "error" and "fonts.g" not in m.text and "ERR_" not in m.text and not m.text.startswith("Failed to load resource") else None)
     await pg.goto(WEB if mode == "web" else AND); await pg.wait_for_timeout(700)
     fails = 0
     for fn in results:
@@ -193,10 +233,13 @@ async def run_mode(browser, mode):
     await ctx.close(); return fails
 
 async def main():
+    global STACK
+    STACK = Stack()
     async with async_playwright() as p:
         b = await p.chromium.launch()
         fails = await run_mode(b, "web") + await run_mode(b, "android")
         await b.close()
+    STACK.close()
     print("\n" + ("All smoke tests passed." if not fails else f"{fails} smoke test(s) failed. Screenshots in build/test-shots/"))
     sys.exit(1 if fails else 0)
 

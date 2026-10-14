@@ -21,6 +21,7 @@
 | Develop | `make dev` | Rebuilds on every save and serves at `http://localhost:8000`; the page reloads itself. Open `http://<computer-ip>:8000` on the tablet's browser to try it on the real screen. |
 | Check | `make check` | Static checks: duplicate names, `$("id")` references that don't exist, duplicate ids, home tiles without screens, storage keys saved but never loaded, card data shape. Seconds. |
 | Test | `make test` | `check` plus Playwright smoke tests that play every game in both builds: the web build with a fake claude.ai runtime, and the Android build with a fake `AndroidBridge` (TTS, file saving). Fails on any console error. Failure screenshots go to `build/test-shots/`. |
+| Server | `make server` | Runs the Spell Car server from `server/.env` (see server/README.md). Point the app at `http://<computer-ip>:8787`. |
 | Release | `make release PART=patch\|minor\|major` | Bumps `VERSION`, moves CHANGELOG's Unreleased notes under the new version, runs tests, builds the APK, commits, tags `vX.Y.Z`. |
 | Ship | `make install` | `adb install -r` onto the connected tablet. Her data is kept. |
 
@@ -30,7 +31,9 @@
 
 - Add a smoke test with every new game (see `tests/smoke.py`, one `@test` function per feature).
 - All saved data goes through `load()` / `store()` with a `luna_` key, and new kinds of data get added to Backup/Restore.
-- Everything must work offline in the Android build: no network fetches; vendor files go in `web/vendor/`.
+- Everything must work offline in the Android build. Network features go through the Spell Car server, must degrade
+  gracefully when it's unreachable, and get a fake-Azure test in `tests/stack.py`. Vendor files go in `web/vendor/`.
+- Never put API keys in the app. New AI features get a narrow, structured endpoint on the server.
 - Every prompt should be speakable (`say()`); a young child can't read most of the screen.
 - The web build is also published as a claude.ai artifact (that's where Story Time works).
 

@@ -279,6 +279,10 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .chips{display:flex;gap:8px;flex-wrap:wrap}
 .chips button{padding:12px 18px;border-radius:99px;background:var(--chip);font-size:18px;font-weight:600}
 .chips button.on{background:var(--violet);color:#fff}
+.preview-wrap{position:relative}
+.preview-wrap.painting::after{content:"🪄 Painting with magic…";position:absolute;inset:0;display:grid;place-items:center;background:rgba(43,22,80,.72);color:#fff;font-size:20px;font-weight:700;border-radius:18px;animation:glow 1.4s ease-in-out infinite}
+@keyframes glow{50%{background:rgba(123,75,224,.72)}}
+.voiceset input{font-family:inherit;font-size:15px;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:var(--chip);color:var(--ink);width:100%;margin:4px 0;user-select:text;-webkit-user-select:text}
 /* celebration */
 .celebrate{position:fixed;inset:0;background:rgba(20,8,48,.82);display:grid;place-items:center;z-index:20;padding:24px}
 .celebrate .box{background:var(--surface);border-radius:30px;padding:18px;max-width:420px;width:100%;text-align:center;animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
@@ -329,7 +333,18 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
       <p><b>Make a Creature:</b> she designs her own creature card. Stronger creatures cost more. Saved creatures appear in Window Magic, Count the Mana, and Who Wins.</p>
       <p><b>Story Time</b> asks Claude to write a short, gentle story starring the creatures she picks, then reads it aloud (it uses your Claude account, so it asks permission the first time). <b>Memory Match</b> is a flip-and-find pairs game. In <b>My Spellbook</b>, tap one of her creatures to edit it, and use <b>Print my creatures</b> to get a real-card-size PDF to cut out and sleeve.</p>
       <p><b>Rootha Says:</b> Simon Says, read aloud, no screen needed. You're the judge: if she moves when Rootha didn't say it, gotcha! Every correct answer earns a star, and every 10 stars earns a sticker in My Spellbook. Tap any question to hear it again. Everything is saved on this device only.</p>
-      <p><b>Mana Bubbles:</b> pop bubbles to pay a card's cost; colored slots need that color, gray slots take any. <b>Game Night</b> is a life counter (20 or 40 life, 2–4 players) with dice, a coin, and "who goes first." In Make a Creature she can <b>draw her own picture</b>, and <b>Art Studio</b> is free painting with a saved gallery. <b>Backup</b> in My Spellbook moves her creatures and stars between the tablet and the web version.</p>
+      <p><b>Mana Bubbles:</b> pop bubbles to pay a card's cost; colored slots need that color, gray slots take any. <b>Game Night</b> is a life counter (20 or 40 life, 2–4 players) with dice, a coin, and "who goes first." In Make a Creature she can <b>draw her own picture</b>, and <b>Art Studio</b> is free painting with a saved gallery. With a <b>Spell Car server</b> (below), the tablet app also gets Story Time, AI creature pictures, and natural neural voices from your Azure account. <b>Backup</b> in My Spellbook moves her creatures and stars between the tablet and the web version.</p>
+      <div class="voiceset hidden" id="cloudSet"><b>Spell Car server (Azure)</b>
+        <div class="pnote" style="margin:2px 0 6px">Adds Story Time, AI creature pictures, and natural voices. Uses your self-hosted Spell Car server; the Azure keys stay on the server.</div>
+        <input id="cloudUrl" placeholder="Server address, e.g. https://spellcar.example.com" autocomplete="off" inputmode="url">
+        <input id="cloudToken" placeholder="App token" type="password" autocomplete="off">
+        <div class="rowbtns"><button id="cloudConnect">Connect</button><span class="pnote" id="cloudStatus" style="align-self:center">Not set up</span></div>
+        <div class="rowbtns" id="cloudVoiceRow"><button data-cv="off">Tablet voice</button><button data-cv="stories">Cloud voice for stories</button><button data-cv="all">Cloud voice everywhere</button></div>
+        <div class="rowbtns"><select id="cloudVoiceSel" aria-label="Cloud voice">
+          <option value="en-US-AnaNeural">Ana (a kid's voice)</option><option value="en-US-JennyNeural">Jenny</option><option value="en-US-AriaNeural">Aria</option>
+          <option value="en-US-AvaNeural">Ava</option><option value="en-US-EmmaNeural">Emma</option><option value="en-US-GuyNeural">Guy</option></select>
+          <button id="cloudVoiceTest">🔊 Test</button></div>
+      </div>
       <div class="voiceset"><b>Reading voice</b>
         <div class="rowbtns"><button data-rate="0.8">Slower</button><button data-rate="1">Normal</button><button data-rate="1.15">Faster</button></div>
         <div class="rowbtns"><select id="voiceSel" aria-label="Voice"></select><button id="voiceTest">🔊 Test</button><button id="ttsSettings" class="hidden">Tablet voice settings</button></div>
@@ -357,7 +372,7 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
       <div class="preview-wrap"><div id="petPreview"></div></div>
       <div class="controls">
         <div class="ctrl"><h3>1. Pick a creature</h3><div class="pickrow" id="kindRow"></div></div>
-        <div class="ctrl"><h3>2. Picture</h3><div class="pickrow"><button class="pick txt" id="artMagic"><span style="font-size:24px">✨</span>Magic picture</button><button class="pick txt" id="artDraw"><span style="font-size:24px">🖍️</span>Draw it myself</button></div></div>
+        <div class="ctrl"><h3>2. Picture</h3><div class="pickrow"><button class="pick txt" id="artMagic"><span style="font-size:24px">✨</span>Magic picture</button><button class="pick txt" id="artDraw"><span style="font-size:24px">🖍️</span>Draw it myself</button><button class="pick txt hidden" id="artAI"><span style="font-size:24px">🪄</span>AI picture</button></div></div>
         <div class="ctrl"><h3>3. Pick a color</h3><div class="pickrow" id="colorRow"></div></div>
         <div class="ctrl"><h3>4. How strong?</h3>
           <div class="stepper"><div class="lab"><span id="swIco2"></span>Power</div><button data-st="p" data-d="-1" aria-label="Less power">−</button><div class="val" id="pVal">2</div><button data-st="p" data-d="1" aria-label="More power">+</button></div>
@@ -560,15 +575,52 @@ function renderVoiceSettings(){
   document.querySelectorAll("[data-rate]").forEach(b => b.classList.toggle("on", +b.dataset.rate === rateMul));
 }
 if ("speechSynthesis" in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
-function say(t, onend){
-  if (!voiceOn || !("speechSynthesis" in window)){ if (onend) setTimeout(onend, 1200); return; }
-  speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(t); u.rate = 0.92 * rateMul; u.pitch = 1.15; if (voice) u.voice = voice;
-  if (onend){ let done = false; const f = () => { if (!done){ done = true; onend(); } }; u.onend = f; setTimeout(f, 1500 + t.length * 75); }
+/* Speech engine: the device's voice, or a neural voice from the Spell Car server (Azure Speech).
+   speechGen invalidates callbacks from anything that was interrupted. */
+let speechGen = 0, curAudio = null;
+const ttsCache = new Map();
+function stopSpeech(){
+  speechGen++;
+  if ("speechSynthesis" in window) speechSynthesis.cancel();
+  if (curAudio){ try { curAudio.pause(); } catch (e) {} curAudio = null; }
+}
+function deviceSpeak(text, rate, pitch, done){
+  if (!("speechSynthesis" in window)){ setTimeout(done, 900 + text.length * 55); return; }
+  const u = new SpeechSynthesisUtterance(text); u.rate = rate * rateMul; u.pitch = pitch; if (voice) u.voice = voice;
+  u.onend = done; u.onerror = done; setTimeout(done, 2500 + text.length * 90);
   speechSynthesis.speak(u);
 }
+function useCloudVoice(kind){ return !!(cloudCaps && cloudCaps.tts) && (cloud.voiceMode === "all" || (cloud.voiceMode === "stories" && kind === "long")); }
+function cloudAudio(text){
+  const key = cloud.voice + "|" + rateMul + "|" + text;
+  if (ttsCache.has(key)) return ttsCache.get(key);
+  const pr = cloudFetch("/tts", { text, voice: cloud.voice, rate: 0.95 * rateMul }).then(r => r.blob()).then(b => URL.createObjectURL(b));
+  pr.catch(() => ttsCache.delete(key));
+  ttsCache.set(key, pr);
+  if (ttsCache.size > 80){ const k0 = ttsCache.keys().next().value; ttsCache.get(k0).then(u => URL.revokeObjectURL(u)).catch(() => {}); ttsCache.delete(k0); }
+  return pr;
+}
+function speakOne(text, opts, onDone){
+  const gen = speechGen; let fired = false;
+  const done = () => { if (!fired && gen === speechGen){ fired = true; onDone && onDone(); } };
+  if (!voiceOn){ setTimeout(done, 900 + text.length * 55); return; }
+  if (useCloudVoice(opts.kind)){
+    const fallback = () => { if (gen === speechGen) deviceSpeak(text, opts.rate, opts.pitch, done); };
+    cloudAudio(text).then(url => {
+      if (gen !== speechGen) return;
+      const a = new Audio(url); curAudio = a; a.onended = done; a.onerror = fallback;
+      a.play().catch(fallback);
+    }).catch(fallback);
+    return;
+  }
+  deviceSpeak(text, opts.rate, opts.pitch, done);
+}
+function say(t, onend){
+  stopSpeech();
+  speakOne(t, { rate: 0.92, pitch: 1.15, kind: current === "says" ? "long" : "short" }, onend);
+}
 function updVoiceBtn(){ $("voiceBtn").textContent = voiceOn ? "🔊" : "🔈"; $("voiceBtn").setAttribute("aria-label", voiceOn ? "Turn voice off" : "Turn voice on"); }
-$("voiceBtn").onclick = () => { voiceOn = !voiceOn; if (!voiceOn && "speechSynthesis" in window) speechSynthesis.cancel(); updVoiceBtn(); store("luna_voice2", voiceOn); if (voiceOn) say("Voice on!"); };
+$("voiceBtn").onclick = () => { voiceOn = !voiceOn; if (!voiceOn) stopSpeech(); updVoiceBtn(); store("luna_voice2", voiceOn); if (voiceOn) say("Voice on!"); };
 updVoiceBtn();
 
 let ac = null;
@@ -804,7 +856,7 @@ function renderMaker(){
   document.querySelectorAll("#colorRow .swatch").forEach(b => b.classList.toggle("on", b.dataset.c === draft.color));
   document.querySelectorAll("#powRow .pick").forEach(b => b.classList.toggle("on", b.dataset.p === draft.power));
   document.querySelectorAll("#accRow .pick").forEach(b => b.classList.toggle("on", b.dataset.a === (draft.acc || "none")));
-  $("artMagic").classList.toggle("on", !draft.art); $("artDraw").classList.toggle("on", !!draft.art);
+  $("artMagic").classList.toggle("on", !draft.art); $("artDraw").classList.toggle("on", !!draft.art && draft.artBy !== "ai"); $("artAI").classList.toggle("on", !!draft.art && draft.artBy === "ai");
   $("savePet").textContent = editId ? "Save changes ✨" : "Save to my Spellbook ✨";
   $("cancelEdit").classList.toggle("hidden", !editId);
   $("pVal").textContent = draft.p; $("tVal").textContent = draft.t;
@@ -1022,7 +1074,7 @@ window.__back = () => {
   if (!window.claude || !window.claude.use) return;
   try { sampleCap = await window.claude.use("sample"); } catch (e) {}
   try { downloadsCap = await window.claude.use("downloads"); } catch (e) {}
-  if (sampleCap){ $("storyTile").classList.remove("hidden"); $("pmStory").classList.remove("hidden"); }
+  updateStoryAvail();
   if (current === "book") renderBook();
 })();
 
@@ -1117,11 +1169,11 @@ function parseStory(text){
 }
 function stopStory(){
   reading = false; if (storyCtl){ try { storyCtl.abort(); } catch (e) {} storyCtl = null; }
-  if ("speechSynthesis" in window) speechSynthesis.cancel();
+  stopSpeech();
   document.querySelectorAll("#storyText .s.reading").forEach(x => x.classList.remove("reading"));
 }
 function readStory(){
-  if ("speechSynthesis" in window) speechSynthesis.cancel();
+  stopSpeech();
   const spans = [...document.querySelectorAll("#storyText .s")];
   const parts = [{ text: $("storyTitle").textContent, el: null }].concat(spans.map(el => ({ text: el.textContent, el })));
   reading = true; let i = 0;
@@ -1129,11 +1181,8 @@ function readStory(){
     document.querySelectorAll("#storyText .s.reading").forEach(x => x.classList.remove("reading"));
     if (!reading || i >= parts.length){ reading = false; return; }
     const part = parts[i++]; if (part.el) part.el.classList.add("reading");
-    if (!voiceOn || !("speechSynthesis" in window)){ setTimeout(next, 900 + part.text.length * 55); return; }
-    const u = new SpeechSynthesisUtterance(part.text); u.rate = 0.9 * rateMul; u.pitch = 1.12; if (voice) u.voice = voice;
-    let done = false; const f = () => { if (!done){ done = true; setTimeout(next, 180); } };
-    u.onend = f; u.onerror = f; setTimeout(f, 2500 + part.text.length * 90);
-    speechSynthesis.speak(u);
+    if (useCloudVoice("long") && parts[i]) cloudAudio(parts[i].text).catch(() => {});
+    speakOne(part.text, { rate: 0.9, pitch: 1.12, kind: "long" }, () => setTimeout(next, 180));
   };
   next();
 }
@@ -1141,7 +1190,7 @@ $("storyRead").onclick = readStory;
 $("storyStop").onclick = () => { stopStory(); };
 $("storyNew").onclick = () => { stopStory(); $("storyBox").classList.add("hidden"); $("storyPick").classList.remove("hidden"); scrollTo({ top: 0, behavior: "smooth" }); say("Pick who's in the next story!"); };
 $("storyGo").onclick = async () => {
-  if (!sampleCap) return;
+  if (!sampleCap && !(cloudCaps && cloudCaps.story)) return;
   stopStory();
   const opts = whoOptions(), chosen = storyWho.map(k => opts.find(o => o.key === k)).filter(Boolean);
   const place = PLACES.find(p => p.id === storyWhere);
@@ -1155,9 +1204,15 @@ Format: the first line is only the title (no quotes, no "Title:"). Then the stor
   say("Rootha is writing your story. Get cozy!");
   storyCtl = new AbortController(); let started = false;
   try {
-    const { text } = await sampleCap(prompt, { modelTier: "quick", cache: false, signal: storyCtl.signal, onText: ({ text }) => {
-      if (!text.trim()) return; started = true; const p = parseStory(text); showStory(p.title, p.body, true);
-    }});
+    let text;
+    if (sampleCap){
+      ({ text } = await sampleCap(prompt, { modelTier: "quick", cache: false, signal: storyCtl.signal, onText: ({ text }) => {
+        if (!text.trim()) return; started = true; const p = parseStory(text); showStory(p.title, p.body, true);
+      }}));
+    } else {
+      try { ({ text } = await (await cloudFetch("/story", { characters: chosen.map(c => c.desc), place: storyWhere }, storyCtl.signal)).json()); }
+      catch (e) { throw { code: e && e.name === "AbortError" ? "cancelled" : e && e.status === 429 ? "rate_limited" : "upstream_error" }; }
+    }
     storyCtl = null;
     const p = parseStory(text); if (!p.body) throw { code: "empty_completion" };
     showStory(p.title, p.body);
@@ -1352,11 +1407,84 @@ $("pDone").onclick = () => {
   if (paintMode === "studio") return finishStudio();
   const out = document.createElement("canvas"); out.width = 480; out.height = 360; const ox = out.getContext("2d");
   ox.fillStyle = "#fff"; ox.fillRect(0, 0, 480, 360); ox.drawImage(pc, 0, 0, 480, 360);
-  draft.art = out.toDataURL("image/jpeg", 0.72);
+  draft.art = out.toDataURL("image/jpeg", 0.72); draft.artBy = "draw";
   $("paint").classList.add("hidden"); renderMaker(); chime(); burst(14); say("Beautiful! That's your creature's picture.");
 };
 $("artDraw").onclick = () => { openPaint(); };
-$("artMagic").onclick = () => { delete draft.art; renderMaker(); tick(4); say("Magic picture!"); };
+$("artMagic").onclick = () => { delete draft.art; delete draft.artBy; renderMaker(); tick(4); say("Magic picture!"); };
+
+/* ---------- SPELL CAR SERVER (Azure) ---------- */
+let cloud = load("luna_cloud", { url: "", token: "", voiceMode: "stories", voice: "en-US-AnaNeural" }), cloudCaps = null;
+const cloudBase = () => (cloud.url || "").trim().replace(/\/+$/, "");
+async function cloudFetch(path, body, signal){
+  const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), path === "/image" ? 150000 : 60000);
+  if (signal) signal.addEventListener("abort", () => ctl.abort());
+  try {
+    const r = await fetch(cloudBase() + path, { method: body ? "POST" : "GET", signal: ctl.signal,
+      headers: Object.assign({ Authorization: "Bearer " + (cloud.token || "").trim() }, body ? { "Content-Type": "application/json" } : {}),
+      body: body ? JSON.stringify(body) : undefined });
+    if (!r.ok){ let msg = ""; try { msg = (await r.json()).error; } catch (e) {} throw { status: r.status, message: msg || ("HTTP " + r.status) }; }
+    return r;
+  } finally { clearTimeout(t); }
+}
+function updateStoryAvail(){
+  const ok = !!sampleCap || !!(cloudCaps && cloudCaps.story);
+  $("storyTile").classList.toggle("hidden", !ok); $("pmStory").classList.toggle("hidden", !ok);
+}
+function refreshCloudUI(msg){
+  if (msg !== undefined) $("cloudStatus").textContent = msg;
+  else if (cloudCaps){ const on = [["story", "stories"], ["image", "pictures"], ["tts", "voices"]].filter(([k]) => cloudCaps[k]).map(x => x[1]);
+    $("cloudStatus").textContent = "✅ Connected: " + (on.join(", ") || "nothing enabled yet"); }
+  else if (!cloudBase()) $("cloudStatus").textContent = "Not set up";
+  $("artAI").classList.toggle("hidden", !(cloudCaps && cloudCaps.image));
+  $("cloudVoiceRow").classList.toggle("hidden", !(cloudCaps && cloudCaps.tts));
+  $("cloudVoiceSel").parentElement.classList.toggle("hidden", !(cloudCaps && cloudCaps.tts));
+  document.querySelectorAll("[data-cv]").forEach(b => b.classList.toggle("on", b.dataset.cv === cloud.voiceMode));
+  $("cloudVoiceSel").value = cloud.voice;
+  updateStoryAvail();
+}
+async function cloudConnect(quiet){
+  cloudCaps = null;
+  if (!cloudBase()){ refreshCloudUI(); return; }
+  if (!quiet) refreshCloudUI("Connecting…");
+  try { cloudCaps = await (await cloudFetch("/health")).json(); refreshCloudUI(); if (!quiet) say("Connected to the Spell Car server!"); }
+  catch (e) { refreshCloudUI(e && e.status === 401 ? "❌ The token doesn't match the server." : "❌ Can't reach the server. Check the address and that the tablet is online."); }
+}
+if (!window.claude){
+  $("cloudSet").classList.remove("hidden");
+  $("cloudUrl").value = cloud.url || ""; $("cloudToken").value = cloud.token || "";
+  $("cloudConnect").onclick = () => { cloud.url = $("cloudUrl").value.trim(); cloud.token = $("cloudToken").value.trim(); store("luna_cloud", cloud); ttsCache.clear(); cloudConnect(false); };
+  document.querySelectorAll("[data-cv]").forEach(b => b.onclick = () => { cloud.voiceMode = b.dataset.cv; store("luna_cloud", cloud); refreshCloudUI(); });
+  $("cloudVoiceSel").onchange = e => { cloud.voice = e.target.value; store("luna_cloud", cloud); };
+  $("cloudVoiceTest").onclick = () => { stopSpeech(); speakOne("Hi Luna! Sparkle sparkle! Let's cast a spell.", { rate: 0.92, pitch: 1.15, kind: cloud.voiceMode === "off" ? "short" : "long" }); };
+  refreshCloudUI(); if (cloudBase()) cloudConnect(true);
+}
+
+/* AI picture for Make a Creature */
+let aiBusy = false;
+function toCardArt(src){
+  return new Promise((res, rej) => {
+    const im = new Image();
+    im.onload = () => {
+      const cv = document.createElement("canvas"); cv.width = 480; cv.height = 360; const x = cv.getContext("2d");
+      const sc = Math.max(480 / im.width, 360 / im.height), w = im.width * sc, h = im.height * sc;
+      x.fillStyle = "#fff"; x.fillRect(0, 0, 480, 360); x.drawImage(im, (480 - w) / 2, (360 - h) / 2, w, h);
+      res(cv.toDataURL("image/jpeg", 0.8));
+    };
+    im.onerror = rej; im.src = src;
+  });
+}
+$("artAI").onclick = async () => {
+  if (aiBusy || !(cloudCaps && cloudCaps.image)) return;
+  aiBusy = true; const wrap = document.querySelector(".preview-wrap"); wrap.classList.add("painting");
+  say("Rootha is painting your creature with magic. This takes a little while!");
+  try {
+    const { image } = await (await cloudFetch("/image", { kind: draft.kind, color: draft.color, acc: draft.acc || "none", power: draft.power })).json();
+    draft.art = await toCardArt(image); draft.artBy = "ai"; renderMaker(); chime(); burst(20); say("Ta-da! Do you like it?");
+  } catch (e) {
+    boop(); say(e && e.status === 429 ? "The magic paintbrush needs a rest. Try again tomorrow!" : e && e.status === 422 ? "Let's try a different creature!" : "The magic paint didn't work this time. Try again!");
+  } finally { aiBusy = false; wrap.classList.remove("painting"); }
+};
 
 /* ---------- ART STUDIO ---------- */
 let drawings = load("luna_drawings", []);

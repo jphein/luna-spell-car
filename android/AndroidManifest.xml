@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.jphein.lunaspellcar">
 
+    <!-- Optional Spell Car server (Azure stories, pictures, voices). Everything else works offline. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <!-- Lets TextToSpeech find the installed speech engine on Android 11+ -->
     <queries>
         <intent>
@@ -15,7 +18,8 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:theme="@android:style/Theme.Material.NoActionBar"
         android:hardwareAccelerated="true"
-        android:allowBackup="true">
+        android:allowBackup="true"
+        android:usesCleartextTraffic="true">
 
         <activity
             android:name=".MainActivity"

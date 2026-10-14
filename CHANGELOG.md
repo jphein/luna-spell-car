@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- Spell Car server (`server/`): self-hosted, stdlib-only bridge to Azure OpenAI and Azure AI Speech. Keys stay on the server; endpoints accept only structured input; daily caps; Docker Compose.
+- Tablet app: Story Time via the server, 🪄 AI picture in Make a Creature, neural cloud voices (Ana, Jenny, Aria, Ava, Emma, Guy) for stories or everything, with automatic fallback to the tablet voice.
+- Android: INTERNET permission (used only for the optional server).
+- Tests: fake Azure stack, 15 server tests, cloud smoke tests through the Android build.
 - `make dev` prints the computer's real LAN address for opening on the tablet.
 
 ## 1.2.0 (2026-10-14)

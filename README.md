@@ -12,7 +12,7 @@ most games work without reading.
 | **Art Studio** | Free painting with crayon, rainbow, sparkle and heart brushes; saved gallery. |
 | **Make a Creature** | Design a creature card (kind, picture, color, power/toughness, special power, accessory, name). **Draw it myself** opens a paint canvas (crayon, rainbow, sparkle and heart brushes, trace-along guide). Stronger creatures cost more. Saved creatures show up in every other game. |
 | **Mana Bubbles** | Pop floating blue/red bubbles to fill a card's cost slots; colored slots need that color, gray slots take any. |
-| **Story Time** | Claude writes a gentle story starring her creatures, read aloud with sentence highlighting. *Web version only (uses the claude.ai `sample` capability).* |
+| **Story Time** | A gentle story starring her creatures, read aloud with sentence highlighting. Web: Claude (claude.ai `sample` capability). Tablet: Azure OpenAI via the Spell Car server. |
 | **Memory Match** | Flip-and-find pairs with deck art and her creatures. |
 | **Count the Mana** | Tap each mana symbol to count it, then pick the total. |
 | **Who Wins?** | Power vs. toughness, with dots to compare. |
@@ -27,6 +27,7 @@ web/app.html          the whole app (HTML/CSS/JS); __CARDS__ is filled from card
 web/cards.json        deck cards with embedded art (base64 JPEG)
 web/tts-shim.js       maps the Web Speech API onto Android's native TextToSpeech
 web/build.py          builds dist/web/index.html and android/assets/
+server/               optional Spell Car server: Azure OpenAI stories + pictures, Azure Speech voices (see server/README.md)
 web/fonts, web/vendor bundled Fredoka font and jsPDF 2.5.1 for offline use
 android/              manifest, MainActivity (WebView + TTS + file bridge), PdfProvider, icons
 build_apk.sh          Gradle-free build: aapt2 → javac → d8 → zipalign → apksigner
@@ -57,6 +58,10 @@ installs over the old one. `versionCode` is derived from `VERSION`, so `make rel
 3. Fire tablets: Settings → Security & Privacy → Apps from Unknown Sources.
 
 ## Text-to-speech
+
+With a Spell Car server connected, stories (or everything) can use Azure neural voices instead, including
+Ana, a child's voice; the app falls back to the tablet's voice whenever the server can't be reached.
+
 
 Android's WebView has no `speechSynthesis`, so `tts-shim.js` replaces it with a bridge to the
 system `TextToSpeech` engine (`AndroidBridge.speak/stop/voices`), including end-of-speech

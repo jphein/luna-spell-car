@@ -4,3 +4,4 @@ android/assets/
 __pycache__/
 *.idea/
 local.properties
+server/.env
