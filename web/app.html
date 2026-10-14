@@ -180,7 +180,7 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .voiceset .rowbtns button.on{background:var(--violet);color:#fff}
 .voiceset select{font-family:inherit;font-size:15px;padding:10px;border-radius:12px;border:2px solid var(--line);background:var(--chip);color:var(--ink);max-width:100%}
 /* story */
-.scrollrow{flex-wrap:nowrap;overflow-x:auto;padding:4px 2px 8px;scrollbar-width:thin}
+.scrollrow{flex-wrap:wrap;padding:2px}
 .who{flex:none;display:flex;flex-direction:column;align-items:center;gap:4px;width:84px;padding:6px 4px;border-radius:18px;background:var(--chip);border:3px solid transparent}
 .who img{width:62px;height:62px;border-radius:50%;object-fit:cover}
 .who span{font-size:12px;font-weight:600;line-height:1.1;text-align:center;max-height:2.2em;overflow:hidden}
@@ -198,7 +198,8 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .storylist{display:grid;gap:8px}
 .storylist button{text-align:left;padding:12px 16px;border-radius:16px;background:var(--surface);box-shadow:0 3px 0 var(--line);font-size:17px;font-weight:600;display:flex;gap:10px;align-items:center}
 .storylist button small{display:block;color:var(--muted);font-weight:500;font-size:13px}
-.story-sec{display:grid;gap:12px}
+.story-sec{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+.ctrl{min-width:0}
 /* memory */
 .memgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 @media (min-width:560px){.memgrid{grid-template-columns:repeat(4,1fr)}}
@@ -221,6 +222,63 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .printbtn{display:flex;align-items:center;gap:8px;margin:12px 0 0;padding:12px 18px;border-radius:99px;background:var(--chip);font-size:17px;font-weight:600}
 .pnote{color:var(--muted);font-size:14px;margin:6px 4px 0}
 @media (prefers-reduced-motion:reduce){.mcard .in{transition:none}.thinking i{animation:none}}
+/* paint */
+.paint{position:fixed;inset:0;z-index:25;background:var(--bg);display:flex;flex-direction:column;padding:calc(10px + env(safe-area-inset-top,0px)) 12px calc(10px + env(safe-area-inset-bottom,0px));gap:10px;overflow:auto}
+.paint .pbar2{display:flex;align-items:center;gap:10px}
+.paint .pbar2 h2{margin:0;font-size:22px;flex:1;text-align:center}
+.paint .pbar2 button{padding:12px 18px;border-radius:99px;font-size:18px;font-weight:700;background:var(--chip)}
+.paint .pbar2 .done{background:var(--good);color:#fff}
+.canvaswrap{position:relative;width:100%;max-width:720px;margin:0 auto;aspect-ratio:4/3;border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 6px 20px var(--shadow);flex:none}
+.canvaswrap img.guide{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:.16;pointer-events:none}
+.canvaswrap canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+.palette{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:720px;margin:0 auto}
+.palette .sw{width:46px;height:46px;border-radius:50%;border:3px solid rgba(0,0,0,.15)}
+.palette .sw.on{box-shadow:0 0 0 4px var(--gold)}
+.palette .tool{min-width:52px;height:50px;border-radius:16px;background:var(--surface);font-size:24px;padding:0 10px;box-shadow:0 3px 0 var(--line);display:flex;align-items:center;gap:4px}
+.palette .tool.on{box-shadow:0 0 0 4px var(--gold)}
+.palette .tool small{font-size:13px;font-weight:600}
+/* bubbles */
+.bub-top{display:flex;align-items:center;gap:14px;text-align:left;padding:12px}
+.bub-top img{width:92px;height:92px;border-radius:16px;object-fit:cover;flex:none}
+.bb-name{font-size:21px;font-weight:700;line-height:1.15}
+.slots{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.slot{width:46px;height:46px;border-radius:50%;border:3px dashed var(--line);display:grid;place-items:center;font-size:12px;font-weight:700;color:var(--muted)}
+.slot.U{border-color:#2E8FE0}.slot.R{border-color:#EF5A31}.slot.N{border-color:#9C93AF}
+.slot.full{border-style:solid;animation:pop .35s cubic-bezier(.2,1.6,.4,1)}
+.slot .sym{width:40px;height:40px}
+.bubfield{position:relative;height:min(54vh,520px);border-radius:26px;overflow:hidden;background:radial-gradient(120% 90% at 50% 100%,#6A3BC4,#2B1658 70%);margin-top:12px;touch-action:manipulation}
+.bub{position:absolute;bottom:-96px;width:84px;height:84px;border-radius:50%;display:grid;place-items:center;padding:0;animation:rise var(--d) linear forwards;box-shadow:inset -6px -8px 14px rgba(0,0,0,.25),inset 6px 8px 14px rgba(255,255,255,.35)}
+.bub.U{background:radial-gradient(circle at 32% 30%,#D4ECFF,#4BA6F5 45%,#1F6FC4)}
+.bub.R{background:radial-gradient(circle at 32% 30%,#FFE0CF,#FF7E4F 45%,#C9391A)}
+.bub svg{width:46px;height:46px}
+.bub.popped{animation:popout .28s ease-out forwards}
+.bub.nope svg{animation:wob .35s}
+@keyframes rise{to{transform:translateY(calc(-1 * var(--h)))}}
+@keyframes popout{to{transform:translateY(var(--y)) scale(1.7);opacity:0}}
+@keyframes wob{25%{transform:rotate(-18deg) scale(.9)}75%{transform:rotate(18deg) scale(.9)}}
+/* game night */
+.nt-setup{display:grid;gap:12px}
+.nt-names{display:grid;gap:8px}
+.nt-names input{font-family:inherit;font-size:18px;padding:12px 14px;border-radius:14px;border:2px solid var(--line);background:var(--chip);color:var(--ink);user-select:text;-webkit-user-select:text}
+.nt-board{display:grid;gap:10px;grid-template-columns:1fr 1fr}
+.nt-board.p2{grid-template-columns:1fr}
+.nt-p{position:relative;border-radius:26px;color:#fff;min-height:190px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;overflow:hidden;box-shadow:0 5px 0 rgba(0,0,0,.18)}
+.nt-p.flip{transform:rotate(180deg)}
+.nt-p .nm{position:absolute;top:10px;left:0;right:0;text-align:center;font-size:19px;font-weight:700;pointer-events:none}
+.nt-p .life{font-size:clamp(56px,14vw,96px);font-weight:700;line-height:1;text-align:center;pointer-events:none}
+.nt-p .tap{height:100%;font-size:40px;font-weight:700;color:rgba(255,255,255,.85)}
+.nt-p .tap:active{background:rgba(255,255,255,.15)}
+.nt-p .five{position:absolute;bottom:8px;left:0;right:0;display:flex;justify-content:center;gap:10px}
+.nt-p .five button{padding:6px 12px;border-radius:99px;background:rgba(255,255,255,.22);color:#fff;font-size:15px;font-weight:700}
+.nt-p.out{filter:grayscale(.8) brightness(.8)}
+.nt-p .delta{position:absolute;top:36px;left:0;right:0;text-align:center;font-size:18px;font-weight:700;opacity:.9;pointer-events:none}
+.nt-tools{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px}
+.nt-tools button{padding:12px 16px;border-radius:99px;background:var(--surface);box-shadow:0 3px 0 var(--line);font-size:17px;font-weight:600}
+.nt-roll{text-align:center;font-size:30px;font-weight:700;min-height:1.4em;margin-top:10px;color:var(--violet)}
+.nt-roll.spin{animation:pop .4s cubic-bezier(.2,1.6,.4,1)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chips button{padding:12px 18px;border-radius:99px;background:var(--chip);font-size:18px;font-weight:600}
+.chips button.on{background:var(--violet);color:#fff}
 /* celebration */
 .celebrate{position:fixed;inset:0;background:rgba(20,8,48,.82);display:grid;place-items:center;z-index:20;padding:24px}
 .celebrate .box{background:var(--surface);border-radius:30px;padding:18px;max-width:420px;width:100%;text-align:center;animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
@@ -254,12 +312,14 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
     </div>
     <div class="games">
       <button class="game-btn" data-go="window"><div class="ico" style="background:linear-gradient(135deg,#2E8FE0,#8A4FE6,#EF5A31)" id="icoWin"></div><b>Window Magic</b><span>Spot colors outside</span></button>
-      <button class="game-btn hidden" data-go="story" id="storyTile"><div class="ico" style="background:#3E7BD6">📖</div><b>Story Time <span class="newtag">NEW</span></b><span>Stories with your creatures</span></button>
+      <button class="game-btn hidden" data-go="story" id="storyTile"><div class="ico" style="background:#3E7BD6">📖</div><b>Story Time</b><span>Stories with your creatures</span></button>
       <button class="game-btn" data-go="maker"><div class="ico" style="background:#E86BB8">🦄</div><b>Make a Creature</b><span>Unicorns, kitties, and more</span></button>
-      <button class="game-btn" data-go="memory"><div class="ico" style="background:#8A4FE6">🃏</div><b>Memory Match <span class="newtag">NEW</span></b><span>Find the pairs</span></button>
+      <button class="game-btn" data-go="memory"><div class="ico" style="background:#8A4FE6">🃏</div><b>Memory Match</b><span>Find the pairs</span></button>
       <button class="game-btn" data-go="count"><div class="ico" style="background:var(--violet)">3</div><b>Count the Mana</b><span>Add up the cost</span></button>
       <button class="game-btn" data-go="battle"><div class="ico" style="background:var(--red)">⚔</div><b>Who Wins?</b><span>Power vs. toughness</span></button>
+      <button class="game-btn" data-go="bubbles"><div class="ico" style="background:radial-gradient(circle at 30% 30%,#9ED2FF,#2E8FE0)">🫧</div><b>Mana Bubbles <span class="newtag">NEW</span></b><span>Pop the right colors!</span></button>
       <button class="game-btn" data-go="says"><div class="ico" style="background:#1F9D63">🗣️</div><b>Rootha Says</b><span>Listen and move!</span></button>
+      <button class="game-btn wide" data-go="night"><div class="ico" style="background:#D9411E">❤️</div><div><b>Game Night <span class="newtag">NEW</span></b><span>Life counter and dice for real games at the table</span></div></button>
       <button class="game-btn wide" data-go="book"><div class="ico" style="background:var(--gold)">⭐</div><div><b>My Spellbook</b><span>Stickers, creatures, and cards you've cast</span></div></button>
     </div>
     <details class="grownup">
@@ -268,6 +328,7 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
       <p><b>Make a Creature:</b> she designs her own creature card. Stronger creatures cost more. Saved creatures appear in Window Magic, Count the Mana, and Who Wins.</p>
       <p><b>Story Time</b> asks Claude to write a short, gentle story starring the creatures she picks, then reads it aloud (it uses your Claude account, so it asks permission the first time). <b>Memory Match</b> is a flip-and-find pairs game. In <b>My Spellbook</b>, tap one of her creatures to edit it, and use <b>Print my creatures</b> to get a real-card-size PDF to cut out and sleeve.</p>
       <p><b>Rootha Says:</b> Simon Says, read aloud, no screen needed. You're the judge: if she moves when Rootha didn't say it, gotcha! Every correct answer earns a star, and every 10 stars earns a sticker in My Spellbook. Tap any question to hear it again. Everything is saved on this device only.</p>
+      <p><b>Mana Bubbles:</b> pop bubbles to pay a card's cost; colored slots need that color, gray slots take any. <b>Game Night</b> is a life counter (20 or 40 life, 2–4 players) with dice, a coin, and "who goes first." In Make a Creature she can <b>draw her own picture</b>. <b>Backup</b> in My Spellbook moves her creatures and stars between the tablet and the web version.</p>
       <div class="voiceset"><b>Reading voice</b>
         <div class="rowbtns"><button data-rate="0.8">Slower</button><button data-rate="1">Normal</button><button data-rate="1.15">Faster</button></div>
         <div class="rowbtns"><select id="voiceSel" aria-label="Voice"></select><button id="voiceTest">🔊 Test</button><button id="ttsSettings" class="hidden">Tablet voice settings</button></div>
@@ -294,14 +355,15 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
       <div class="preview-wrap"><div id="petPreview"></div></div>
       <div class="controls">
         <div class="ctrl"><h3>1. Pick a creature</h3><div class="pickrow" id="kindRow"></div></div>
-        <div class="ctrl"><h3>2. Pick a color</h3><div class="pickrow" id="colorRow"></div></div>
-        <div class="ctrl"><h3>3. How strong?</h3>
+        <div class="ctrl"><h3>2. Picture</h3><div class="pickrow"><button class="pick txt" id="artMagic"><span style="font-size:24px">✨</span>Magic picture</button><button class="pick txt" id="artDraw"><span style="font-size:24px">🖍️</span>Draw it myself</button></div></div>
+        <div class="ctrl"><h3>3. Pick a color</h3><div class="pickrow" id="colorRow"></div></div>
+        <div class="ctrl"><h3>4. How strong?</h3>
           <div class="stepper"><div class="lab"><span id="swIco2"></span>Power</div><button data-st="p" data-d="-1" aria-label="Less power">−</button><div class="val" id="pVal">2</div><button data-st="p" data-d="1" aria-label="More power">+</button></div>
           <div class="stepper"><div class="lab"><span id="htIco2"></span>Toughness</div><button data-st="t" data-d="-1" aria-label="Less toughness">−</button><div class="val" id="tVal">2</div><button data-st="t" data-d="1" aria-label="More toughness">+</button></div>
         </div>
-        <div class="ctrl"><h3>4. Special power</h3><div class="pickrow" id="powRow"></div></div>
-        <div class="ctrl"><h3>5. Add something special</h3><div class="pickrow" id="accRow"></div></div>
-        <div class="ctrl"><h3>6. Name</h3><div class="namerow"><input id="petName" maxlength="28" aria-label="Creature name"><button class="dice" id="reroll" aria-label="New name">🎲</button></div></div>
+        <div class="ctrl"><h3>5. Special power</h3><div class="pickrow" id="powRow"></div></div>
+        <div class="ctrl"><h3>6. Add something special</h3><div class="pickrow" id="accRow"></div></div>
+        <div class="ctrl"><h3>7. Name</h3><div class="namerow"><input id="petName" maxlength="28" aria-label="Creature name"><button class="dice" id="reroll" aria-label="New name">🎲</button></div></div>
         <button class="save" id="savePet">Save to my Spellbook ✨</button>
         <button class="reset hidden" id="cancelEdit">Cancel changes</button>
       </div>
@@ -379,6 +441,32 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
     <div style="text-align:center"><button class="next hidden" id="memAgain">Play again</button></div>
   </section>
 
+  <!-- MANA BUBBLES -->
+  <section id="bubbles" class="hidden">
+    <div class="stage bub-top"><img id="bbArt" alt=""><div><div class="bb-name" id="bbName"></div><div class="slots" id="bbSlots"></div></div></div>
+    <div class="bubfield" id="bubField"></div>
+    <div class="hint" id="bbHint"></div>
+    <div style="text-align:center"><button class="next hidden" id="bbNext">Next spell ✨</button></div>
+  </section>
+
+  <!-- GAME NIGHT -->
+  <section id="night" class="hidden">
+    <div class="nt-setup" id="ntSetup">
+      <div class="ctrl"><h3>How many players?</h3><div class="chips" id="ntCount"></div></div>
+      <div class="ctrl"><h3>Starting life</h3><div class="chips" id="ntLife"></div></div>
+      <div class="ctrl"><h3>Names</h3><div class="nt-names" id="ntNames"></div></div>
+      <button class="save" id="ntStart">Start the game ❤️</button>
+    </div>
+    <div id="ntGame" class="hidden">
+      <div class="nt-board" id="ntBoard"></div>
+      <div class="nt-roll" id="ntRoll"></div>
+      <div class="nt-tools">
+        <button data-roll="6">🎲 d6</button><button data-roll="20">🎲 d20</button><button id="ntCoin">🪙 Coin</button>
+        <button id="ntFirst">👑 Who goes first?</button><button id="ntFlip">↕ Face each other</button><button id="ntNew">🔄 New game</button>
+      </div>
+    </div>
+  </section>
+
   <!-- SPELLBOOK -->
   <section id="book" class="hidden">
     <h3 class="sec-h">My stickers</h3>
@@ -388,6 +476,10 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
     <div class="book" id="petBook"></div>
     <button class="printbtn hidden" id="printBtn">🖨️ Print my creatures</button>
     <div class="pnote hidden" id="printNote">Makes a PDF with real-size cards. Print at "Actual size," cut them out, and slide them into sleeves!</div>
+    <h3 class="sec-h">Backup</h3>
+    <div class="rowbtns"><button id="bkSave">💾 Save a backup</button><button id="bkLoad">📂 Restore a backup</button></div>
+    <input type="file" id="bkFile" accept=".json,application/json,text/plain" class="hidden">
+    <div class="pnote">Moves creatures, stars, stickers, and stories between devices. Restoring adds to what's here; nothing gets erased.</div>
     <h3 class="sec-h">Cards I've cast <span id="castCount" style="color:var(--muted);font-size:16px"></span></h3>
     <div class="book" id="cardBook"></div>
   </section>
@@ -402,6 +494,19 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
     <div class="rowbtns"><button id="pmDel" class="danger">Remove</button><button id="pmClose">Close</button></div>
   </div>
 </div>
+<div class="paint hidden" id="paint" role="dialog" aria-modal="true" aria-label="Draw your creature">
+  <div class="pbar2"><button id="pCancel">✖</button><h2>Draw your creature!</h2><button class="done" id="pDone">✓ Done</button></div>
+  <div class="canvaswrap"><img class="guide" id="pGuide" alt=""><canvas id="pCanvas" width="960" height="720"></canvas></div>
+  <div class="palette" id="pColors"></div>
+  <div class="palette">
+    <button class="tool on" data-tool="pen" aria-label="Crayon">🖍️</button><button class="tool" data-tool="rainbow" aria-label="Rainbow">🌈</button>
+    <button class="tool" data-tool="sparkle" aria-label="Sparkles">✨</button><button class="tool" data-tool="stamp" aria-label="Stamp hearts">💜</button>
+    <button class="tool" data-tool="erase" aria-label="Eraser">🧽</button>
+    <button class="tool" data-size="10"><small>S</small></button><button class="tool on" data-size="22"><small>M</small></button><button class="tool" data-size="44"><small>L</small></button>
+    <button class="tool" id="pGuideBtn" aria-label="Show a guide">👻<small>Guide</small></button>
+    <button class="tool" id="pUndo" aria-label="Undo">↩️</button><button class="tool" id="pClear" aria-label="Start over">🗑️</button>
+  </div>
+</div>
 <div class="spark-layer" id="sparks"></div>
 
 <!--SHIM-->
@@ -412,7 +517,7 @@ const rnd = a => a[Math.floor(Math.random() * a.length)];
 
 /* ---------- saved state (this device only) ---------- */
 function load(k, d){ try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } }
-function store(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+function store(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
 let stars = load("luna_stars", 0), voiceOn = load("luna_voice2", true), cast = load("luna_cast", {}), pets = load("luna_pets", []);
 if (typeof stars !== "number") stars = 0;
 $("starCount").textContent = stars;
@@ -541,6 +646,7 @@ function petCost(p){
 }
 const imgCache = {}, artCache = {};
 function petImg(p){
+  if (p.art) return p.art;
   const key = p.kind + p.color + (p.acc || "none");
   if (imgCache[key]) return imgCache[key];
   return (imgCache[key] = petArt(p).toDataURL("image/jpeg", 0.85));
@@ -612,11 +718,12 @@ $("celOk").onclick = () => {
 };
 
 /* ---------- navigation ---------- */
-const screens = { home: "", window: "Window Magic", story: "Story Time", memory: "Memory Match", maker: "Make a Creature", count: "Count the Mana", battle: "Who Wins?", says: "Rootha Says", book: "My Spellbook" };
+const screens = { home: "", bubbles: "Mana Bubbles", night: "Game Night", window: "Window Magic", story: "Story Time", memory: "Memory Match", maker: "Make a Creature", count: "Count the Mana", battle: "Who Wins?", says: "Rootha Says", book: "My Spellbook" };
 let current = "home";
 function go(id, quiet){
   if (current === "says" && id !== "says") stopSays();
   if (current === "story" && id !== "story") stopStory();
+  if (current === "bubbles" && id !== "bubbles") stopBubbles();
   current = id;
   Object.keys(screens).forEach(k => $(k).classList.toggle("hidden", k !== id));
   $("homeBtn").classList.toggle("hidden", id === "home"); $("screenTitle").textContent = screens[id];
@@ -629,6 +736,8 @@ function go(id, quiet){
   if (id === "battle") newBattle();
   if (id === "says") say("Rootha says, let's play! Do what Rootha says. But if Rootha doesn't say it, don't move! Tap start.");
   if (id === "book") renderBook();
+  if (id === "bubbles") newBubbles();
+  if (id === "night") openNight();
   if (id === "home" && !quiet) say("Pick a magic game!");
 }
 document.querySelectorAll("[data-go]").forEach(b => b.onclick = () => go(b.dataset.go));
@@ -685,6 +794,7 @@ function renderMaker(){
   document.querySelectorAll("#colorRow .swatch").forEach(b => b.classList.toggle("on", b.dataset.c === draft.color));
   document.querySelectorAll("#powRow .pick").forEach(b => b.classList.toggle("on", b.dataset.p === draft.power));
   document.querySelectorAll("#accRow .pick").forEach(b => b.classList.toggle("on", b.dataset.a === (draft.acc || "none")));
+  $("artMagic").classList.toggle("on", !draft.art); $("artDraw").classList.toggle("on", !!draft.art);
   $("savePet").textContent = editId ? "Save changes ✨" : "Save to my Spellbook ✨";
   $("cancelEdit").classList.toggle("hidden", !editId);
   $("pVal").textContent = draft.p; $("tVal").textContent = draft.t;
@@ -726,8 +836,12 @@ $("savePet").onclick = () => {
   if (!draft.name.trim()) draft.name = makeName(draft.kind);
   const p = { id: editId || Date.now().toString(36), kind: draft.kind, color: draft.color, p: draft.p, t: draft.t, power: draft.power, acc: draft.acc || "none", name: draft.name.trim() };
   const wasEdit = !!editId;
-  if (wasEdit){ pets = pets.map(x => x.id === editId ? p : x); } else { pets.push(p); if (pets.length > 40) pets.shift(); addStar(); }
-  store("luna_pets", pets); editId = null;
+  if (draft.art) p.art = draft.art;
+  const before = pets;
+  if (wasEdit){ pets = pets.map(x => x.id === editId ? p : x); } else { pets = pets.concat([p]); if (pets.length > 60) pets = pets.slice(-60); }
+  if (!store("luna_pets", pets)){ pets = before; boop(); say("Your Spellbook is too full! Ask a grown-up to remove a creature first."); return; }
+  if (!wasEdit) addStar();
+  editId = null;
   const pw = POWERS.find(x => x.id === p.power);
   showCelebrate({ img: petImg(p), title: wasEdit ? `${p.name} is all new!` : `${p.name} joined your Spellbook!`, sub: `Power ${p.p}, toughness ${p.t}`,
                   spoken: wasEdit ? `${p.name} looks amazing!` : `Hooray! ${p.name} has ${p.p} power, ${p.t} toughness, and ${pw.say}! You can cast it in Window Magic!` });
@@ -883,11 +997,12 @@ let sampleCap = null, downloadsCap = null;
 if (window.AndroidBridge){
   downloadsCap = { save: ({ filename, data }) => new Promise((res, rej) => {
     const fr = new FileReader();
-    fr.onload = () => { const r = window.AndroidBridge.saveFile(filename, String(fr.result).split(",")[1], "application/pdf"); r === "ok" ? res({ status: "saved" }) : rej({ code: "unavailable" }); };
+    fr.onload = () => { const r = window.AndroidBridge.saveFile(filename, String(fr.result).split(",")[1], /\.json$/i.test(filename) ? "application/json" : "application/pdf"); r === "ok" ? res({ status: "saved" }) : rej({ code: "unavailable" }); };
     fr.onerror = () => rej({ code: "bad_request" }); fr.readAsDataURL(data);
   }) };
 }
 window.__back = () => {
+  if (!$("paint").classList.contains("hidden")){ $("pCancel").click(); return "stay"; }
   if (!$("celebrate").classList.contains("hidden")){ $("celOk").click(); return "stay"; }
   if (!$("petModal").classList.contains("hidden")){ $("petModal").classList.add("hidden"); return "stay"; }
   if (current !== "home"){ go("home"); return "stay"; }
@@ -1121,7 +1236,7 @@ function cardCanvas(p){
   x.fillStyle = "#2B1650"; let fs = 46; x.font = `700 ${fs}px Fredoka, Arial, sans-serif`;
   const maxN = cx + r - 82; while (x.measureText(p.name).width > maxN && fs > 24){ fs -= 2; x.font = `700 ${fs}px Fredoka, Arial, sans-serif`; }
   x.textBaseline = "middle"; x.fillText(p.name, 78, 102);
-  x.save(); rr(x, 58, 156, W_ - 116, 474, 10); x.clip(); x.drawImage(petArt(p), 58, 156, W_ - 116, 474); x.restore();
+  x.save(); rr(x, 58, 156, W_ - 116, 474, 10); x.clip(); x.drawImage(p.art && drawnImgs[p.id] ? drawnImgs[p.id] : petArt(p), 58, 156, W_ - 116, 474); x.restore();
   x.fillStyle = "#fff"; rr(x, 58, 644, W_ - 116, 70, 14); x.fill(); x.stroke();
   x.fillStyle = "#2B1650"; x.font = `600 36px Fredoka, Arial, sans-serif`; x.fillText(`Creature — ${k.name}`, 78, 680);
   x.textBaseline = "alphabetic"; x.font = `500 38px Fredoka, Arial, sans-serif`; wrapText(x, pw.text, 78, 776, W_ - 156, 48);
@@ -1137,6 +1252,7 @@ $("printBtn").onclick = async () => {
   try {
     await loadScript(window.AndroidBridge ? "vendor/jspdf.umd.min.js" : "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
     try { await document.fonts.load("700 40px Fredoka"); await document.fonts.load("500 40px Fredoka"); } catch (e) {}
+    await loadDrawnImages();
     const { jsPDF } = window.jspdf, pdf = new jsPDF({ unit: "mm", format: "letter" });
     const cw = 63, ch = 88, mx = (215.9 - cw * 3) / 2, my = (279.4 - ch * 3) / 2;
     pets.forEach((p, i) => {
@@ -1150,6 +1266,238 @@ $("printBtn").onclick = async () => {
   } catch (e) {
     if (!(e && e.code === "declined")) say("Hmm, the cards didn't save. Ask a grown-up to try again.");
   } finally { btn.disabled = false; btn.textContent = "🖨️ Print my creatures"; }
+};
+
+/* ---------- DRAW IT MYSELF ---------- */
+const drawnImgs = {};
+function loadDrawnImages(){
+  return Promise.all(pets.filter(p => p.art).map(p => new Promise(res => {
+    if (drawnImgs[p.id] && drawnImgs[p.id].src === p.art) return res();
+    const im = new Image(); im.onload = () => { drawnImgs[p.id] = im; res(); }; im.onerror = res; im.src = p.art;
+  })));
+}
+const PAINT_COLORS = ["#7B4BE0", "#C77DFF", "#2E8FE0", "#5AD1FF", "#EF5A31", "#FF7EB6", "#FFC94A", "#2BB673", "#8B5A2B", "#1E1033", "#9AA0A6", "#FFFFFF"];
+const pc = $("pCanvas"), px = pc.getContext("2d");
+let pColor = PAINT_COLORS[0], pSize = 22, pTool = "pen", pDown = false, pLast = null, pUndoStack = [], pHue = 0, pDist = 0;
+PAINT_COLORS.forEach(col => {
+  const b = document.createElement("button"); b.className = "sw" + (col === pColor ? " on" : ""); b.style.background = col; b.setAttribute("aria-label", "Color");
+  b.onclick = () => { pColor = col; if (pTool === "erase" || pTool === "rainbow") setTool("pen"); document.querySelectorAll("#pColors .sw").forEach(x => x.classList.toggle("on", x === b)); tick(3); };
+  $("pColors").appendChild(b);
+});
+function setTool(t){ pTool = t; document.querySelectorAll("[data-tool]").forEach(x => x.classList.toggle("on", x.dataset.tool === t)); }
+document.querySelectorAll("[data-tool]").forEach(b => b.onclick = () => { setTool(b.dataset.tool); tick(4); say({ pen: "Crayon!", rainbow: "Rainbow!", sparkle: "Sparkles!", stamp: "Hearts!", erase: "Eraser!" }[b.dataset.tool]); });
+document.querySelectorAll("[data-size]").forEach(b => b.onclick = () => { pSize = +b.dataset.size; document.querySelectorAll("[data-size]").forEach(x => x.classList.toggle("on", x === b)); tick(2); });
+function pPos(e){ const r = pc.getBoundingClientRect(); return { x: (e.clientX - r.left) * pc.width / r.width, y: (e.clientY - r.top) * pc.height / r.height }; }
+function starAt(x, y, r, col){
+  px.save(); px.fillStyle = col; px.beginPath();
+  px.moveTo(x, y - r); px.quadraticCurveTo(x, y, x + r, y); px.quadraticCurveTo(x, y, x, y + r); px.quadraticCurveTo(x, y, x - r, y); px.quadraticCurveTo(x, y, x, y - r);
+  px.fill(); px.restore();
+}
+function heartAt(x, y, r, col){
+  px.save(); px.fillStyle = col; px.beginPath(); px.moveTo(x, y + r * 0.9);
+  px.bezierCurveTo(x - r * 1.6, y - r * 0.2, x - r * 0.6, y - r * 1.3, x, y - r * 0.4);
+  px.bezierCurveTo(x + r * 0.6, y - r * 1.3, x + r * 1.6, y - r * 0.2, x, y + r * 0.9); px.fill(); px.restore();
+}
+function pStroke(a, b){
+  if (pTool === "sparkle" || pTool === "stamp"){
+    const d = Math.hypot(b.x - a.x, b.y - a.y); pDist += d;
+    const gap = pTool === "stamp" ? pSize * 2.2 : pSize * 1.1;
+    if (pDist >= gap || d === 0){
+      pDist = 0;
+      if (pTool === "stamp") heartAt(b.x, b.y, pSize * 0.9, pColor);
+      else starAt(b.x + (Math.random() - .5) * pSize, b.y + (Math.random() - .5) * pSize, pSize * (0.4 + Math.random() * 0.6), rnd(["#FFC94A", "#FFFFFF", pColor, "#C77DFF", "#5AD1FF"]));
+    }
+    return;
+  }
+  px.save(); px.lineCap = "round"; px.lineJoin = "round"; px.lineWidth = pSize;
+  if (pTool === "erase"){ px.globalCompositeOperation = "destination-out"; px.strokeStyle = "#000"; }
+  else if (pTool === "rainbow"){ pHue = (pHue + 6) % 360; px.strokeStyle = `hsl(${pHue},90%,60%)`; }
+  else px.strokeStyle = pColor;
+  px.beginPath(); px.moveTo(a.x, a.y); px.lineTo(b.x, b.y); px.stroke(); px.restore();
+}
+pc.addEventListener("pointerdown", e => {
+  e.preventDefault(); pc.setPointerCapture(e.pointerId); pDown = true; pDist = 999;
+  try { pUndoStack.push(px.getImageData(0, 0, pc.width, pc.height)); if (pUndoStack.length > 12) pUndoStack.shift(); } catch (err) {}
+  pLast = pPos(e); pStroke(pLast, pLast);
+});
+pc.addEventListener("pointermove", e => { if (!pDown) return; e.preventDefault(); const q = pPos(e); pStroke(pLast, q); pLast = q; });
+["pointerup", "pointercancel", "pointerleave"].forEach(ev => pc.addEventListener(ev, () => { pDown = false; }));
+$("pUndo").onclick = () => { const im = pUndoStack.pop(); if (im){ px.putImageData(im, 0, 0); tick(1); } else boop(); };
+$("pClear").onclick = () => { if (!confirm("Start your drawing over?")) return; pUndoStack.push(px.getImageData(0, 0, pc.width, pc.height)); px.clearRect(0, 0, pc.width, pc.height); say("Fresh page!"); };
+$("pGuideBtn").onclick = () => { const g = $("pGuide"); const on = g.style.display !== "none"; g.style.display = on ? "none" : ""; $("pGuideBtn").classList.toggle("on", !on); };
+function openPaint(){
+  px.clearRect(0, 0, pc.width, pc.height); pUndoStack = [];
+  const k = KINDS.find(z => z.id === draft.kind);
+  const g = document.createElement("canvas"); g.width = 480; g.height = 360; const gx = g.getContext("2d");
+  gx.font = "260px 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif"; gx.textAlign = "center"; gx.textBaseline = "middle"; gx.fillText(k.emo, 240, 190);
+  $("pGuide").src = g.toDataURL(); $("pGuide").style.display = "none"; $("pGuideBtn").classList.remove("on");
+  if (draft.art){ const im = new Image(); im.onload = () => px.drawImage(im, 0, 0, pc.width, pc.height); im.src = draft.art; }
+  $("paint").classList.remove("hidden");
+  say(`Draw your ${k.name.toLowerCase()}! Tap the ghost if you want a guide to trace.`);
+}
+$("pCancel").onclick = () => { $("paint").classList.add("hidden"); say("Okay!"); };
+$("pDone").onclick = () => {
+  const out = document.createElement("canvas"); out.width = 480; out.height = 360; const ox = out.getContext("2d");
+  ox.fillStyle = "#fff"; ox.fillRect(0, 0, 480, 360); ox.drawImage(pc, 0, 0, 480, 360);
+  draft.art = out.toDataURL("image/jpeg", 0.72);
+  $("paint").classList.add("hidden"); renderMaker(); chime(); burst(14); say("Beautiful! That's your creature's picture.");
+};
+$("artDraw").onclick = () => { openPaint(); };
+$("artMagic").onclick = () => { delete draft.art; renderMaker(); tick(4); say("Magic picture!"); };
+
+/* ---------- MANA BUBBLES ---------- */
+const bb = { card: null, slots: [], timer: null, on: false, nagAt: 0, last: null };
+const BUB_SVG = { U: `<svg viewBox="0 0 24 24"><path d="${SYM_PATH.U}" fill="#fff"/></svg>`, R: `<svg viewBox="0 0 24 24"><path d="${SYM_PATH.R}" fill="#fff"/></svg>` };
+function stopBubbles(){ bb.on = false; clearInterval(bb.timer); bb.timer = null; $("bubField").innerHTML = ""; }
+function renderSlots(){
+  $("bbSlots").innerHTML = bb.slots.map(sl => `<div class="slot ${sl.k}${sl.full ? " full" : ""}">${sl.full ? sym(sl.got, 0, false) : sl.k === "N" ? "any" : ""}</div>`).join("");
+}
+function needWords(){
+  const left = bb.slots.filter(s => !s.full), u = left.filter(s => s.k === "U").length, r = left.filter(s => s.k === "R").length, n = left.filter(s => s.k === "N").length;
+  const parts = []; if (u) parts.push(`${u} blue`); if (r) parts.push(`${r} red`); if (n) parts.push(`${n} of any color`);
+  return parts.join(", and ");
+}
+function newBubbles(){
+  stopBubbles(); $("bbNext").classList.add("hidden");
+  const pool_ = allCards(); do { bb.card = rnd(pool_); } while (bb.card === bb.last && pool_.length > 1); bb.last = bb.card;
+  bb.slots = []; for (let i = 0; i < bb.card.u; i++) bb.slots.push({ k: "U" }); for (let i = 0; i < bb.card.r; i++) bb.slots.push({ k: "R" }); for (let i = 0; i < bb.card.g; i++) bb.slots.push({ k: "N" });
+  $("bbArt").src = bb.card.img; $("bbName").textContent = bb.card.name; renderSlots();
+  $("bbHint").textContent = "Pop the bubbles to fill the circles!";
+  bb.on = true; spawnBubble(); bb.timer = setInterval(spawnBubble, 820);
+  say(`Pop bubbles to cast ${bb.card.say}! You need ${needWords()}.`);
+}
+function spawnBubble(){
+  if (!bb.on) return;
+  const f = $("bubField"), H_ = f.clientHeight, W_ = f.clientWidth;
+  if (f.children.length > 9) return;
+  const needCol = bb.slots.filter(s => !s.full && s.k !== "N").map(s => s.k);
+  const k = needCol.length && Math.random() < 0.55 ? rnd(needCol) : rnd(["U", "R"]);
+  const b = document.createElement("button"); b.className = "bub " + k; b.innerHTML = BUB_SVG[k];
+  b.setAttribute("aria-label", k === "U" ? "Blue bubble" : "Red bubble");
+  b.style.left = Math.round(8 + Math.random() * Math.max(10, W_ - 100)) + "px";
+  b.style.setProperty("--d", (6.2 + Math.random() * 2.4).toFixed(2) + "s"); b.style.setProperty("--h", (H_ + 200) + "px");
+  b.addEventListener("animationend", ev => { if (ev.animationName === "rise" || ev.animationName === "popout") b.remove(); });
+  b.addEventListener("pointerdown", ev => { ev.preventDefault(); popBubble(b, k); });
+  f.appendChild(b);
+}
+function popBubble(b, k){
+  if (!bb.on || b.classList.contains("popped")) return;
+  const slot = bb.slots.find(s => !s.full && s.k === k) || bb.slots.find(s => !s.full && s.k === "N");
+  if (!slot){
+    b.classList.remove("nope"); void b.offsetWidth; b.classList.add("nope"); boop();
+    if (Date.now() - bb.nagAt > 2500){ bb.nagAt = Date.now(); say(`No more ${k === "U" ? "blue" : "red"}! You need ${needWords()}.`); }
+    return;
+  }
+  const m = new DOMMatrixReadOnly(getComputedStyle(b).transform), ty = m.m42 || 0;
+  b.style.transform = `translateY(${ty}px)`; b.style.setProperty("--y", ty + "px"); b.classList.add("popped");
+  slot.full = true; slot.got = k; renderSlots(); plink(k);
+  if (bb.slots.every(s => s.full)){
+    stopBubbles(); addStar(); if (!bb.card.pet) recordCast(bb.card);
+    showCelebrate({ img: bb.card.img, title: `You cast ${bb.card.name}!`, sub: "Bubble magic!", spoken: `Pop pop pop! You cast ${bb.card.say}!` });
+    $("bbNext").classList.remove("hidden"); $("bbHint").textContent = "";
+  }
+}
+$("bbNext").onclick = newBubbles;
+
+/* ---------- GAME NIGHT ---------- */
+const NT_COLORS = ["#7B4BE0", "#2E8FE0", "#E0457B", "#1F9D63"];
+let night = load("luna_night", { count: 2, life: 20, names: ["Luna", "Dad", "Player 3", "Player 4"], players: null, flip: false });
+let ntSpeak = {};
+function saveNight(){ store("luna_night", night); }
+function openNight(){
+  if (night.players){ $("ntSetup").classList.add("hidden"); $("ntGame").classList.remove("hidden"); renderBoard(); say("Game night! Tap plus or minus to change life."); }
+  else { $("ntSetup").classList.remove("hidden"); $("ntGame").classList.add("hidden"); renderNightSetup(); say("Game night! How many players?"); }
+}
+function renderNightSetup(){
+  const c = $("ntCount"); c.innerHTML = "";
+  [2, 3, 4].forEach(n => { const b = document.createElement("button"); b.textContent = n; b.className = night.count === n ? "on" : ""; b.onclick = () => { night.count = n; saveNight(); renderNightSetup(); tick(n); }; c.appendChild(b); });
+  const l = $("ntLife"); l.innerHTML = "";
+  [[20, "20 (quick)"], [40, "40 (Commander)"]].forEach(([n, t]) => { const b = document.createElement("button"); b.textContent = t; b.className = night.life === n ? "on" : ""; b.onclick = () => { night.life = n; saveNight(); renderNightSetup(); tick(4); }; l.appendChild(b); });
+  const nm = $("ntNames"); nm.innerHTML = "";
+  for (let i = 0; i < night.count; i++){
+    const inp = document.createElement("input"); inp.value = night.names[i] || `Player ${i + 1}`; inp.maxLength = 16; inp.setAttribute("aria-label", `Player ${i + 1} name`);
+    inp.style.borderLeft = `8px solid ${NT_COLORS[i]}`;
+    inp.oninput = () => { night.names[i] = inp.value; saveNight(); };
+    nm.appendChild(inp);
+  }
+}
+$("ntStart").onclick = () => {
+  night.players = Array.from({ length: night.count }, (_, i) => ({ name: (night.names[i] || `Player ${i + 1}`).trim() || `Player ${i + 1}`, life: night.life, out: false }));
+  saveNight(); $("ntSetup").classList.add("hidden"); $("ntGame").classList.remove("hidden"); $("ntRoll").textContent = ""; renderBoard();
+  fanfare(); say(`Let's play! Everyone starts with ${night.life} life.`);
+};
+function renderBoard(){
+  const b = $("ntBoard"); b.innerHTML = ""; b.className = "nt-board" + (night.players.length === 2 ? " p2" : "");
+  night.players.forEach((pl, i) => {
+    const d = document.createElement("div");
+    const flip = night.flip && (night.players.length === 2 ? i === 0 : i < 2);
+    d.className = "nt-p" + (flip ? " flip" : "") + (pl.life <= 0 ? " out" : ""); d.style.background = NT_COLORS[i];
+    d.innerHTML = `<div class="nm"></div><button class="tap" aria-label="Lose 1 life">−</button><div class="life">${pl.life <= 0 ? "💤" : pl.life}</div><button class="tap" aria-label="Gain 1 life">+</button>
+      <div class="delta"></div><div class="five"><button>−5</button><button>+5</button></div>`;
+    d.querySelector(".nm").textContent = pl.name;
+    const [minus, plus] = d.querySelectorAll(".tap"), [m5, p5] = d.querySelectorAll(".five button");
+    minus.onclick = () => changeLife(i, -1); plus.onclick = () => changeLife(i, 1); m5.onclick = () => changeLife(i, -5); p5.onclick = () => changeLife(i, 5);
+    b.appendChild(d);
+  });
+}
+function changeLife(i, d){
+  const pl = night.players[i]; const wasOut = pl.life <= 0; pl.life += d; saveNight(); tick(Math.max(0, Math.min(9, pl.life % 10)));
+  renderBoard();
+  const sp = ntSpeak[i] || (ntSpeak[i] = { sum: 0, t: null }); sp.sum += d; clearTimeout(sp.t);
+  const delta = $("ntBoard").children[i].querySelector(".delta"); delta.textContent = (sp.sum > 0 ? "+" : "") + sp.sum;
+  sp.t = setTimeout(() => {
+    sp.sum = 0; const el = $("ntBoard").children[i]; if (el) el.querySelector(".delta").textContent = "";
+    if (pl.life <= 0 && !wasOut) say(`Oh no! ${pl.name} is out of life!`); else say(`${pl.name}, ${pl.life}.`);
+  }, 1300);
+}
+document.querySelectorAll("[data-roll]").forEach(b => b.onclick = () => {
+  const n = +b.dataset.roll, v = 1 + Math.floor(Math.random() * n), r = $("ntRoll");
+  r.classList.remove("spin"); void r.offsetWidth; r.classList.add("spin"); r.textContent = `🎲 ${v}`; tone([392, 523, 659], 0.06, "triangle", 0.05); say(`You rolled ${v}!`);
+});
+$("ntCoin").onclick = () => { const h = Math.random() < 0.5, r = $("ntRoll"); r.classList.remove("spin"); void r.offsetWidth; r.classList.add("spin"); r.textContent = h ? "🪙 Heads!" : "🪙 Tails!"; tick(5); say(h ? "Heads!" : "Tails!"); };
+$("ntFirst").onclick = () => {
+  const r = $("ntRoll"), names = night.players.map(p => p.name); let k = 0;
+  const spin = setInterval(() => { r.textContent = "👑 " + names[k++ % names.length]; tick(k % 8); }, 110);
+  setTimeout(() => { clearInterval(spin); const w = rnd(names); r.classList.remove("spin"); void r.offsetWidth; r.classList.add("spin"); r.textContent = `👑 ${w} goes first!`; fanfare(); say(`${w} goes first!`); }, 1500);
+};
+$("ntFlip").onclick = () => { night.flip = !night.flip; saveNight(); renderBoard(); tick(3); };
+$("ntNew").onclick = () => { if (!confirm("Start a new game?")) return; night.players = null; saveNight(); openNight(); };
+
+/* ---------- BACKUP & RESTORE ---------- */
+$("bkSave").onclick = async () => {
+  const data = JSON.stringify({ app: "luna-spell-car", v: 1, at: new Date().toISOString(), stars, cast, pets, stories });
+  const name = `luna-spellbook-${new Date().toISOString().slice(0, 10)}.json`;
+  try {
+    if (downloadsCap) await downloadsCap.save({ filename: name, data: new Blob([data], { type: "application/json" }) });
+    else { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([data], { type: "application/json" })); a.download = name; a.click(); }
+    say("Backup saved!");
+  } catch (e) { if (!(e && e.code === "declined")) say("The backup didn't save. Ask a grown-up to try again."); }
+};
+$("bkLoad").onclick = () => { $("bkFile").value = ""; $("bkFile").click(); };
+$("bkFile").onchange = () => {
+  const f = $("bkFile").files[0]; if (!f) return;
+  const fr = new FileReader();
+  fr.onload = () => {
+    let d; try { d = JSON.parse(fr.result); } catch (e) { say("Hmm, that's not a Spellbook backup."); return; }
+    if (!d || d.app !== "luna-spell-car" || !Array.isArray(d.pets)){ say("Hmm, that's not a Spellbook backup."); return; }
+    const ok = p => p && typeof p.name === "string" && KINDS.some(k => k.id === p.kind) && COLORS[p.color] && POWERS.some(w => w.id === p.power)
+      && Number.isFinite(p.p) && Number.isFinite(p.t) && (!p.art || (typeof p.art === "string" && /^data:image\/(jpeg|png);base64,/.test(p.art) && p.art.length < 600000));
+    const have = new Set(pets.map(p => p.id)); let added = 0;
+    const merged = pets.slice();
+    d.pets.filter(ok).forEach(p => { const clean = { id: String(p.id || Date.now().toString(36) + added), kind: p.kind, color: p.color, p: Math.max(0, Math.min(9, p.p | 0)), t: Math.max(1, Math.min(9, p.t | 0)), power: p.power, acc: ACCS.some(a => a.id === p.acc) ? p.acc : "none", name: p.name.slice(0, 28) };
+      if (p.art) clean.art = p.art; if (!have.has(clean.id)){ merged.push(clean); have.add(clean.id); added++; } });
+    if (!store("luna_pets", merged)){ say("There isn't enough room for all of those creatures."); return; }
+    pets = merged;
+    if (Number.isFinite(d.stars) && d.stars > stars){ stars = Math.floor(d.stars); store("luna_stars", stars); $("starCount").textContent = stars; }
+    if (d.cast && typeof d.cast === "object") Object.entries(d.cast).forEach(([k, v]) => { if (CARDS.some(c => c.name === k) && Number.isFinite(v)) cast[k] = Math.max(cast[k] || 0, v | 0); });
+    store("luna_cast", cast);
+    if (Array.isArray(d.stories)){ const seen = new Set(stories.map(s => s.title + s.at));
+      d.stories.filter(s => s && typeof s.title === "string" && typeof s.body === "string").forEach(s => { if (!seen.has(s.title + s.at)) stories.push({ title: s.title.slice(0, 120), body: s.body.slice(0, 4000), place: s.place, who: String(s.who || "").slice(0, 80), at: s.at || 0 }); });
+      stories.sort((a, b) => (b.at || 0) - (a.at || 0)); stories = stories.slice(0, 30); store("luna_stories", stories); }
+    renderBook(); chime(); burst(18);
+    say(added ? `Restored! ${added} creature${added > 1 ? "s" : ""} came home.` : "Restored! Everything was already here.");
+  };
+  fr.readAsText(f);
 };
 
 go("home", true);

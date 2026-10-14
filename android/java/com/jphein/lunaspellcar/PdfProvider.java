@@ -28,7 +28,10 @@ public class PdfProvider extends ContentProvider {
         return ParcelFileDescriptor.open(fileFor(uri), ParcelFileDescriptor.MODE_READ_ONLY);
     }
 
-    @Override public String getType(Uri uri) { return "application/pdf"; }
+    @Override public String getType(Uri uri) {
+        String n = uri.getLastPathSegment();
+        return n != null && n.endsWith(".json") ? "application/json" : "application/pdf";
+    }
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] args, String sort) {

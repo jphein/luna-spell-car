@@ -9,13 +9,15 @@ most games work without reading.
 | Game | What it teaches |
 |---|---|
 | **Window Magic** | Spot blue/red/purple things outside to build a mana pool, then cast cards she can afford. Real cost rules: colored symbols need that color, gray numbers take any color. |
-| **Make a Creature** | Design a creature card (kind, color, power/toughness, special power, accessory, name). Stronger creatures cost more. Saved creatures show up in every other game. |
+| **Make a Creature** | Design a creature card (kind, picture, color, power/toughness, special power, accessory, name). **Draw it myself** opens a paint canvas (crayon, rainbow, sparkle and heart brushes, trace-along guide). Stronger creatures cost more. Saved creatures show up in every other game. |
+| **Mana Bubbles** | Pop floating blue/red bubbles to fill a card's cost slots; colored slots need that color, gray slots take any. |
 | **Story Time** | Claude writes a gentle story starring her creatures, read aloud with sentence highlighting. *Web version only (uses the claude.ai `sample` capability).* |
 | **Memory Match** | Flip-and-find pairs with deck art and her creatures. |
 | **Count the Mana** | Tap each mana symbol to count it, then pick the total. |
 | **Who Wins?** | Power vs. toughness, with dots to compare. |
 | **Rootha Says** | Simon Says read aloud; eyes-free. |
-| **My Spellbook** | Stickers every 10 stars, her creatures (tap to edit), cards she's cast, and **Print my creatures**: a real-card-size PDF (63 × 88 mm, 9 per US Letter page). |
+| **Game Night** | Life counter for real games: 2–4 players, 20 or 40 life, ±1/±5, "face each other" flip for tablets on the table, d6/d20, coin, who goes first. |
+| **My Spellbook** | Stickers every 10 stars, her creatures (tap to edit), cards she's cast, **Print my creatures** (real-card-size PDF, 63 × 88 mm, 9 per US Letter page), and **Backup / Restore** (JSON file; restore merges and never deletes). |
 
 ## Layout
 
@@ -60,7 +62,13 @@ install/update **Speech Services by Google** and download a high-quality English
 
 ## Notes
 
-- Saved data (stars, creatures, stories) lives in each device's local storage; the tablet app and
-  the web version don't share it.
+- Saved data (stars, creatures, stories) lives in each device's local storage. Use **My Spellbook → Backup**
+  to move it between the tablet and the web version.
+
+## Changelog
+
+- **1.1.0** Mana Bubbles, Game Night, draw-your-own creature art, backup & restore, Android file picker,
+  Story Time character picker wraps instead of scrolling sideways.
+- **1.0.0** First Android build: native TTS bridge, voice settings, offline assets, printable cards.
 - Card art is © Wizards of the Coast via Scryfall. This is unofficial fan content for personal family
   use; keep the repo private.

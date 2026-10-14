@@ -41,6 +41,8 @@ public class MainActivity extends Activity implements TextToSpeech.OnInitListene
     private WebView web;
     private TextToSpeech tts;
     private volatile boolean ttsReady = false;
+    private ValueCallback<Uri[]> fileCallback;
+    private static final int PICK_FILE = 42;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,7 +61,23 @@ public class MainActivity extends Activity implements TextToSpeech.OnInitListene
         s.setTextZoom(100);
         web.setBackgroundColor(0xFF1B0F38);
         web.addJavascriptInterface(new Bridge(), "AndroidBridge");
-        web.setWebChromeClient(new WebChromeClient());
+        web.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback, FileChooserParams params) {
+                if (fileCallback != null) fileCallback.onReceiveValue(null);
+                fileCallback = callback;
+                Intent i = new Intent(Intent.ACTION_GET_CONTENT);
+                i.addCategory(Intent.CATEGORY_OPENABLE);
+                i.setType("*/*");
+                try {
+                    startActivityForResult(Intent.createChooser(i, "Choose a Spellbook backup"), PICK_FILE);
+                } catch (Exception e) {
+                    fileCallback = null;
+                    return false;
+                }
+                return true;
+            }
+        });
         web.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
@@ -197,7 +215,10 @@ public class MainActivity extends Activity implements TextToSpeech.OnInitListene
                 final String type = mime;
                 runOnUiThread(new Runnable() {
                     @Override public void run() {
-                        Toast.makeText(MainActivity.this, saved ? "Cards saved to Downloads" : "Cards ready", Toast.LENGTH_SHORT).show();
+                        boolean pdf = "application/pdf".equals(type);
+                        String what = pdf ? "Cards" : "Backup";
+                        Toast.makeText(MainActivity.this, saved ? what + " saved to Downloads" : what + " ready", Toast.LENGTH_LONG).show();
+                        if (!pdf) return;
                         Intent v = new Intent(Intent.ACTION_VIEW);
                         v.setDataAndType(shareUri, type);
                         v.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -209,6 +230,15 @@ public class MainActivity extends Activity implements TextToSpeech.OnInitListene
                 return "error";
             }
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode != PICK_FILE || fileCallback == null) return;
+        Uri[] result = (resultCode == RESULT_OK && data != null && data.getData() != null) ? new Uri[] { data.getData() } : null;
+        fileCallback.onReceiveValue(result);
+        fileCallback = null;
     }
 
     @Override
