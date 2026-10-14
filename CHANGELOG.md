@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+
+## 1.2.0 (2026-10-14)
 - Art Studio: free painting with a saved gallery (tap a painting to keep working on it); paintings are included in backups.
 - Development cycle: VERSION file, `make dev` live-reload server, `make test` (static checks + Playwright smoke tests for web and Android builds), `make release`, `make install`, CI workflow.
 - Version number shown in the For grown-ups panel.
