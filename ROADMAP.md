@@ -1,0 +1,20 @@
+# Roadmap
+
+Ideas in rough priority order. Move an item to CHANGELOG "Unreleased" when it ships.
+
+## Next
+- [ ] **Second-deck edition**: a build flavor around a second First Flight deck (white-blue flyers), with his own
+      deck art, Wing Commander stickers, and harder math (bigger costs, combat with flying/reach).
+- [ ] **Coloring pages**: outline versions of her deck's art to color in Art Studio.
+- [ ] **Turn helper for real games**: in Game Night, a big "whose turn" banner with the 6 turn steps read aloud.
+- [ ] **Sound effects volume** and a "quiet car" mode (voice only, no chimes).
+
+## Later
+- [ ] Story Time on the tablet via a self-hosted endpoint (no API key on the device).
+- [ ] Parent stats: which games she plays, how her counting accuracy changes.
+- [ ] More creature kinds (pegasus, mermaid, fox) and backgrounds (castle, beach, space).
+- [ ] Sticker book page where stickers can be placed and arranged.
+- [ ] Spanish voice + text toggle.
+
+## Done
+See CHANGELOG.md.

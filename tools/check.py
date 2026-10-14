@@ -1,0 +1,34 @@
+#!/usr/bin/env python3
+"""Fast static checks that catch the bugs this project has actually hit."""
+import json, os, re, sys
+from collections import Counter
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+src = open(os.path.join(ROOT, "web", "app.html"), encoding="utf-8").read()
+fails = []
+def check(ok, msg):
+    print(("  ok   " if ok else "  FAIL ") + msg); ok or fails.append(msg)
+
+ver = open(os.path.join(ROOT, "VERSION")).read().strip()
+check(re.fullmatch(r"\d+\.\d+\.\d+", ver) is not None, f"VERSION is semver ({ver})")
+cards = json.load(open(os.path.join(ROOT, "web", "cards.json"), encoding="utf-8"))
+need = {"name", "full", "say", "g", "u", "r", "p", "t", "artist", "img"}
+check(all(need <= set(c) for c in cards), f"cards.json: {len(cards)} cards have all fields")
+check(all(c["img"].startswith("data:image/jpeg;base64,") for c in cards), "cards.json: art is embedded")
+
+script = src[src.index("<script>\nconst CARDS"):]
+names = re.findall(r"^(?:const|let|var|function|class)\s+([A-Za-z_$][\w$]*)", script, re.M)
+dupes = [n for n, k in Counter(names).items() if k > 1]
+check(not dupes, "no duplicate top-level names" + (f": {dupes}" if dupes else ""))
+refs = set(re.findall(r'\$\("([\w-]+)"\)', src)) | set(re.findall(r'getElementById\("([\w-]+)"\)', src))
+ids = re.findall(r'\bid="([\w-]+)"', src)
+check(not (refs - set(ids)), "every $(\"id\") exists in the HTML" + (f": missing {sorted(refs - set(ids))}" if refs - set(ids) else ""))
+dup_ids = [i for i, k in Counter(ids).items() if k > 1]
+check(not dup_ids, "element ids are unique" + (f": {dup_ids}" if dup_ids else ""))
+gos = set(re.findall(r'data-go="(\w+)"', src)); screens = set(re.findall(r"(\w+):\s*\"[^\"]*\"", src[src.index("const screens"):src.index("};", src.index("const screens"))]))
+check(gos <= screens, "every home tile has a screen" + (f": {sorted(gos - screens)}" if gos - screens else ""))
+check(all(f'<section id="{g}"' in src for g in gos), "every screen has a <section>")
+stored = set(re.findall(r'store\("(luna_\w+)"', script)); loaded = set(re.findall(r'load\("(luna_\w+)"', script))
+check(stored <= loaded, "every saved key is loaded back" + (f": {sorted(stored - loaded)}" if stored - loaded else ""))
+check(src.count("__CARDS__") == 1 and "__VERSION__" in src, "build placeholders present")
+check(len(src) < 400_000, f"app.html source size {len(src)//1024} KB")
+print("\n" + ("All checks passed." if not fails else f"{len(fails)} check(s) failed.")); sys.exit(1 if fails else 0)

@@ -9,6 +9,7 @@ most games work without reading.
 | Game | What it teaches |
 |---|---|
 | **Window Magic** | Spot blue/red/purple things outside to build a mana pool, then cast cards she can afford. Real cost rules: colored symbols need that color, gray numbers take any color. |
+| **Art Studio** | Free painting with crayon, rainbow, sparkle and heart brushes; saved gallery. |
 | **Make a Creature** | Design a creature card (kind, picture, color, power/toughness, special power, accessory, name). **Draw it myself** opens a paint canvas (crayon, rainbow, sparkle and heart brushes, trace-along guide). Stronger creatures cost more. Saved creatures show up in every other game. |
 | **Mana Bubbles** | Pop floating blue/red bubbles to fill a card's cost slots; colored slots need that color, gray slots take any. |
 | **Story Time** | Claude writes a gentle story starring her creatures, read aloud with sentence highlighting. *Web version only (uses the claude.ai `sample` capability).* |
@@ -31,20 +32,23 @@ android/              manifest, MainActivity (WebView + TTS + file bridge), PdfP
 build_apk.sh          Gradle-free build: aapt2 → javac → d8 → zipalign → apksigner
 ```
 
+## Develop
+
+See **DEVELOPMENT.md** for the full cycle (`make dev`, `make test`, `make release`, `make install`) and **ROADMAP.md** for what's next.
+
 ## Build
 
 Requirements: JDK 17+, Python 3, Android SDK with `platforms;android-34` and `build-tools;34.0.0`.
 
 ```bash
 export ANDROID_HOME=/path/to/android-sdk
-./build_apk.sh                      # → build/luna-spell-car.apk
-VERSION_NAME=1.1.0 VERSION_CODE=2 ./build_apk.sh   # bump for updates
-python3 web/build.py                # web only → dist/web/index.html
+make apk          # → build/luna-spell-car.apk at the version in VERSION
+make build        # web only → dist/web/index.html
 ```
 
 The APK is signed with `android/luna-debug.keystore` (password `android`, alias `luna`).
 It's a throwaway family key, committed on purpose so any machine can build an update that
-installs over the old one. Bump `VERSION_CODE` for each update.
+installs over the old one. `versionCode` is derived from `VERSION`, so `make release` handles upgrades.
 
 ## Install on the tablet
 
@@ -65,10 +69,4 @@ install/update **Speech Services by Google** and download a high-quality English
 - Saved data (stars, creatures, stories) lives in each device's local storage. Use **My Spellbook → Backup**
   to move it between the tablet and the web version.
 
-## Changelog
-
-- **1.1.0** Mana Bubbles, Game Night, draw-your-own creature art, backup & restore, Android file picker,
-  Story Time character picker wraps instead of scrolling sideways.
-- **1.0.0** First Android build: native TTS bridge, voice settings, offline assets, printable cards.
-- Card art is © Wizards of the Coast via Scryfall. This is unofficial fan content for personal family
-  use; keep the repo private.
+See CHANGELOG.md for release notes.

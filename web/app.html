@@ -313,13 +313,14 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
     <div class="games">
       <button class="game-btn" data-go="window"><div class="ico" style="background:linear-gradient(135deg,#2E8FE0,#8A4FE6,#EF5A31)" id="icoWin"></div><b>Window Magic</b><span>Spot colors outside</span></button>
       <button class="game-btn hidden" data-go="story" id="storyTile"><div class="ico" style="background:#3E7BD6">📖</div><b>Story Time</b><span>Stories with your creatures</span></button>
+      <button class="game-btn" data-go="studio"><div class="ico" style="background:#FF7EB6">🎨</div><b>Art Studio <span class="newtag">NEW</span></b><span>Paint anything!</span></button>
       <button class="game-btn" data-go="maker"><div class="ico" style="background:#E86BB8">🦄</div><b>Make a Creature</b><span>Unicorns, kitties, and more</span></button>
       <button class="game-btn" data-go="memory"><div class="ico" style="background:#8A4FE6">🃏</div><b>Memory Match</b><span>Find the pairs</span></button>
       <button class="game-btn" data-go="count"><div class="ico" style="background:var(--violet)">3</div><b>Count the Mana</b><span>Add up the cost</span></button>
       <button class="game-btn" data-go="battle"><div class="ico" style="background:var(--red)">⚔</div><b>Who Wins?</b><span>Power vs. toughness</span></button>
-      <button class="game-btn" data-go="bubbles"><div class="ico" style="background:radial-gradient(circle at 30% 30%,#9ED2FF,#2E8FE0)">🫧</div><b>Mana Bubbles <span class="newtag">NEW</span></b><span>Pop the right colors!</span></button>
+      <button class="game-btn" data-go="bubbles"><div class="ico" style="background:radial-gradient(circle at 30% 30%,#9ED2FF,#2E8FE0)">🫧</div><b>Mana Bubbles</b><span>Pop the right colors!</span></button>
       <button class="game-btn" data-go="says"><div class="ico" style="background:#1F9D63">🗣️</div><b>Rootha Says</b><span>Listen and move!</span></button>
-      <button class="game-btn wide" data-go="night"><div class="ico" style="background:#D9411E">❤️</div><div><b>Game Night <span class="newtag">NEW</span></b><span>Life counter and dice for real games at the table</span></div></button>
+      <button class="game-btn wide" data-go="night"><div class="ico" style="background:#D9411E">❤️</div><div><b>Game Night</b><span>Life counter and dice for real games at the table</span></div></button>
       <button class="game-btn wide" data-go="book"><div class="ico" style="background:var(--gold)">⭐</div><div><b>My Spellbook</b><span>Stickers, creatures, and cards you've cast</span></div></button>
     </div>
     <details class="grownup">
@@ -328,12 +329,13 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
       <p><b>Make a Creature:</b> she designs her own creature card. Stronger creatures cost more. Saved creatures appear in Window Magic, Count the Mana, and Who Wins.</p>
       <p><b>Story Time</b> asks Claude to write a short, gentle story starring the creatures she picks, then reads it aloud (it uses your Claude account, so it asks permission the first time). <b>Memory Match</b> is a flip-and-find pairs game. In <b>My Spellbook</b>, tap one of her creatures to edit it, and use <b>Print my creatures</b> to get a real-card-size PDF to cut out and sleeve.</p>
       <p><b>Rootha Says:</b> Simon Says, read aloud, no screen needed. You're the judge: if she moves when Rootha didn't say it, gotcha! Every correct answer earns a star, and every 10 stars earns a sticker in My Spellbook. Tap any question to hear it again. Everything is saved on this device only.</p>
-      <p><b>Mana Bubbles:</b> pop bubbles to pay a card's cost; colored slots need that color, gray slots take any. <b>Game Night</b> is a life counter (20 or 40 life, 2–4 players) with dice, a coin, and "who goes first." In Make a Creature she can <b>draw her own picture</b>. <b>Backup</b> in My Spellbook moves her creatures and stars between the tablet and the web version.</p>
+      <p><b>Mana Bubbles:</b> pop bubbles to pay a card's cost; colored slots need that color, gray slots take any. <b>Game Night</b> is a life counter (20 or 40 life, 2–4 players) with dice, a coin, and "who goes first." In Make a Creature she can <b>draw her own picture</b>, and <b>Art Studio</b> is free painting with a saved gallery. <b>Backup</b> in My Spellbook moves her creatures and stars between the tablet and the web version.</p>
       <div class="voiceset"><b>Reading voice</b>
         <div class="rowbtns"><button data-rate="0.8">Slower</button><button data-rate="1">Normal</button><button data-rate="1.15">Faster</button></div>
         <div class="rowbtns"><select id="voiceSel" aria-label="Voice"></select><button id="voiceTest">🔊 Test</button><button id="ttsSettings" class="hidden">Tablet voice settings</button></div>
       </div>
       <p>Card art from Luna's Prismari Artistry deck: <span id="credits"></span>. Images via Scryfall. Magic: The Gathering is property of Wizards of the Coast; this is an unofficial family game.</p>
+      <p class="ver">Luna's Spell Car v__VERSION__</p>
     </details>
   </section>
 
@@ -441,6 +443,13 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
     <div style="text-align:center"><button class="next hidden" id="memAgain">Play again</button></div>
   </section>
 
+  <!-- ART STUDIO -->
+  <section id="studio" class="hidden">
+    <button class="save" id="stNew">🎨 New painting</button>
+    <h3 class="sec-h" id="stH">My paintings</h3>
+    <div class="book" id="stGallery"></div>
+  </section>
+
   <!-- MANA BUBBLES -->
   <section id="bubbles" class="hidden">
     <div class="stage bub-top"><img id="bbArt" alt=""><div><div class="bb-name" id="bbName"></div><div class="slots" id="bbSlots"></div></div></div>
@@ -479,7 +488,7 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
     <h3 class="sec-h">Backup</h3>
     <div class="rowbtns"><button id="bkSave">💾 Save a backup</button><button id="bkLoad">📂 Restore a backup</button></div>
     <input type="file" id="bkFile" accept=".json,application/json,text/plain" class="hidden">
-    <div class="pnote">Moves creatures, stars, stickers, and stories between devices. Restoring adds to what's here; nothing gets erased.</div>
+    <div class="pnote">Moves creatures, stars, stickers, and stories between devices. Includes Art Studio paintings. Restoring adds to what's here; nothing gets erased.</div>
     <h3 class="sec-h">Cards I've cast <span id="castCount" style="color:var(--muted);font-size:16px"></span></h3>
     <div class="book" id="cardBook"></div>
   </section>
@@ -495,7 +504,7 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
   </div>
 </div>
 <div class="paint hidden" id="paint" role="dialog" aria-modal="true" aria-label="Draw your creature">
-  <div class="pbar2"><button id="pCancel">✖</button><h2>Draw your creature!</h2><button class="done" id="pDone">✓ Done</button></div>
+  <div class="pbar2"><button id="pCancel">✖</button><h2 id="pTitle">Draw your creature!</h2><button class="done" id="pDone">✓ Done</button></div>
   <div class="canvaswrap"><img class="guide" id="pGuide" alt=""><canvas id="pCanvas" width="960" height="720"></canvas></div>
   <div class="palette" id="pColors"></div>
   <div class="palette">
@@ -718,7 +727,7 @@ $("celOk").onclick = () => {
 };
 
 /* ---------- navigation ---------- */
-const screens = { home: "", bubbles: "Mana Bubbles", night: "Game Night", window: "Window Magic", story: "Story Time", memory: "Memory Match", maker: "Make a Creature", count: "Count the Mana", battle: "Who Wins?", says: "Rootha Says", book: "My Spellbook" };
+const screens = { home: "", studio: "Art Studio", bubbles: "Mana Bubbles", night: "Game Night", window: "Window Magic", story: "Story Time", memory: "Memory Match", maker: "Make a Creature", count: "Count the Mana", battle: "Who Wins?", says: "Rootha Says", book: "My Spellbook" };
 let current = "home";
 function go(id, quiet){
   if (current === "says" && id !== "says") stopSays();
@@ -737,6 +746,7 @@ function go(id, quiet){
   if (id === "says") say("Rootha says, let's play! Do what Rootha says. But if Rootha doesn't say it, don't move! Tap start.");
   if (id === "book") renderBook();
   if (id === "bubbles") newBubbles();
+  if (id === "studio"){ renderStudio(); say("Art studio! Tap new painting, or tap a painting to keep working on it."); }
   if (id === "night") openNight();
   if (id === "home" && !quiet) say("Pick a magic game!");
 }
@@ -1325,7 +1335,9 @@ pc.addEventListener("pointermove", e => { if (!pDown) return; e.preventDefault()
 $("pUndo").onclick = () => { const im = pUndoStack.pop(); if (im){ px.putImageData(im, 0, 0); tick(1); } else boop(); };
 $("pClear").onclick = () => { if (!confirm("Start your drawing over?")) return; pUndoStack.push(px.getImageData(0, 0, pc.width, pc.height)); px.clearRect(0, 0, pc.width, pc.height); say("Fresh page!"); };
 $("pGuideBtn").onclick = () => { const g = $("pGuide"); const on = g.style.display !== "none"; g.style.display = on ? "none" : ""; $("pGuideBtn").classList.toggle("on", !on); };
+let paintMode = "creature", paintEditId = null;
 function openPaint(){
+  paintMode = "creature"; $("pTitle").textContent = "Draw your creature!"; $("pGuideBtn").classList.remove("hidden");
   px.clearRect(0, 0, pc.width, pc.height); pUndoStack = [];
   const k = KINDS.find(z => z.id === draft.kind);
   const g = document.createElement("canvas"); g.width = 480; g.height = 360; const gx = g.getContext("2d");
@@ -1337,6 +1349,7 @@ function openPaint(){
 }
 $("pCancel").onclick = () => { $("paint").classList.add("hidden"); say("Okay!"); };
 $("pDone").onclick = () => {
+  if (paintMode === "studio") return finishStudio();
   const out = document.createElement("canvas"); out.width = 480; out.height = 360; const ox = out.getContext("2d");
   ox.fillStyle = "#fff"; ox.fillRect(0, 0, 480, 360); ox.drawImage(pc, 0, 0, 480, 360);
   draft.art = out.toDataURL("image/jpeg", 0.72);
@@ -1344,6 +1357,39 @@ $("pDone").onclick = () => {
 };
 $("artDraw").onclick = () => { openPaint(); };
 $("artMagic").onclick = () => { delete draft.art; renderMaker(); tick(4); say("Magic picture!"); };
+
+/* ---------- ART STUDIO ---------- */
+let drawings = load("luna_drawings", []);
+function renderStudio(){
+  const g = $("stGallery"); g.innerHTML = ""; $("stH").classList.toggle("hidden", !drawings.length);
+  drawings.slice().reverse().forEach(d => {
+    const el = document.createElement("div"); el.className = "bk";
+    el.innerHTML = `<img src="${d.img}" alt="Painting"><div class="nm">${new Date(d.at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</div><button class="del" aria-label="Remove painting">✕</button>`;
+    el.querySelector("img").onclick = () => openStudioPaint(d);
+    el.querySelector(".del").onclick = ev => { ev.stopPropagation(); if (confirm("Remove this painting?")){ drawings = drawings.filter(x => x.id !== d.id); store("luna_drawings", drawings); renderStudio(); } };
+    g.appendChild(el);
+  });
+}
+function openStudioPaint(d){
+  paintMode = "studio"; paintEditId = d ? d.id : null;
+  $("pTitle").textContent = d ? "Keep painting!" : "Paint anything!"; $("pGuideBtn").classList.add("hidden"); $("pGuide").style.display = "none";
+  px.clearRect(0, 0, pc.width, pc.height); pUndoStack = [];
+  if (d){ const im = new Image(); im.onload = () => px.drawImage(im, 0, 0, pc.width, pc.height); im.src = d.img; }
+  $("paint").classList.remove("hidden"); say(d ? "Let's keep painting!" : "Paint anything you like!");
+}
+function finishStudio(){
+  if (!paintEditId && !pUndoStack.length){ $("paint").classList.add("hidden"); say("Your page was empty. Paint something first!"); return; }
+  const out = document.createElement("canvas"); out.width = 640; out.height = 480; const ox = out.getContext("2d");
+  ox.fillStyle = "#fff"; ox.fillRect(0, 0, 640, 480); ox.drawImage(pc, 0, 0, 640, 480);
+  const img = out.toDataURL("image/jpeg", 0.72), before = drawings;
+  drawings = paintEditId ? drawings.map(x => x.id === paintEditId ? { ...x, img, at: Date.now() } : x)
+                         : drawings.concat([{ id: Date.now().toString(36), img, at: Date.now() }]).slice(-40);
+  if (!store("luna_drawings", drawings)){ drawings = before; boop(); say("The art studio is full! Ask a grown-up to remove a painting."); return; }
+  $("paint").classList.add("hidden"); renderStudio();
+  if (!paintEditId) addStar();
+  showCelebrate({ img, title: paintEditId ? "Painting saved!" : "What a masterpiece!", sub: "It's in your Art Studio.", spoken: paintEditId ? "Saved!" : "What a masterpiece! I love it!" });
+}
+$("stNew").onclick = () => openStudioPaint(null);
 
 /* ---------- MANA BUBBLES ---------- */
 const bb = { card: null, slots: [], timer: null, on: false, nagAt: 0, last: null };
@@ -1465,7 +1511,7 @@ $("ntNew").onclick = () => { if (!confirm("Start a new game?")) return; night.pl
 
 /* ---------- BACKUP & RESTORE ---------- */
 $("bkSave").onclick = async () => {
-  const data = JSON.stringify({ app: "luna-spell-car", v: 1, at: new Date().toISOString(), stars, cast, pets, stories });
+  const data = JSON.stringify({ app: "luna-spell-car", v: 2, at: new Date().toISOString(), stars, cast, pets, stories, drawings });
   const name = `luna-spellbook-${new Date().toISOString().slice(0, 10)}.json`;
   try {
     if (downloadsCap) await downloadsCap.save({ filename: name, data: new Blob([data], { type: "application/json" }) });
@@ -1494,6 +1540,10 @@ $("bkFile").onchange = () => {
     if (Array.isArray(d.stories)){ const seen = new Set(stories.map(s => s.title + s.at));
       d.stories.filter(s => s && typeof s.title === "string" && typeof s.body === "string").forEach(s => { if (!seen.has(s.title + s.at)) stories.push({ title: s.title.slice(0, 120), body: s.body.slice(0, 4000), place: s.place, who: String(s.who || "").slice(0, 80), at: s.at || 0 }); });
       stories.sort((a, b) => (b.at || 0) - (a.at || 0)); stories = stories.slice(0, 30); store("luna_stories", stories); }
+    if (Array.isArray(d.drawings)){ const have2 = new Set(drawings.map(x => x.id)), merged2 = drawings.slice();
+      d.drawings.filter(x => x && typeof x.img === "string" && /^data:image\/(jpeg|png);base64,/.test(x.img) && x.img.length < 800000)
+        .forEach(x => { const id = String(x.id || Date.now().toString(36)); if (!have2.has(id)){ merged2.push({ id, img: x.img, at: +x.at || Date.now() }); have2.add(id); } });
+      if (store("luna_drawings", merged2)) drawings = merged2; }
     renderBook(); chime(); burst(18);
     say(added ? `Restored! ${added} creature${added > 1 ? "s" : ""} came home.` : "Restored! Everything was already here.");
   };
