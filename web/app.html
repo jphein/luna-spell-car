@@ -1,0 +1,1158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Luna's Spell Car</title>
+<!--FONTS--><link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet"><!--/FONTS-->
+<style>
+:root{
+  --bg:#EFE6FF; --bg2:#E2D2FF; --surface:#FFFFFF; --ink:#2B1650; --muted:#6E5F8F;
+  --violet:#7B4BE0; --blue:#2E8FE0; --red:#EF5A31; --gold:#E9A91B; --good:#1F9D63; --line:#D6C6F6;
+  --shadow:rgba(60,20,120,.18); --chip:#F3ECFF;
+  color-scheme:light; box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#1B0F38; --bg2:#2B1658; --surface:#2E1D5A; --ink:#F6F0FF; --muted:#BBAAE0;
+    --violet:#A27BFF; --blue:#5AB0FF; --red:#FF7A52; --gold:#FFC94A; --good:#4BD394; --line:#4A3585;
+    --shadow:rgba(0,0,0,.35); --chip:#3A2770; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1B0F38; --bg2:#2B1658; --surface:#2E1D5A; --ink:#F6F0FF; --muted:#BBAAE0;
+  --violet:#A27BFF; --blue:#5AB0FF; --red:#FF7A52; --gold:#FFC94A; --good:#4BD394; --line:#4A3585;
+  --shadow:rgba(0,0,0,.35); --chip:#3A2770; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{margin:0;height:100%}
+body{background:radial-gradient(120% 80% at 50% 0%,var(--bg2),var(--bg) 70%);background-color:var(--bg);color:var(--ink);
+  font-family:"Fredoka","Trebuchet MS","Arial Rounded MT Bold",sans-serif;-webkit-tap-highlight-color:transparent;
+  user-select:none;-webkit-user-select:none;overflow-x:hidden}
+button{font-family:inherit;color:inherit;cursor:pointer;border:0;-webkit-tap-highlight-color:transparent;background:none}
+button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-offset:3px}
+.app{max-width:760px;margin:0 auto;padding:14px 16px 28px;min-height:100%;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+#voiceBtn{margin-left:auto}
+.home-btn,.icon-btn{width:52px;height:52px;border-radius:50%;background:var(--surface);box-shadow:0 3px 0 var(--line);font-size:24px;display:grid;place-items:center;flex:none}
+.stars{display:flex;align-items:center;gap:6px;background:var(--surface);padding:8px 14px;border-radius:999px;font-weight:700;font-size:20px;box-shadow:0 3px 0 var(--line)}
+.title{font-size:22px;font-weight:700}
+.hidden{display:none!important}
+.press:active{transform:translateY(3px)}
+
+/* home */
+.hero{text-align:center;padding:6px 0 4px}
+.hero h1{font-size:clamp(34px,8vw,52px);margin:0;line-height:1}
+.hero h1 .spark{color:var(--gold)}
+.hero p{margin:8px 0 0;color:var(--muted);font-size:18px}
+.rootha{width:120px;height:120px;border-radius:50%;object-fit:cover;object-position:50% 25%;border:5px solid var(--violet);margin:4px auto;display:block;box-shadow:0 8px 24px var(--shadow)}
+.games{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.game-btn{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 10px;border-radius:26px;background:var(--surface);box-shadow:0 5px 0 var(--line),0 10px 24px var(--shadow);text-align:center;min-height:150px;justify-content:center}
+.game-btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--line)}
+.game-btn .ico{width:64px;height:64px;border-radius:20px;display:grid;place-items:center;flex:none;font-size:34px;color:#fff;font-weight:700}
+.game-btn b{display:block;font-size:20px;line-height:1.1}
+.game-btn span{color:var(--muted);font-size:14px;line-height:1.2}
+.game-btn.wide{grid-column:1/-1;flex-direction:row;min-height:84px;justify-content:flex-start;padding:12px 18px;text-align:left}
+.newtag{font-size:11px;background:var(--gold);color:#2B1650;padding:2px 8px;border-radius:99px;font-weight:700;vertical-align:middle;margin-left:4px}
+.grownup{margin-top:auto;padding-top:22px;color:var(--muted);font-size:13px;line-height:1.45}
+.grownup summary{cursor:pointer;font-size:15px;font-weight:600}
+
+/* window magic */
+.pool{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.mana-btn{border-radius:28px;min-height:140px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:#fff;font-size:21px;font-weight:700;box-shadow:0 6px 0 rgba(0,0,0,.18)}
+.mana-btn:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(0,0,0,.18)}
+.mana-btn.blue{background:linear-gradient(160deg,#4BA6F5,#1F6FC4)}
+.mana-btn.red{background:linear-gradient(160deg,#FF8556,#D9411E)}
+.mana-btn.purple{grid-column:1/-1;min-height:74px;flex-direction:row;gap:12px;background:linear-gradient(100deg,#2E8FE0,#8A4FE6 45%,#EF5A31)}
+.mana-btn .count{font-size:46px;line-height:1}
+.hint{text-align:center;color:var(--muted);font-size:17px;margin:12px 0 8px;min-height:1.4em}
+.shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(102px,1fr));gap:10px}
+.mini{position:relative;border-radius:16px;overflow:hidden;aspect-ratio:3/4;background:var(--surface);opacity:.45;filter:grayscale(.7);transition:opacity .25s,filter .25s;box-shadow:0 3px 0 var(--line);padding:0}
+.mini img{width:100%;height:70%;object-fit:cover;display:block}
+.mini .cost{display:flex;gap:2px;justify-content:center;padding:6px 2px 0;flex-wrap:wrap}
+.mini.ready{opacity:1;filter:none;box-shadow:0 0 0 4px var(--gold),0 6px 16px var(--shadow);animation:pulse 1.6s ease-in-out infinite}
+.mini .pettag{position:absolute;top:6px;left:6px;font-size:18px}
+@keyframes pulse{50%{transform:scale(1.04)}}
+.sym{width:22px;height:22px;flex:none}
+.sym.big{width:46px;height:46px}
+.reset{display:block;margin:14px auto 0;color:var(--muted);font-size:15px;padding:8px 14px;border-radius:99px;background:var(--chip)}
+
+/* stage */
+.stage{background:var(--surface);border-radius:28px;padding:16px;box-shadow:0 5px 0 var(--line),0 10px 24px var(--shadow);text-align:center}
+.stage img.art{width:100%;max-height:40vh;object-fit:cover;border-radius:18px;display:block}
+.stage h2{margin:12px 0 4px;font-size:26px}
+.costrow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:10px 0 4px}
+.costrow button{border-radius:50%;padding:0;transition:transform .15s}
+.costrow button.counted{transform:scale(1.15);box-shadow:0 0 0 4px var(--gold);border-radius:50%}
+.tapnote{font-size:15px;color:var(--muted);min-height:1.3em}
+.runtotal{font-size:28px;font-weight:700;color:var(--violet);min-height:1.2em}
+.answers{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+.ans{min-height:84px;border-radius:24px;background:var(--surface);font-size:40px;font-weight:700;box-shadow:0 5px 0 var(--line);border:2px solid var(--line)}
+.ans:active{transform:translateY(3px);box-shadow:0 2px 0 var(--line)}
+.ans.right{background:var(--good);color:#fff;border-color:var(--good)}
+.ans.wrong{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.vs{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center}
+.fighter img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:18px;display:block}
+.fighter .nm{font-weight:600;font-size:16px;margin-top:6px;min-height:2.4em}
+.stat{display:flex;align-items:center;justify-content:center;gap:6px;font-size:34px;font-weight:700;margin-top:4px}
+.dots{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;min-height:16px;margin-top:4px}
+.dot{width:14px;height:14px;border-radius:50%}
+.vsword{font-size:30px;font-weight:700;color:var(--violet)}
+.question{font-size:22px;margin:16px 4px 0;font-weight:600;cursor:pointer}
+.question::after{content:" 🔁";font-size:16px}
+.yesno{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.yesno .ans{font-size:23px}
+.explain{min-height:1.5em;margin-top:12px;font-size:19px;color:var(--muted)}
+.next{margin-top:14px;padding:16px 28px;border-radius:999px;background:var(--violet);color:#fff;font-size:22px;font-weight:700;box-shadow:0 5px 0 rgba(0,0,0,.2)}
+.next:active{transform:translateY(3px)}
+
+/* creature maker */
+.maker{display:grid;gap:14px}
+@media (min-width:640px){.maker{grid-template-columns:240px 1fr;align-items:start}.preview-wrap{position:sticky;top:10px}}
+.preview-wrap{display:flex;justify-content:center}
+.petcard{width:min(230px,62vw);border-radius:18px;padding:9px;background:var(--frame,#7B4BE0);box-shadow:0 8px 22px var(--shadow);color:#2B1650;text-align:left}
+.petcard .inner{background:#FBF7FF;border-radius:11px;padding:6px}
+.petcard .bar{display:flex;align-items:center;justify-content:space-between;gap:4px;background:#fff;border-radius:8px;padding:4px 6px;border:1.5px solid rgba(0,0,0,.15)}
+.petcard .bar b{font-size:14px;line-height:1.1}
+.petcard .bar .cost{display:flex;gap:1px}
+.petcard .bar .sym{width:17px;height:17px}
+.petcard img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:6px;margin:5px 0}
+.petcard .type{font-size:12px;font-weight:600;background:#fff;border-radius:7px;padding:3px 6px;border:1.5px solid rgba(0,0,0,.15)}
+.petcard .text{font-size:12.5px;padding:6px 4px 2px;min-height:42px;line-height:1.25}
+.petcard .pt{display:flex;justify-content:flex-end}
+.petcard .pt span{background:#fff;border:1.5px solid rgba(0,0,0,.2);border-radius:8px;padding:2px 9px;font-weight:700;font-size:16px}
+.controls{display:grid;gap:14px}
+.ctrl{background:var(--surface);border-radius:22px;padding:12px 14px;box-shadow:0 4px 0 var(--line)}
+.ctrl h3{margin:0 0 8px;font-size:18px}
+.pickrow{display:flex;flex-wrap:wrap;gap:8px}
+.pick{min-width:60px;height:60px;border-radius:18px;background:var(--chip);font-size:32px;display:grid;place-items:center;border:3px solid transparent;padding:0 8px}
+.pick.on{border-color:var(--gold);background:var(--surface);box-shadow:0 0 0 3px var(--gold)}
+.pick.txt{font-size:16px;font-weight:600;height:52px;gap:6px;display:flex;align-items:center}
+.swatch{width:74px;height:60px;border-radius:18px;border:3px solid transparent;color:#fff;font-weight:700;font-size:15px}
+.swatch.on{box-shadow:0 0 0 4px var(--gold)}
+.stepper{display:flex;align-items:center;gap:10px;margin:4px 0}
+.stepper .lab{width:110px;font-weight:600;font-size:17px;display:flex;align-items:center;gap:6px}
+.stepper button{width:52px;height:52px;border-radius:50%;background:var(--chip);font-size:28px;font-weight:700}
+.stepper .val{font-size:32px;font-weight:700;width:40px;text-align:center}
+.namerow{display:flex;gap:8px}
+.namerow input{flex:1;min-width:0;font-family:inherit;font-size:18px;padding:12px 14px;border-radius:16px;border:2px solid var(--line);background:var(--chip);color:var(--ink);user-select:text;-webkit-user-select:text}
+.dice{width:56px;height:52px;border-radius:16px;background:var(--chip);font-size:26px}
+.save{width:100%;padding:18px;border-radius:999px;background:var(--violet);color:#fff;font-size:22px;font-weight:700;box-shadow:0 5px 0 rgba(0,0,0,.2)}
+
+/* rootha says */
+.says{text-align:center}
+.says .face{width:180px;height:180px;border-radius:50%;object-fit:cover;object-position:50% 25%;border:6px solid var(--violet);display:block;margin:4px auto 10px;transition:transform .2s}
+.says .face.talk{animation:bob .5s ease-in-out 3}
+@keyframes bob{50%{transform:scale(1.06) rotate(-3deg)}}
+.cmd{font-size:clamp(26px,6.5vw,38px);font-weight:700;min-height:2.6em;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;padding:0 8px}
+.cmd .emo{font-size:58px;line-height:1}
+.gotcha{font-size:22px;font-weight:700;color:var(--red);min-height:1.4em}
+.pace{display:flex;gap:10px;justify-content:center;margin-top:10px}
+.pace button{padding:10px 18px;border-radius:99px;background:var(--chip);font-size:17px;font-weight:600}
+.pace button.on{background:var(--violet);color:#fff}
+.bigplay{width:100%;padding:20px;border-radius:999px;font-size:26px;font-weight:700;color:#fff;background:var(--good);margin-top:14px;box-shadow:0 5px 0 rgba(0,0,0,.2)}
+.bigplay.stop{background:var(--red)}
+
+/* spellbook */
+.sec-h{font-size:21px;margin:18px 4px 10px}
+.stickers{display:flex;flex-wrap:wrap;gap:8px;background:var(--surface);border-radius:22px;padding:14px;box-shadow:0 4px 0 var(--line);min-height:76px;align-items:center}
+.stk{font-size:40px;line-height:1;animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
+.stk.empty{opacity:.18;filter:grayscale(1);animation:none}
+.progress{margin:10px 4px 0;color:var(--muted);font-size:16px}
+.pbar{height:14px;border-radius:99px;background:var(--chip);overflow:hidden;margin-top:6px}
+.pbar i{display:block;height:100%;background:linear-gradient(90deg,var(--violet),var(--gold));border-radius:99px}
+.book{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px}
+.bk{cursor:pointer;position:relative;border-radius:16px;overflow:hidden;background:var(--surface);aspect-ratio:3/4;box-shadow:0 3px 0 var(--line);padding:0}
+.bk img{width:100%;height:76%;object-fit:cover;display:block}
+.bk .nm{font-size:12px;font-weight:600;padding:4px;line-height:1.1}
+.bk.locked img{filter:brightness(0) opacity(.25)}
+.bk.locked::after{content:"?";position:absolute;top:24%;left:0;right:0;text-align:center;font-size:40px;font-weight:700;color:var(--muted)}
+.bk .times{position:absolute;top:6px;right:6px;background:var(--gold);color:#2B1650;font-weight:700;font-size:13px;padding:2px 7px;border-radius:99px}
+.bk .del{position:absolute;top:4px;left:4px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;font-size:15px}
+.empty-note{color:var(--muted);font-size:16px;padding:6px 4px}
+
+.voiceset{background:var(--surface);border-radius:16px;padding:10px 12px;margin:8px 0;color:var(--ink)}
+.voiceset .rowbtns button.on{background:var(--violet);color:#fff}
+.voiceset select{font-family:inherit;font-size:15px;padding:10px;border-radius:12px;border:2px solid var(--line);background:var(--chip);color:var(--ink);max-width:100%}
+/* story */
+.scrollrow{flex-wrap:nowrap;overflow-x:auto;padding:4px 2px 8px;scrollbar-width:thin}
+.who{flex:none;display:flex;flex-direction:column;align-items:center;gap:4px;width:84px;padding:6px 4px;border-radius:18px;background:var(--chip);border:3px solid transparent}
+.who img{width:62px;height:62px;border-radius:50%;object-fit:cover}
+.who span{font-size:12px;font-weight:600;line-height:1.1;text-align:center;max-height:2.2em;overflow:hidden}
+.who.on{border-color:var(--gold);background:var(--surface);box-shadow:0 0 0 3px var(--gold)}
+.storybox{background:var(--surface);border-radius:26px;padding:18px 18px 14px;box-shadow:0 5px 0 var(--line),0 10px 24px var(--shadow);margin-top:14px}
+.storybox h2{margin:0 0 10px;font-size:26px;color:var(--violet);line-height:1.15}
+.storytext{font-size:20px;line-height:1.55}
+.storytext p{margin:0 0 12px}
+.storytext .s.reading{background:rgba(233,169,27,.28);border-radius:6px;box-shadow:0 0 0 3px rgba(233,169,27,.28)}
+.thinking{font-size:20px;color:var(--muted);display:flex;align-items:center;gap:10px}
+.thinking i{display:inline-block;animation:spin 1.6s linear infinite;font-style:normal;font-size:28px;color:var(--gold)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.rowbtns{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.rowbtns button{padding:12px 18px;border-radius:99px;background:var(--chip);font-size:17px;font-weight:600}
+.storylist{display:grid;gap:8px}
+.storylist button{text-align:left;padding:12px 16px;border-radius:16px;background:var(--surface);box-shadow:0 3px 0 var(--line);font-size:17px;font-weight:600;display:flex;gap:10px;align-items:center}
+.storylist button small{display:block;color:var(--muted);font-weight:500;font-size:13px}
+.story-sec{display:grid;gap:12px}
+/* memory */
+.memgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media (min-width:560px){.memgrid{grid-template-columns:repeat(4,1fr)}}
+.mcard{aspect-ratio:3/4;perspective:700px;padding:0}
+.mcard .in{position:relative;width:100%;height:100%;transition:transform .45s;transform-style:preserve-3d}
+.mcard.up .in,.mcard.done .in{transform:rotateY(180deg)}
+.mcard .f,.mcard .b{position:absolute;inset:0;border-radius:16px;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden}
+.mcard .b{background:linear-gradient(145deg,#8A4FE6,#4A23A8);display:grid;place-items:center;color:#FFC94A;font-size:40px;box-shadow:0 4px 0 rgba(0,0,0,.2)}
+.mcard .b::after{content:"";position:absolute;inset:7px;border:2px solid rgba(255,255,255,.35);border-radius:11px}
+.mcard .f{transform:rotateY(180deg);background:var(--surface)}
+.mcard .f img{width:100%;height:100%;object-fit:cover}
+.mcard.done .f{box-shadow:0 0 0 4px var(--good)}
+.memstats{display:flex;justify-content:space-between;color:var(--muted);font-size:17px;margin:0 4px 10px}
+/* creature modal */
+.pmodal{position:fixed;inset:0;background:rgba(20,8,48,.82);display:grid;place-items:center;z-index:19;padding:20px;overflow:auto}
+.pmodal .box{background:var(--surface);border-radius:28px;padding:18px;max-width:380px;width:100%;display:grid;gap:10px;justify-items:center;animation:pop .35s cubic-bezier(.2,1.6,.4,1)}
+.pmodal .petcard{width:min(300px,76vw)}
+.pmodal .rowbtns{justify-content:center}
+.pmodal .rowbtns .danger{color:var(--red)}
+.printbtn{display:flex;align-items:center;gap:8px;margin:12px 0 0;padding:12px 18px;border-radius:99px;background:var(--chip);font-size:17px;font-weight:600}
+.pnote{color:var(--muted);font-size:14px;margin:6px 4px 0}
+@media (prefers-reduced-motion:reduce){.mcard .in{transition:none}.thinking i{animation:none}}
+/* celebration */
+.celebrate{position:fixed;inset:0;background:rgba(20,8,48,.82);display:grid;place-items:center;z-index:20;padding:24px}
+.celebrate .box{background:var(--surface);border-radius:30px;padding:18px;max-width:420px;width:100%;text-align:center;animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
+@keyframes pop{from{transform:scale(.6);opacity:0}}
+.celebrate img{width:100%;border-radius:20px;display:block}
+.celebrate .bigemo{font-size:120px;line-height:1.1}
+.celebrate h2{font-size:28px;margin:12px 0 2px}
+.celebrate p{margin:0 0 12px;color:var(--muted);font-size:18px}
+.spark-layer{position:fixed;inset:0;pointer-events:none;z-index:30;overflow:hidden}
+.spk{position:absolute;width:22px;height:22px;animation:fly 1.2s ease-out forwards}
+@keyframes fly{to{transform:translate(var(--dx),var(--dy)) rotate(200deg) scale(.2);opacity:0}}
+@media (prefers-reduced-motion:reduce){.mini.ready,.says .face.talk,.stk{animation:none}.spk{display:none}.celebrate .box{animation:none}}
+@media (max-width:420px){.mana-btn{min-height:120px}.ans{min-height:72px;font-size:34px}.game-btn{min-height:136px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <button class="home-btn hidden" id="homeBtn" aria-label="Back to games">🏠</button>
+    <div class="title" id="screenTitle"></div>
+    <button class="icon-btn" id="voiceBtn" aria-label="Turn voice off">🔊</button>
+    <div class="stars" aria-label="Stars"><span>⭐</span><span id="starCount">0</span></div>
+  </div>
+
+  <!-- HOME -->
+  <section id="home">
+    <div class="hero">
+      <img class="rootha" id="roothaImg" alt="Rootha">
+      <h1>Luna's Spell Car <span class="spark">✦</span></h1>
+      <p>Pick a magic game!</p>
+    </div>
+    <div class="games">
+      <button class="game-btn" data-go="window"><div class="ico" style="background:linear-gradient(135deg,#2E8FE0,#8A4FE6,#EF5A31)" id="icoWin"></div><b>Window Magic</b><span>Spot colors outside</span></button>
+      <button class="game-btn hidden" data-go="story" id="storyTile"><div class="ico" style="background:#3E7BD6">📖</div><b>Story Time <span class="newtag">NEW</span></b><span>Stories with your creatures</span></button>
+      <button class="game-btn" data-go="maker"><div class="ico" style="background:#E86BB8">🦄</div><b>Make a Creature</b><span>Unicorns, kitties, and more</span></button>
+      <button class="game-btn" data-go="memory"><div class="ico" style="background:#8A4FE6">🃏</div><b>Memory Match <span class="newtag">NEW</span></b><span>Find the pairs</span></button>
+      <button class="game-btn" data-go="count"><div class="ico" style="background:var(--violet)">3</div><b>Count the Mana</b><span>Add up the cost</span></button>
+      <button class="game-btn" data-go="battle"><div class="ico" style="background:var(--red)">⚔</div><b>Who Wins?</b><span>Power vs. toughness</span></button>
+      <button class="game-btn" data-go="says"><div class="ico" style="background:#1F9D63">🗣️</div><b>Rootha Says</b><span>Listen and move!</span></button>
+      <button class="game-btn wide" data-go="book"><div class="ico" style="background:var(--gold)">⭐</div><div><b>My Spellbook</b><span>Stickers, creatures, and cards you've cast</span></div></button>
+    </div>
+    <details class="grownup">
+      <summary>For grown-ups</summary>
+      <p><b>Window Magic:</b> Luna taps blue or red when she spots that color outside; purple gives one of each (blue + red = purple, like her deck). Cards she can afford glow; colored symbols need that color, gray numbers take any color, just like the real game.</p>
+      <p><b>Make a Creature:</b> she designs her own creature card. Stronger creatures cost more. Saved creatures appear in Window Magic, Count the Mana, and Who Wins.</p>
+      <p><b>Story Time</b> asks Claude to write a short, gentle story starring the creatures she picks, then reads it aloud (it uses your Claude account, so it asks permission the first time). <b>Memory Match</b> is a flip-and-find pairs game. In <b>My Spellbook</b>, tap one of her creatures to edit it, and use <b>Print my creatures</b> to get a real-card-size PDF to cut out and sleeve.</p>
+      <p><b>Rootha Says:</b> Simon Says, read aloud, no screen needed. You're the judge: if she moves when Rootha didn't say it, gotcha! Every correct answer earns a star, and every 10 stars earns a sticker in My Spellbook. Tap any question to hear it again. Everything is saved on this device only.</p>
+      <div class="voiceset"><b>Reading voice</b>
+        <div class="rowbtns"><button data-rate="0.8">Slower</button><button data-rate="1">Normal</button><button data-rate="1.15">Faster</button></div>
+        <div class="rowbtns"><select id="voiceSel" aria-label="Voice"></select><button id="voiceTest">🔊 Test</button><button id="ttsSettings" class="hidden">Tablet voice settings</button></div>
+      </div>
+      <p>Card art from Luna's Prismari Artistry deck: <span id="credits"></span>. Images via Scryfall. Magic: The Gathering is property of Wizards of the Coast; this is an unofficial family game.</p>
+    </details>
+  </section>
+
+  <!-- WINDOW MAGIC -->
+  <section id="window" class="hidden">
+    <div class="pool">
+      <button class="mana-btn blue" id="addBlue" aria-label="Add blue mana"><span id="symBlue"></span><span class="count" id="blueCount">0</span>I saw blue!</button>
+      <button class="mana-btn red" id="addRed" aria-label="Add red mana"><span id="symRed"></span><span class="count" id="redCount">0</span>I saw red!</button>
+      <button class="mana-btn purple" id="addPurple" aria-label="Add purple: one blue and one red"><span id="symPurple"></span>I saw purple!</button>
+    </div>
+    <div class="hint" id="winHint"></div>
+    <div class="shelf" id="shelf"></div>
+    <button class="reset" id="resetPool">Empty my mana</button>
+  </section>
+
+  <!-- MAKER -->
+  <section id="maker" class="hidden">
+    <div class="maker">
+      <div class="preview-wrap"><div id="petPreview"></div></div>
+      <div class="controls">
+        <div class="ctrl"><h3>1. Pick a creature</h3><div class="pickrow" id="kindRow"></div></div>
+        <div class="ctrl"><h3>2. Pick a color</h3><div class="pickrow" id="colorRow"></div></div>
+        <div class="ctrl"><h3>3. How strong?</h3>
+          <div class="stepper"><div class="lab"><span id="swIco2"></span>Power</div><button data-st="p" data-d="-1" aria-label="Less power">−</button><div class="val" id="pVal">2</div><button data-st="p" data-d="1" aria-label="More power">+</button></div>
+          <div class="stepper"><div class="lab"><span id="htIco2"></span>Toughness</div><button data-st="t" data-d="-1" aria-label="Less toughness">−</button><div class="val" id="tVal">2</div><button data-st="t" data-d="1" aria-label="More toughness">+</button></div>
+        </div>
+        <div class="ctrl"><h3>4. Special power</h3><div class="pickrow" id="powRow"></div></div>
+        <div class="ctrl"><h3>5. Add something special</h3><div class="pickrow" id="accRow"></div></div>
+        <div class="ctrl"><h3>6. Name</h3><div class="namerow"><input id="petName" maxlength="28" aria-label="Creature name"><button class="dice" id="reroll" aria-label="New name">🎲</button></div></div>
+        <button class="save" id="savePet">Save to my Spellbook ✨</button>
+        <button class="reset hidden" id="cancelEdit">Cancel changes</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- COUNT -->
+  <section id="count" class="hidden">
+    <div class="stage">
+      <img class="art" id="cArt" alt="">
+      <h2 id="cName"></h2>
+      <div class="costrow" id="cCost"></div>
+      <div class="tapnote" id="cTapNote">Tap each circle to count!</div>
+      <div class="runtotal" id="cRun"></div>
+      <div class="question" id="cQ">How many mana in all?</div>
+      <div class="answers" id="cAns"></div>
+      <div class="explain" id="cExplain"></div>
+      <button class="next hidden" id="cNext">Next card</button>
+    </div>
+  </section>
+
+  <!-- BATTLE -->
+  <section id="battle" class="hidden">
+    <div class="stage">
+      <div class="vs">
+        <div class="fighter"><img id="bA" alt=""><div class="nm" id="bAn"></div>
+          <div class="stat"><span id="swordIco"></span><span id="bAp"></span></div><div class="dots" id="bAd"></div></div>
+        <div class="vsword">vs</div>
+        <div class="fighter"><img id="bB" alt=""><div class="nm" id="bBn"></div>
+          <div class="stat"><span id="heartIco"></span><span id="bBt"></span></div><div class="dots" id="bBd"></div></div>
+      </div>
+      <div class="question" id="bQ"></div>
+      <div class="yesno">
+        <button class="ans" data-yes="1">Yes, defeated!</button>
+        <button class="ans" data-yes="0">No, it's safe!</button>
+      </div>
+      <div class="explain" id="bExplain"></div>
+      <button class="next hidden" id="bNext">Next battle</button>
+    </div>
+  </section>
+
+  <!-- ROOTHA SAYS -->
+  <section id="says" class="hidden">
+    <div class="stage says">
+      <img class="face" id="saysFace" alt="Rootha">
+      <div class="cmd" id="saysCmd"><span class="emo">🗣️</span><span>Listen to Rootha!</span></div>
+      <div class="gotcha" id="saysGotcha"></div>
+      <div class="pace"><button data-pace="slow" class="on">Slow</button><button data-pace="fast">Fast</button></div>
+      <button class="bigplay" id="saysPlay">Start ▶</button>
+    </div>
+  </section>
+
+  <!-- STORY -->
+  <section id="story" class="hidden">
+    <div class="story-sec" id="storyPick">
+      <div class="ctrl"><h3>Who's in the story? <span style="color:var(--muted);font-weight:500;font-size:15px">(pick 1 or 2)</span></h3><div class="pickrow scrollrow" id="storyWho"></div></div>
+      <div class="ctrl"><h3>Where does it happen?</h3><div class="pickrow" id="storyWhere"></div></div>
+      <button class="save" id="storyGo">Tell me a story ✨</button>
+    </div>
+    <div class="storybox hidden" id="storyBox">
+      <h2 id="storyTitle"></h2>
+      <div class="storytext" id="storyText"></div>
+      <div class="rowbtns" id="storyBtns">
+        <button id="storyRead">🔊 Read it again</button><button id="storyStop">■ Stop</button><button id="storyNew">✨ New story</button>
+      </div>
+    </div>
+    <h3 class="sec-h" id="storyListH">My stories</h3>
+    <div class="storylist" id="storyList"></div>
+  </section>
+
+  <!-- MEMORY -->
+  <section id="memory" class="hidden">
+    <div class="memstats"><span id="memTries">Tries: 0</span><span id="memLeft"></span></div>
+    <div class="memgrid" id="memGrid"></div>
+    <div style="text-align:center"><button class="next hidden" id="memAgain">Play again</button></div>
+  </section>
+
+  <!-- SPELLBOOK -->
+  <section id="book" class="hidden">
+    <h3 class="sec-h">My stickers</h3>
+    <div class="stickers" id="stickers"></div>
+    <div class="progress"><span id="stkNote"></span><div class="pbar"><i id="stkBar"></i></div></div>
+    <h3 class="sec-h">My creatures</h3>
+    <div class="book" id="petBook"></div>
+    <button class="printbtn hidden" id="printBtn">🖨️ Print my creatures</button>
+    <div class="pnote hidden" id="printNote">Makes a PDF with real-size cards. Print at "Actual size," cut them out, and slide them into sleeves!</div>
+    <h3 class="sec-h">Cards I've cast <span id="castCount" style="color:var(--muted);font-size:16px"></span></h3>
+    <div class="book" id="cardBook"></div>
+  </section>
+</div>
+
+<div class="celebrate hidden" id="celebrate" role="dialog" aria-modal="true">
+  <div class="box"><img id="celImg" alt=""><div class="bigemo hidden" id="celEmo"></div><h2 id="celTitle"></h2><p id="celSub"></p><button class="next" id="celOk">Yay!</button></div>
+</div>
+<div class="pmodal hidden" id="petModal" role="dialog" aria-modal="true">
+  <div class="box"><div id="pmCard"></div>
+    <div class="rowbtns"><button id="pmEdit">✏️ Edit</button><button id="pmStory" class="hidden">📖 Story</button><button id="pmSay">🔊</button></div>
+    <div class="rowbtns"><button id="pmDel" class="danger">Remove</button><button id="pmClose">Close</button></div>
+  </div>
+</div>
+<div class="spark-layer" id="sparks"></div>
+
+<!--SHIM-->
+<script>
+const CARDS = __CARDS__;
+const $ = id => document.getElementById(id);
+const rnd = a => a[Math.floor(Math.random() * a.length)];
+
+/* ---------- saved state (this device only) ---------- */
+function load(k, d){ try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } }
+function store(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+let stars = load("luna_stars", 0), voiceOn = load("luna_voice2", true), cast = load("luna_cast", {}), pets = load("luna_pets", []);
+if (typeof stars !== "number") stars = 0;
+$("starCount").textContent = stars;
+
+const STICKERS = ["🦄", "🐴", "🌈", "🧚", "🐱", "🐶", "🌙", "💜", "🦋", "⭐", "🐉", "🔮", "🎀", "🌸", "👑", "🪄"];
+let pendingSticker = null;
+function addStar(){
+  stars++; $("starCount").textContent = stars; store("luna_stars", stars);
+  if (stars % 10 === 0){
+    const s = STICKERS[(stars / 10 - 1) % STICKERS.length];
+    if (!$("celebrate").classList.contains("hidden")) pendingSticker = s; else setTimeout(() => stickerParty(s), 900);
+  }
+}
+function stickerParty(s){
+  showCelebrate({ emo: s, title: "New sticker!", sub: `${stars} stars! Look in My Spellbook.`, spoken: `Wow! ${stars} stars! You earned a new sticker!` });
+}
+
+/* ---------- voice + sound ---------- */
+let voice = null, rateMul = load("luna_rate", 1), voicePref = load("luna_voicename", "");
+function pickVoice(){
+  if (!("speechSynthesis" in window)) return;
+  const vs = speechSynthesis.getVoices().filter(v => /^en/i.test(v.lang));
+  voice = vs.find(v => v.name === voicePref) || vs.find(v => /samantha|female|zira|aria|jenny|google us english/i.test(v.name)) || vs[0] || null;
+  renderVoiceSettings();
+}
+function renderVoiceSettings(){
+  const sel = document.getElementById("voiceSel"); if (!sel || !("speechSynthesis" in window)) return;
+  const vs = speechSynthesis.getVoices().filter(v => /^en/i.test(v.lang));
+  sel.innerHTML = ""; sel.classList.toggle("hidden", !vs.length);
+  vs.forEach((v, i) => { const o = document.createElement("option"); o.value = v.name; o.textContent = v.label || v.name; if (voice && v.name === voice.name) o.selected = true; sel.appendChild(o); });
+  document.querySelectorAll("[data-rate]").forEach(b => b.classList.toggle("on", +b.dataset.rate === rateMul));
+}
+if ("speechSynthesis" in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function say(t, onend){
+  if (!voiceOn || !("speechSynthesis" in window)){ if (onend) setTimeout(onend, 1200); return; }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(t); u.rate = 0.92 * rateMul; u.pitch = 1.15; if (voice) u.voice = voice;
+  if (onend){ let done = false; const f = () => { if (!done){ done = true; onend(); } }; u.onend = f; setTimeout(f, 1500 + t.length * 75); }
+  speechSynthesis.speak(u);
+}
+function updVoiceBtn(){ $("voiceBtn").textContent = voiceOn ? "🔊" : "🔈"; $("voiceBtn").setAttribute("aria-label", voiceOn ? "Turn voice off" : "Turn voice on"); }
+$("voiceBtn").onclick = () => { voiceOn = !voiceOn; if (!voiceOn && "speechSynthesis" in window) speechSynthesis.cancel(); updVoiceBtn(); store("luna_voice2", voiceOn); if (voiceOn) say("Voice on!"); };
+updVoiceBtn();
+
+let ac = null;
+function tone(freqs, dur = 0.12, type = "triangle", gap = 0.09, vol = 0.18){
+  try {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    if (ac.state === "suspended") ac.resume();
+    freqs.forEach((f, i) => {
+      const o = ac.createOscillator(), g = ac.createGain(), t0 = ac.currentTime + i * gap;
+      o.type = type; o.frequency.value = f; g.gain.setValueAtTime(0.0001, t0);
+      g.gain.exponentialRampToValueAtTime(vol, t0 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur + 0.25);
+      o.connect(g).connect(ac.destination); o.start(t0); o.stop(t0 + dur + 0.3);
+    });
+  } catch (e) {}
+}
+const chime = () => tone([784, 988, 1319, 1568], 0.14);
+const fanfare = () => tone([523, 659, 784, 1047, 784, 1047, 1319], 0.12, "triangle", 0.11);
+const plink = c => tone([c === "U" ? 660 : c === "R" ? 523 : 587], 0.08, "sine");
+const boop = () => tone([330, 262], 0.12, "sine", 0.12);
+const tick = n => tone([440 + n * 70], 0.06, "sine", 0.05, 0.14);
+
+document.querySelectorAll("[data-rate]").forEach(b => b.onclick = () => { rateMul = +b.dataset.rate; store("luna_rate", rateMul); renderVoiceSettings(); say("This is how fast I'll read."); });
+document.getElementById("voiceSel").onchange = e => { voicePref = e.target.value; store("luna_voicename", voicePref); pickVoice(); say("Hi Luna! This is my new voice."); };
+document.getElementById("voiceTest").onclick = () => say("Hi Luna! Sparkle sparkle! Let's cast a spell.");
+if (window.AndroidBridge){ const b = document.getElementById("ttsSettings"); b.classList.remove("hidden"); b.onclick = () => window.AndroidBridge.openTtsSettings(); }
+renderVoiceSettings();
+
+/* ---------- symbols ---------- */
+function sym(kind, n, big){
+  const cls = "sym" + (big ? " big" : "");
+  if (kind === "U") return `<svg class="${cls}" viewBox="0 0 24 24" aria-label="blue"><circle cx="12" cy="12" r="11.5" fill="#2E8FE0"/><path d="M12 4.6c1.6 3 4.9 5.4 4.9 8.6a4.9 4.9 0 0 1-9.8 0c0-3.2 3.3-5.6 4.9-8.6z" fill="#fff"/></svg>`;
+  if (kind === "R") return `<svg class="${cls}" viewBox="0 0 24 24" aria-label="red"><circle cx="12" cy="12" r="11.5" fill="#EF5A31"/><path d="M12 19.2c-3.4 0-5.3-2.4-5.3-5 0-2.4 1.6-3.6 2.3-5.6.8 1.2 1.2 2 1.3 3 .9-2.2 2.3-4 2.1-6.8 2.8 2 5 5.2 5 9.4 0 2.6-2 5-5.4 5z" fill="#fff"/></svg>`;
+  return `<svg class="${cls}" viewBox="0 0 24 24" aria-label="${n} any color"><circle cx="12" cy="12" r="11.5" fill="#C9C2D6"/><text x="12" y="16.6" text-anchor="middle" font-family="Fredoka,Arial,sans-serif" font-weight="700" font-size="14" fill="#2B1650">${n}</text></svg>`;
+}
+function costParts(c){ const a = []; if (c.g) a.push(["N", c.g]); for (let i = 0; i < c.u; i++) a.push(["U", 1]); for (let i = 0; i < c.r; i++) a.push(["R", 1]); return a; }
+function costHTML(c, big){ return costParts(c).map(([k, n]) => sym(k, n, big)).join(""); }
+const total = c => c.g + c.u + c.r;
+const swordSVG = s => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true"><path d="M19.5 2.5 21.5 4.5 10 16l-2-2zM6.2 12.8l5 5-1.4 1.4-1.6-1.6-3.1 3.1-1.4-1.4 3.1-3.1-1.6-1.6z" fill="var(--red)"/></svg>`;
+const heartSVG = s => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-8-5.2-8-11a4.6 4.6 0 0 1 8-3 4.6 4.6 0 0 1 8 3c0 5.8-8 11-8 11z" fill="var(--violet)"/></svg>`;
+$("symBlue").innerHTML = sym("U", 0, true); $("symRed").innerHTML = sym("R", 0, true);
+$("symPurple").innerHTML = `<span style="display:flex;gap:4px">${sym("U",0,false)}${sym("R",0,false)}</span>`;
+$("icoWin").innerHTML = `<div style="display:flex;gap:2px">${sym("U",0,false)}${sym("R",0,false)}</div>`;
+$("swordIco").innerHTML = swordSVG(30); $("heartIco").innerHTML = heartSVG(30);
+$("swIco2").innerHTML = swordSVG(22); $("htIco2").innerHTML = heartSVG(22);
+const roothaImg = CARDS.find(c => c.name === "Rootha").img;
+$("roothaImg").src = roothaImg; $("saysFace").src = roothaImg;
+$("credits").textContent = CARDS.map(c => `${c.full} (${c.artist})`).join(", ");
+
+/* ---------- custom creatures ---------- */
+const KINDS = [
+  { id: "unicorn", emo: "🦄", name: "Unicorn", end: ["horn", "hooves", "mane"] },
+  { id: "horse", emo: "🐴", name: "Horse", end: ["hooves", "gallop", "mane"] },
+  { id: "kitty", emo: "🐱", name: "Cat", end: ["whiskers", "paws", "purr"] },
+  { id: "puppy", emo: "🐶", name: "Dog", end: ["paws", "wag", "ears"] },
+  { id: "fairy", emo: "🧚", name: "Faerie", end: ["wings", "glow", "dust"] },
+  { id: "dragon", emo: "🐉", name: "Dragon", end: ["flame", "scales", "wing"] },
+  { id: "owl", emo: "🦉", name: "Owl", end: ["feathers", "hoot", "wing"] },
+  { id: "otter", emo: "🦦", name: "Otter", end: ["splash", "paws", "whiskers"] },
+  { id: "bunny", emo: "🐰", name: "Rabbit", end: ["hop", "ears", "fluff"] },
+  { id: "butterfly", emo: "🦋", name: "Butterfly", end: ["wings", "flutter", "dust"] },
+];
+const COLORS = { U: { name: "Blue", grad: ["#9ED2FF", "#2E8FE0"], frame: "#2E8FE0" }, R: { name: "Red", grad: ["#FFC08A", "#EF5A31"], frame: "#EF5A31" },
+                 P: { name: "Purple", grad: ["#E7B8FF", "#7B4BE0"], frame: "#7B4BE0" } };
+const POWERS = [
+  { id: "fly", emo: "☁️", label: "Flying", text: "Flying", say: "flying" },
+  { id: "sparkle", emo: "✨", label: "Sparkles", text: "Whenever this creature attacks, everything gets sparkly.", say: "sparkles" },
+  { id: "heart", emo: "💜", label: "Kind heart", text: "When this creature arrives, you gain 3 life.", say: "a kind heart" },
+  { id: "zoom", emo: "💨", label: "Zoom", text: "Haste. (It can attack the turn it arrives!)", say: "zoom" },
+  { id: "friend", emo: "🤝", label: "Best friend", text: "Your other creatures get +1/+1.", say: "best friend" },
+];
+const ACCS = [
+  { id: "none", emo: "🚫", label: "Nothing" }, { id: "crown", emo: "👑", label: "Crown" }, { id: "bow", emo: "🎀", label: "Bow" },
+  { id: "flower", emo: "🌸", label: "Flower" }, { id: "star", emo: "⭐", label: "Star" }, { id: "hat", emo: "🎩", label: "Top hat" },
+  { id: "glasses", emo: "🕶️", label: "Sunglasses" }, { id: "rainbow", emo: "🌈", label: "Rainbow" }, { id: "heart", emo: "💖", label: "Heart" },
+];
+const PRE = ["Princess", "Captain", "Sir", "Lady", "Little", "Professor", "Queen", "Duchess", "Twinkle", "Baby"];
+const MID = ["Star", "Moon", "Glitter", "Twinkle", "Rainbow", "Cupcake", "Thunder", "Velvet", "Sparkle", "Bubble", "Velvet", "Sugar", "Comet"];
+function makeName(kindId){ const k = KINDS.find(x => x.id === kindId); return `${rnd(PRE)} ${rnd(MID)}${rnd(k.end)}`; }
+function petCost(p){
+  const tot = Math.max(1, Math.min(7, Math.ceil((p.p + p.t) / 2)));
+  const u = p.color === "U" || p.color === "P" ? 1 : 0, r = p.color === "R" || p.color === "P" ? 1 : 0;
+  const t = Math.max(tot, u + r);
+  return { g: t - u - r, u, r };
+}
+const imgCache = {}, artCache = {};
+function petImg(p){
+  const key = p.kind + p.color + (p.acc || "none");
+  if (imgCache[key]) return imgCache[key];
+  return (imgCache[key] = petArt(p).toDataURL("image/jpeg", 0.85));
+}
+function petArt(p){
+  const key = p.kind + p.color + (p.acc || "none");
+  if (artCache[key]) return artCache[key];
+  const cv = document.createElement("canvas"); cv.width = 480; cv.height = 360; const x = cv.getContext("2d");
+  const [c1, c2] = COLORS[p.color].grad;
+  const g = x.createRadialGradient(240, 150, 30, 240, 180, 330); g.addColorStop(0, c1); g.addColorStop(1, c2);
+  x.fillStyle = g; x.fillRect(0, 0, 480, 360);
+  let seed = key.split("").reduce((a, ch) => a + ch.charCodeAt(0), 7);
+  const r = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+  for (let i = 0; i < 26; i++){
+    const sx = r() * 480, sy = r() * 360, s = 3 + r() * 9;
+    x.fillStyle = `rgba(255,255,255,${0.35 + r() * 0.5})`; x.beginPath();
+    x.moveTo(sx, sy - s); x.quadraticCurveTo(sx, sy, sx + s, sy); x.quadraticCurveTo(sx, sy, sx, sy + s);
+    x.quadraticCurveTo(sx, sy, sx - s, sy); x.quadraticCurveTo(sx, sy, sx, sy - s); x.fill();
+  }
+  x.fillStyle = "rgba(255,255,255,.35)"; x.beginPath(); x.ellipse(240, 316, 150, 26, 0, 0, Math.PI * 2); x.fill();
+  x.fillStyle = "#000"; x.font = "210px 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif"; x.textAlign = "center"; x.textBaseline = "middle";
+  x.fillText(KINDS.find(k => k.id === p.kind).emo, 240, 185);
+  const acc = ACCS.find(a => a.id === (p.acc || "none"));
+  if (acc && acc.id !== "none"){
+    x.save(); x.translate(acc.id === "rainbow" ? 120 : 352, acc.id === "rainbow" ? 92 : 86); x.rotate(acc.id === "glasses" ? 0 : 0.22);
+    x.font = "104px 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif"; x.fillText(acc.emo, 0, 0); x.restore();
+  }
+  return (artCache[key] = cv);
+}
+function petToCard(p){
+  const k = KINDS.find(x => x.id === p.kind), c = petCost(p);
+  const pw = POWERS.find(x => x.id === p.power);
+  return { name: p.name, full: p.name, say: p.name, ...c, p: p.p, t: p.t, img: petImg(p), pet: true, emo: k.emo, id: p.id,
+           desc: `${p.name}, a ${COLORS[p.color].name.toLowerCase()} ${k.name.toLowerCase()} with ${pw.label.toLowerCase()} (${pw.text.replace(/\(.*\)/, "").trim()})` };
+}
+function petCardHTML(p){
+  const k = KINDS.find(x => x.id === p.kind), pw = POWERS.find(x => x.id === p.power), c = petCost(p);
+  const esc = s => s.replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
+  return `<div class="petcard" style="--frame:${COLORS[p.color].frame}"><div class="inner">
+    <div class="bar"><b>${esc(p.name || "My creature")}</b><span class="cost">${costHTML(c)}</span></div>
+    <img src="${petImg(p)}" alt="${k.name}">
+    <div class="type">Creature — ${k.name}</div>
+    <div class="text">${pw.text}</div>
+    <div class="pt"><span>${p.p}/${p.t}</span></div></div></div>`;
+}
+const allCards = () => CARDS.concat(pets.map(petToCard));
+
+/* ---------- sparkles + celebration ---------- */
+function burst(n = 18){
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const L = $("sparks"), cx = innerWidth / 2, cy = innerHeight / 2, cols = ["#FFC94A", "#A27BFF", "#5AB0FF", "#FF7A52", "#fff", "#FF8FD0"];
+  for (let i = 0; i < n; i++){
+    const s = document.createElement("div"); s.className = "spk";
+    const a = Math.random() * Math.PI * 2, d = 120 + Math.random() * 240;
+    s.style.left = cx + "px"; s.style.top = cy + "px"; s.style.setProperty("--dx", Math.cos(a) * d + "px"); s.style.setProperty("--dy", Math.sin(a) * d + "px");
+    s.innerHTML = `<svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 0C13 9 15 11 24 12 15 13 13 15 12 24 11 15 9 13 0 12 9 11 11 9 12 0z" fill="${cols[i % cols.length]}"/></svg>`;
+    L.appendChild(s); setTimeout(() => s.remove(), 1300);
+  }
+}
+function showCelebrate({ img, emo, title, sub, spoken }){
+  $("celImg").classList.toggle("hidden", !img); if (img) $("celImg").src = img;
+  $("celEmo").classList.toggle("hidden", !emo); $("celEmo").textContent = emo || "";
+  $("celTitle").textContent = title; $("celSub").textContent = sub || "";
+  $("celebrate").classList.remove("hidden"); burst(28); emo ? fanfare() : chime(); say(spoken || title); $("celOk").focus();
+}
+$("celOk").onclick = () => {
+  $("celebrate").classList.add("hidden");
+  if (pendingSticker){ const s = pendingSticker; pendingSticker = null; setTimeout(() => stickerParty(s), 250); }
+};
+
+/* ---------- navigation ---------- */
+const screens = { home: "", window: "Window Magic", story: "Story Time", memory: "Memory Match", maker: "Make a Creature", count: "Count the Mana", battle: "Who Wins?", says: "Rootha Says", book: "My Spellbook" };
+let current = "home";
+function go(id, quiet){
+  if (current === "says" && id !== "says") stopSays();
+  if (current === "story" && id !== "story") stopStory();
+  current = id;
+  Object.keys(screens).forEach(k => $(k).classList.toggle("hidden", k !== id));
+  $("homeBtn").classList.toggle("hidden", id === "home"); $("screenTitle").textContent = screens[id];
+  scrollTo(0, 0);
+  if (id === "window"){ renderShelf(); say("Window magic! Look outside. Tap blue when you see something blue, red for red, and purple for purple!"); }
+  if (id === "maker"){ startMaker(quiet); }
+  if (id === "story") openStory();
+  if (id === "memory") newMemory();
+  if (id === "count") newCount();
+  if (id === "battle") newBattle();
+  if (id === "says") say("Rootha says, let's play! Do what Rootha says. But if Rootha doesn't say it, don't move! Tap start.");
+  if (id === "book") renderBook();
+  if (id === "home" && !quiet) say("Pick a magic game!");
+}
+document.querySelectorAll("[data-go]").forEach(b => b.onclick = () => go(b.dataset.go));
+$("homeBtn").onclick = () => go("home");
+
+/* ---------- WINDOW MAGIC ---------- */
+const pool = load("luna_pool", { U: 0, R: 0 });
+const canPay = c => pool.U >= c.u && pool.R >= c.r && (pool.U - c.u) + (pool.R - c.r) >= c.g;
+function pay(c){ pool.U -= c.u; pool.R -= c.r; let g = c.g; while (g > 0){ if (pool.U >= pool.R) pool.U--; else pool.R--; g--; } }
+function renderPool(){ $("blueCount").textContent = pool.U; $("redCount").textContent = pool.R; store("luna_pool", pool); }
+function recordCast(c){ cast[c.name] = (cast[c.name] || 0) + 1; store("luna_cast", cast); }
+function renderShelf(){
+  const sh = $("shelf"); sh.innerHTML = "";
+  allCards().sort((a, b) => total(a) - total(b)).forEach(c => {
+    const b = document.createElement("button"); b.className = "mini" + (canPay(c) ? " ready" : "");
+    b.setAttribute("aria-label", `${c.name}, costs ${total(c)}`);
+    b.innerHTML = `<img src="${c.img}" alt="">${c.pet ? '<span class="pettag">💖</span>' : ""}<div class="cost">${costHTML(c)}</div>`;
+    b.onclick = () => {
+      if (!canPay(c)){
+        boop(); const need = [];
+        if (pool.U < c.u) need.push(`${c.u - pool.U} more blue`); if (pool.R < c.r) need.push(`${c.r - pool.R} more red`);
+        const left = Math.max(0, total(c) - pool.U - pool.R);
+        say(need.length ? `${c.say} needs ${need.join(" and ")}.` : `${c.say} needs ${left} more mana of any color.`); return;
+      }
+      pay(c); renderPool(); renderShelf(); recordCast(c); addStar();
+      showCelebrate({ img: c.img, title: `You cast ${c.name}!`, sub: c.p !== null ? `Power ${c.p}, toughness ${c.t}` : "A sparkly spell!",
+                      spoken: c.pet ? `Hooray! ${c.name} is here!` : `Sparkle sparkle! You cast ${c.say}!` });
+    };
+    sh.appendChild(b);
+  });
+  const ready = allCards().filter(canPay).length;
+  $("winHint").textContent = ready ? `${ready} card${ready > 1 ? "s" : ""} glowing! Tap one to cast it.` : "Look out the window for blue, red, or purple!";
+}
+function addMana(k){
+  const add = k === "P" ? 2 : 1;
+  if (pool.U + pool.R + add > 14){ say("Your mana is full! Cast a glowing card."); boop(); return; }
+  const before = allCards().filter(canPay).length;
+  if (k === "P"){ pool.U++; pool.R++; tone([660, 523], 0.08, "sine", 0.08); } else { pool[k]++; plink(k); }
+  renderPool(); const after = allCards().filter(canPay).length; renderShelf();
+  const glow = after > before ? " A new card is glowing!" : "";
+  if (k === "P") say(`Purple! That's blue and red together!${glow}`);
+  else say(`${pool[k]} ${k === "U" ? "blue" : "red"}!${glow}`);
+}
+$("addBlue").onclick = () => addMana("U"); $("addRed").onclick = () => addMana("R"); $("addPurple").onclick = () => addMana("P");
+$("resetPool").onclick = () => { pool.U = 0; pool.R = 0; renderPool(); renderShelf(); say("All empty. Let's find more colors!"); };
+
+/* ---------- MAKE A CREATURE ---------- */
+let draft = null;
+function newDraft(){ const kind = rnd(["unicorn", "horse", "kitty", "fairy"]); return { kind, color: "P", p: 2, t: 2, power: "sparkle", acc: "none", name: makeName(kind) }; }
+let editId = null;
+function renderMaker(){
+  $("petPreview").innerHTML = petCardHTML(draft);
+  document.querySelectorAll("#kindRow .pick").forEach(b => b.classList.toggle("on", b.dataset.k === draft.kind));
+  document.querySelectorAll("#colorRow .swatch").forEach(b => b.classList.toggle("on", b.dataset.c === draft.color));
+  document.querySelectorAll("#powRow .pick").forEach(b => b.classList.toggle("on", b.dataset.p === draft.power));
+  document.querySelectorAll("#accRow .pick").forEach(b => b.classList.toggle("on", b.dataset.a === (draft.acc || "none")));
+  $("savePet").textContent = editId ? "Save changes ✨" : "Save to my Spellbook ✨";
+  $("cancelEdit").classList.toggle("hidden", !editId);
+  $("pVal").textContent = draft.p; $("tVal").textContent = draft.t;
+  if (document.activeElement !== $("petName")) $("petName").value = draft.name;
+}
+KINDS.forEach(k => {
+  const b = document.createElement("button"); b.className = "pick"; b.dataset.k = k.id; b.textContent = k.emo; b.setAttribute("aria-label", k.name);
+  b.onclick = () => { const wasAuto = !draft.custom; draft.kind = k.id; if (wasAuto) draft.name = makeName(k.id); renderMaker(); plink("U"); say(`${k.name}!`); };
+  $("kindRow").appendChild(b);
+});
+Object.entries(COLORS).forEach(([id, c]) => {
+  const b = document.createElement("button"); b.className = "swatch"; b.dataset.c = id; b.textContent = c.name;
+  b.style.background = id === "P" ? "linear-gradient(135deg,#2E8FE0,#8A4FE6,#EF5A31)" : c.frame;
+  b.onclick = () => { draft.color = id; renderMaker(); plink(id === "P" ? "U" : id); say(id === "P" ? "Purple! Blue and red together!" : `${c.name}!`); };
+  $("colorRow").appendChild(b);
+});
+POWERS.forEach(p => {
+  const b = document.createElement("button"); b.className = "pick txt"; b.dataset.p = p.id; b.innerHTML = `<span style="font-size:24px">${p.emo}</span>${p.label}`;
+  b.onclick = () => { draft.power = p.id; renderMaker(); plink("R"); say(p.label + "! " + p.text.replace(/\(.*\)/, "")); };
+  $("powRow").appendChild(b);
+});
+ACCS.forEach(a => {
+  const b = document.createElement("button"); b.className = "pick"; b.dataset.a = a.id; b.textContent = a.emo; b.setAttribute("aria-label", a.label);
+  b.onclick = () => { draft.acc = a.id; renderMaker(); tick(4); say(a.id === "none" ? "Nothing extra." : `${a.label}!`); };
+  $("accRow").appendChild(b);
+});
+document.querySelectorAll("[data-st]").forEach(b => b.onclick = () => {
+  const k = b.dataset.st, lo = k === "p" ? 0 : 1, v = Math.max(lo, Math.min(9, draft[k] + +b.dataset.d));
+  if (v === draft[k]){ boop(); return; }
+  draft[k] = v; renderMaker(); tick(v);
+  const c = total(petCost(draft));
+  say(`${k === "p" ? "Power" : "Toughness"} ${v}. It costs ${c}.`);
+});
+$("reroll").onclick = () => { draft.name = makeName(draft.kind); draft.custom = false; renderMaker(); tick(3); say(draft.name); };
+$("petName").oninput = e => { draft.name = e.target.value; draft.custom = true; $("petPreview").innerHTML = petCardHTML(draft); };
+function startMaker(quiet){ if (!draft) draft = newDraft(); renderMaker(); if (!quiet) say(editId ? `Let's change ${draft.name}!` : "Let's make your very own creature! Pick a creature, a color, and how strong it is."); }
+$("cancelEdit").onclick = () => { editId = null; draft = newDraft(); renderMaker(); say("Okay! Let's make a new one."); };
+$("savePet").onclick = () => {
+  if (!draft.name.trim()) draft.name = makeName(draft.kind);
+  const p = { id: editId || Date.now().toString(36), kind: draft.kind, color: draft.color, p: draft.p, t: draft.t, power: draft.power, acc: draft.acc || "none", name: draft.name.trim() };
+  const wasEdit = !!editId;
+  if (wasEdit){ pets = pets.map(x => x.id === editId ? p : x); } else { pets.push(p); if (pets.length > 40) pets.shift(); addStar(); }
+  store("luna_pets", pets); editId = null;
+  const pw = POWERS.find(x => x.id === p.power);
+  showCelebrate({ img: petImg(p), title: wasEdit ? `${p.name} is all new!` : `${p.name} joined your Spellbook!`, sub: `Power ${p.p}, toughness ${p.t}`,
+                  spoken: wasEdit ? `${p.name} looks amazing!` : `Hooray! ${p.name} has ${p.p} power, ${p.t} toughness, and ${pw.say}! You can cast it in Window Magic!` });
+  draft = newDraft(); renderMaker();
+};
+
+/* ---------- COUNT THE MANA ---------- */
+let cCur = null, cLast = null, cRun = 0;
+const numWords = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
+function newCount(){
+  const pool_ = allCards(); do { cCur = rnd(pool_); } while (cCur === cLast && pool_.length > 1); cLast = cCur; cRun = 0;
+  $("cArt").src = cCur.img; $("cName").textContent = cCur.name;
+  const row = $("cCost"); row.innerHTML = "";
+  costParts(cCur).forEach(([k, n]) => {
+    const b = document.createElement("button"); b.innerHTML = sym(k, n, true); b.setAttribute("aria-label", k === "N" ? `${n} any color` : k === "U" ? "blue" : "red");
+    b.onclick = () => {
+      if (b.classList.contains("counted")) return;
+      b.classList.add("counted"); cRun += n; $("cRun").textContent = cRun; tick(cRun);
+      say(k === "N" && n > 1 ? `${numWords[n]} any color! ${numWords[cRun] || cRun}!` : `${numWords[cRun] || cRun}!`);
+    };
+    row.appendChild(b);
+  });
+  $("cRun").textContent = ""; $("cExplain").textContent = ""; $("cNext").classList.add("hidden");
+  const t = total(cCur); const opts = new Set([t]);
+  while (opts.size < 3){ const o = t + rnd([-2, -1, 1, 2]); if (o >= 1 && o <= 8) opts.add(o); }
+  const box = $("cAns"); box.innerHTML = "";
+  [...opts].sort((a, b) => a - b).forEach(n => {
+    const b = document.createElement("button"); b.className = "ans"; b.textContent = n;
+    b.onclick = () => {
+      if (!$("cNext").classList.contains("hidden")) return;
+      if (n === t){
+        b.classList.add("right"); addStar(); burst(); chime();
+        const parts = []; if (cCur.g) parts.push(`${cCur.g} of any color`); if (cCur.u) parts.push(`${cCur.u} blue`); if (cCur.r) parts.push(`${cCur.r} red`);
+        $("cExplain").textContent = parts.join(" + ") + ` = ${t}`; $("cNext").classList.remove("hidden");
+        say(`Yes! ${parts.join(", plus ")}. That makes ${t}!`);
+      } else { b.classList.remove("wrong"); void b.offsetWidth; b.classList.add("wrong"); boop(); say("Hmm, tap the circles to count them."); }
+    };
+    box.appendChild(b);
+  });
+  say(`${cCur.say}. How many mana in all? Tap the circles to count!`);
+}
+$("cNext").onclick = newCount;
+$("cQ").onclick = () => say(`How many mana does ${cCur.say} cost?`);
+
+/* ---------- WHO WINS ---------- */
+let bAtk, bDef, bLastKey = "";
+const dots = (n, col) => Array.from({ length: n }, () => `<span class="dot" style="background:${col}"></span>`).join("");
+function newBattle(){
+  const cr = allCards().filter(c => c.p !== null);
+  const petsIn = cr.filter(c => c.pet);
+  let key, tries = 0;
+  do {
+    bAtk = petsIn.length && Math.random() < 0.4 ? rnd(petsIn) : rnd(cr);
+    bDef = rnd(cr); key = bAtk.name + bDef.name; tries++;
+  } while ((bAtk === bDef || bAtk.p === 0 || key === bLastKey) && tries < 50);
+  bLastKey = key;
+  $("bA").src = bAtk.img; $("bB").src = bDef.img; $("bAn").textContent = bAtk.name; $("bBn").textContent = bDef.name;
+  $("bAp").textContent = bAtk.p; $("bBt").textContent = bDef.t;
+  $("bAd").innerHTML = dots(bAtk.p, "var(--red)"); $("bBd").innerHTML = dots(bDef.t, "var(--violet)");
+  $("bQ").textContent = `${bAtk.name} attacks! Is ${bDef.name} defeated?`;
+  $("bExplain").textContent = ""; $("bNext").classList.add("hidden");
+  document.querySelectorAll("#battle .yesno .ans").forEach(b => b.classList.remove("right", "wrong"));
+  sayBattle();
+}
+function sayBattle(){ say(`${bAtk.say} attacks with ${bAtk.p} power! ${bDef.say} has ${bDef.t} toughness. Is ${bDef.say} defeated?`); }
+$("bQ").onclick = sayBattle;
+document.querySelectorAll("#battle .yesno .ans").forEach(b => b.onclick = () => {
+  if (!$("bNext").classList.contains("hidden")) return;
+  const truth = bAtk.p >= bDef.t, pick = b.dataset.yes === "1";
+  if (pick === truth){
+    b.classList.add("right"); addStar(); burst(); chime();
+    $("bExplain").textContent = truth ? `${bAtk.p} is as big as ${bDef.t} or bigger, so ${bDef.name} is defeated!` : `${bAtk.p} is less than ${bDef.t}, so ${bDef.name} is safe!`;
+    $("bNext").classList.remove("hidden");
+    say(truth ? `Yes! ${bAtk.p} damage is enough. ${bDef.say} is defeated!` : `Right! ${bAtk.p} damage is not enough. ${bDef.say} is safe!`);
+  } else { b.classList.remove("wrong"); void b.offsetWidth; b.classList.add("wrong"); boop(); say("Try again! Compare the red dots and the purple dots."); }
+});
+$("bNext").onclick = newBattle;
+
+/* ---------- ROOTHA SAYS ---------- */
+const MOVES = [
+  ["🪄", "wave your magic wand", "Wave your magic wand!"], ["🐉", "roar like Goldspan Dragon", "Roar like a dragon!"],
+  ["🦦", "swim like an otter", "Swim like an otter!"], ["🧚", "flutter like a faerie", "Flutter like a faerie!"],
+  ["↪️", "tap! Lean to the side", "Tap! Lean to the side!"], ["⬆️", "untap! Sit up tall", "Untap! Sit up tall!"],
+  ["👃", "touch your nose", "Touch your nose!"], ["✨", "make sparkles with your fingers", "Make sparkles with your fingers!"],
+  ["🦄", "make a unicorn horn", "Make a unicorn horn!"], ["🐴", "gallop with your hands", "Gallop with your hands!"],
+  ["🐱", "say meow like a kitty", "Say meow!"], ["🔥", "make a fire spell", "Make a fire spell!"],
+  ["💧", "make a water spell", "Make a water spell!"], ["🤫", "whisper abracadabra", "Whisper abracadabra!"],
+  ["👏", "clap three times", "Clap three times!"], ["😝", "make a silly face", "Make a silly face!"],
+  ["🙌", "wiggle your fingers in the air", "Wiggle your fingers!"], ["🫶", "make a heart with your hands", "Make a heart with your hands!"],
+  ["👀", "blink like an owl", "Blink like an owl!"], ["🎹", "play the piano in the air", "Play the air piano!"],
+];
+let saysOn = false, saysTimer = null, pace = "slow", lastMove = null;
+function stopSays(){ saysOn = false; clearTimeout(saysTimer); $("saysPlay").textContent = "Start ▶"; $("saysPlay").classList.remove("stop"); }
+function saysRound(){
+  if (!saysOn) return;
+  let m; do { m = rnd(MOVES); } while (m === lastMove); lastMove = m;
+  const real = Math.random() < 0.7;
+  $("saysGotcha").textContent = "";
+  $("saysCmd").innerHTML = `<span class="emo">${m[0]}</span><span>${real ? `Rootha says ${m[1]}!` : m[2]}</span>`;
+  const f = $("saysFace"); f.classList.remove("talk"); void f.offsetWidth; f.classList.add("talk");
+  say(real ? `Rootha says, ${m[1]}!` : m[2], () => {
+    if (!saysOn) return;
+    const wait = pace === "slow" ? 3200 : 1900;
+    saysTimer = setTimeout(() => {
+      if (!saysOn) return;
+      if (!real){ $("saysGotcha").textContent = "😜 Rootha didn't say it!"; boop(); say("Gotcha! Rootha didn't say it! Did you move?", () => { if (saysOn) saysTimer = setTimeout(saysRound, 1600); }); }
+      else { tone([880, 1175], 0.08); if (Math.random() < 0.35) addStar(); saysTimer = setTimeout(saysRound, 600); }
+    }, wait);
+  });
+}
+$("saysPlay").onclick = () => {
+  if (saysOn){ stopSays(); say("Rootha says, great job!"); return; }
+  saysOn = true; $("saysPlay").textContent = "Stop ■"; $("saysPlay").classList.add("stop");
+  say("Here we go!", () => { saysTimer = setTimeout(saysRound, 400); });
+};
+document.querySelectorAll("[data-pace]").forEach(b => b.onclick = () => {
+  pace = b.dataset.pace; document.querySelectorAll("[data-pace]").forEach(x => x.classList.toggle("on", x === b)); say(pace === "slow" ? "Slow and steady." : "Super fast!");
+});
+
+/* ---------- SPELLBOOK ---------- */
+function renderBook(){
+  const earned = Math.floor(stars / 10), st = $("stickers"); st.innerHTML = "";
+  for (let i = 0; i < Math.max(earned + 1, 8); i++){
+    const sp = document.createElement("span"); sp.className = "stk" + (i < earned ? "" : " empty"); sp.textContent = STICKERS[i % STICKERS.length]; st.appendChild(sp);
+  }
+  const left = 10 - (stars % 10);
+  $("stkNote").textContent = `${left} more star${left > 1 ? "s" : ""} to your next sticker!`;
+  $("stkBar").style.width = ((stars % 10) * 10) + "%";
+  const pb = $("petBook"); pb.innerHTML = "";
+  if (!pets.length) pb.innerHTML = `<div class="empty-note">No creatures yet. Go to Make a Creature!</div>`;
+  pets.slice().reverse().forEach(p => {
+    const c = petToCard(p), d = document.createElement("div"); d.className = "bk";
+    d.innerHTML = `<img src="${c.img}" alt=""><div class="nm">${c.name.replace(/</g, "&lt;")}<br>${p.p}/${p.t}</div>`;
+    d.onclick = () => openPet(p);
+    pb.appendChild(d);
+  });
+  $("printBtn").classList.toggle("hidden", !(downloadsCap && pets.length)); $("printNote").classList.toggle("hidden", !(downloadsCap && pets.length));
+  const cb = $("cardBook"); cb.innerHTML = "";
+  let n = 0;
+  CARDS.forEach(c => {
+    const times = cast[c.name] || 0; if (times) n++;
+    const d = document.createElement("button"); d.className = "bk" + (times ? "" : " locked");
+    d.innerHTML = `<img src="${c.img}" alt="">${times ? `<span class="times">×${times}</span>` : ""}<div class="nm">${times ? c.name : "???"}</div>`;
+    d.onclick = () => say(times ? `${c.say}! You cast it ${times} time${times > 1 ? "s" : ""}.` : "Cast this card in Window Magic to unlock it!");
+    cb.appendChild(d);
+  });
+  $("castCount").textContent = `${n} of ${CARDS.length}`;
+}
+
+
+/* ---------- Claude capabilities (light up when available) ---------- */
+let sampleCap = null, downloadsCap = null;
+if (window.AndroidBridge){
+  downloadsCap = { save: ({ filename, data }) => new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onload = () => { const r = window.AndroidBridge.saveFile(filename, String(fr.result).split(",")[1], "application/pdf"); r === "ok" ? res({ status: "saved" }) : rej({ code: "unavailable" }); };
+    fr.onerror = () => rej({ code: "bad_request" }); fr.readAsDataURL(data);
+  }) };
+}
+window.__back = () => {
+  if (!$("celebrate").classList.contains("hidden")){ $("celOk").click(); return "stay"; }
+  if (!$("petModal").classList.contains("hidden")){ $("petModal").classList.add("hidden"); return "stay"; }
+  if (current !== "home"){ go("home"); return "stay"; }
+  return "exit";
+};
+(async () => {
+  if (!window.claude || !window.claude.use) return;
+  try { sampleCap = await window.claude.use("sample"); } catch (e) {}
+  try { downloadsCap = await window.claude.use("downloads"); } catch (e) {}
+  if (sampleCap){ $("storyTile").classList.remove("hidden"); $("pmStory").classList.remove("hidden"); }
+  if (current === "book") renderBook();
+})();
+
+/* ---------- creature modal ---------- */
+let modalPet = null;
+function openPet(p){
+  modalPet = p; $("pmCard").innerHTML = petCardHTML(p); $("petModal").classList.remove("hidden");
+  say(`${p.name}. Power ${p.p}, toughness ${p.t}.`);
+}
+$("pmClose").onclick = () => $("petModal").classList.add("hidden");
+$("pmSay").onclick = () => { const pw = POWERS.find(x => x.id === modalPet.power); say(`${modalPet.name}. ${pw.text}. Power ${modalPet.p}, toughness ${modalPet.t}.`); };
+$("pmEdit").onclick = () => { editId = modalPet.id; draft = { ...modalPet, acc: modalPet.acc || "none", custom: true }; $("petModal").classList.add("hidden"); go("maker"); };
+$("pmDel").onclick = () => { if (confirm(`Remove ${modalPet.name}?`)){ pets = pets.filter(x => x.id !== modalPet.id); store("luna_pets", pets); $("petModal").classList.add("hidden"); renderBook(); } };
+$("pmStory").onclick = () => { storyWho = ["pet:" + modalPet.id]; $("petModal").classList.add("hidden"); go("story"); };
+
+/* ---------- STORY TIME ---------- */
+const STAR_DESC = {
+  "Rootha": "Rootha, a kind orc sorcerer who mixes blue water magic and red fire magic, and her bubbly water-fire Elemental friend",
+  "Muddle": "Muddle, a giggly otter who can change shape into anything",
+  "Faerie Mastermind": "a clever little faerie with shimmering wings",
+  "Goldspan Dragon": "Goldspan Dragon, a big golden dragon whose wings sprinkle treasure",
+  "Stormcatch Mentor": "a tiny otter wizard who catches lightning in a jar",
+};
+const PLACES = [
+  { id: "castle", emo: "🏰", label: "Castle", text: "a sparkly castle on a hill" },
+  { id: "meadow", emo: "🌈", label: "Rainbow meadow", text: "a rainbow meadow full of flowers and butterflies" },
+  { id: "sky", emo: "🌙", label: "Night sky", text: "the night sky, floating among friendly stars" },
+  { id: "sea", emo: "🌊", label: "Under the sea", text: "a shimmering kingdom under the sea" },
+  { id: "school", emo: "🏫", label: "Magic school", text: "Strixhaven, a school for young wizards" },
+  { id: "car", emo: "🚗", label: "Car trip", text: "a family car trip where magic happens outside the window" },
+];
+let storyWho = [], storyWhere = "castle", storyCtl = null, stories = load("luna_stories", []), readIdx = -1, reading = false;
+function whoOptions(){
+  const ps = pets.slice().reverse().map(p => ({ key: "pet:" + p.id, name: p.name, img: petImg(p), desc: petToCard(p).desc }));
+  const st = CARDS.filter(c => STAR_DESC[c.name]).map(c => ({ key: "card:" + c.name, name: c.name, img: c.img, desc: STAR_DESC[c.name] }));
+  return ps.concat(st);
+}
+function renderStoryPick(){
+  const opts = whoOptions(), row = $("storyWho"); row.innerHTML = "";
+  storyWho = storyWho.filter(k => opts.some(o => o.key === k));
+  if (!storyWho.length) storyWho = [opts[0].key];
+  opts.forEach(o => {
+    const b = document.createElement("button"); b.className = "who" + (storyWho.includes(o.key) ? " on" : "");
+    b.innerHTML = `<img src="${o.img}" alt=""><span></span>`; b.querySelector("span").textContent = o.name;
+    b.onclick = () => {
+      if (storyWho.includes(o.key)){ if (storyWho.length > 1) storyWho = storyWho.filter(k => k !== o.key); }
+      else { storyWho.push(o.key); if (storyWho.length > 2) storyWho.shift(); }
+      renderStoryPick(); tick(storyWho.length + 2); say(o.name);
+    };
+    row.appendChild(b);
+  });
+  const wr = $("storyWhere"); wr.innerHTML = "";
+  PLACES.forEach(pl => {
+    const b = document.createElement("button"); b.className = "pick txt" + (storyWhere === pl.id ? " on" : "");
+    b.innerHTML = `<span style="font-size:24px">${pl.emo}</span>${pl.label}`;
+    b.onclick = () => { storyWhere = pl.id; renderStoryPick(); tick(5); say(pl.label + "!"); };
+    wr.appendChild(b);
+  });
+  renderStoryList();
+}
+function renderStoryList(){
+  const L = $("storyList"); L.innerHTML = "";
+  $("storyListH").classList.toggle("hidden", !stories.length);
+  stories.forEach((st, i) => {
+    const b = document.createElement("button");
+    b.innerHTML = `<span style="font-size:24px">${(PLACES.find(p => p.id === st.place) || PLACES[0]).emo}</span><span><span class="t"></span><small></small></span>`;
+    b.querySelector(".t").textContent = st.title; b.querySelector("small").textContent = st.who;
+    b.onclick = () => { showStory(st.title, st.body); readStory(); scrollTo({ top: $("storyBox").offsetTop - 70, behavior: "smooth" }); };
+    L.appendChild(b);
+  });
+}
+function openStory(){
+  stopStory(); $("storyBox").classList.add("hidden"); $("storyPick").classList.remove("hidden"); renderStoryPick();
+  say("Story time! Pick who's in the story, and where it happens.");
+}
+function splitSentences(t){ return t.match(/[^.!?]+[.!?]+["')\]]*|[^.!?]+$/g) || [t]; }
+function showStory(title, body, streaming){
+  $("storyBox").classList.remove("hidden"); $("storyTitle").textContent = title || "";
+  const box = $("storyText"); box.innerHTML = ""; let i = 0;
+  body.split(/\n\s*\n|\n/).map(x => x.trim()).filter(Boolean).forEach(par => {
+    const p = document.createElement("p");
+    splitSentences(par).forEach(sn => { const sp = document.createElement("span"); sp.className = "s"; sp.dataset.i = i++; sp.textContent = sn.trim() + " "; p.appendChild(sp); });
+    box.appendChild(p);
+  });
+  $("storyBtns").classList.toggle("hidden", !!streaming);
+}
+function parseStory(text){
+  const lines = text.replace(/\*\*/g, "").replace(/^#+\s*/gm, "").split("\n");
+  while (lines.length && !lines[0].trim()) lines.shift();
+  const title = (lines.shift() || "").replace(/^title:\s*/i, "").replace(/^["“]|["”]$/g, "").trim();
+  return { title, body: lines.join("\n").trim() };
+}
+function stopStory(){
+  reading = false; if (storyCtl){ try { storyCtl.abort(); } catch (e) {} storyCtl = null; }
+  if ("speechSynthesis" in window) speechSynthesis.cancel();
+  document.querySelectorAll("#storyText .s.reading").forEach(x => x.classList.remove("reading"));
+}
+function readStory(){
+  if ("speechSynthesis" in window) speechSynthesis.cancel();
+  const spans = [...document.querySelectorAll("#storyText .s")];
+  const parts = [{ text: $("storyTitle").textContent, el: null }].concat(spans.map(el => ({ text: el.textContent, el })));
+  reading = true; let i = 0;
+  const next = () => {
+    document.querySelectorAll("#storyText .s.reading").forEach(x => x.classList.remove("reading"));
+    if (!reading || i >= parts.length){ reading = false; return; }
+    const part = parts[i++]; if (part.el) part.el.classList.add("reading");
+    if (!voiceOn || !("speechSynthesis" in window)){ setTimeout(next, 900 + part.text.length * 55); return; }
+    const u = new SpeechSynthesisUtterance(part.text); u.rate = 0.9 * rateMul; u.pitch = 1.12; if (voice) u.voice = voice;
+    let done = false; const f = () => { if (!done){ done = true; setTimeout(next, 180); } };
+    u.onend = f; u.onerror = f; setTimeout(f, 2500 + part.text.length * 90);
+    speechSynthesis.speak(u);
+  };
+  next();
+}
+$("storyRead").onclick = readStory;
+$("storyStop").onclick = () => { stopStory(); };
+$("storyNew").onclick = () => { stopStory(); $("storyBox").classList.add("hidden"); $("storyPick").classList.remove("hidden"); scrollTo({ top: 0, behavior: "smooth" }); say("Pick who's in the next story!"); };
+$("storyGo").onclick = async () => {
+  if (!sampleCap) return;
+  stopStory();
+  const opts = whoOptions(), chosen = storyWho.map(k => opts.find(o => o.key === k)).filter(Boolean);
+  const place = PLACES.find(p => p.id === storyWhere);
+  const prompt = `Write a short story for Luna, a young girl who loves sparkles, spells, the color purple, horses, unicorns, and fairies. It will be read aloud to her in the car.
+Characters: ${chosen.map(c => c.desc).join("; and ")}. Luna is in the story too, as a young apprentice wizard.
+Setting: ${place.text}.
+Rules: 140 to 190 words. Simple words and short sentences a young child understands. Gentle, happy, and a little funny. Nothing scary or sad, and no villains; any problem is small and solved with kindness and teamwork. Include one small moment where Luna counts her blue mana and red mana out loud to cast a sparkly spell. End warmly.
+Format: the first line is only the title (no quotes, no "Title:"). Then the story in 3 to 5 short paragraphs separated by blank lines. Plain text only, no markdown, no emoji.`;
+  $("storyPick").classList.add("hidden"); $("storyBox").classList.remove("hidden"); $("storyTitle").textContent = "";
+  $("storyText").innerHTML = `<div class="thinking"><i>✦</i> Rootha is writing your story…</div>`; $("storyBtns").classList.add("hidden");
+  say("Rootha is writing your story. Get cozy!");
+  storyCtl = new AbortController(); let started = false;
+  try {
+    const { text } = await sampleCap(prompt, { modelTier: "quick", cache: false, signal: storyCtl.signal, onText: ({ text }) => {
+      if (!text.trim()) return; started = true; const p = parseStory(text); showStory(p.title, p.body, true);
+    }});
+    storyCtl = null;
+    const p = parseStory(text); if (!p.body) throw { code: "empty_completion" };
+    showStory(p.title, p.body);
+    stories.unshift({ title: p.title, body: p.body, place: storyWhere, who: chosen.map(c => c.name).join(" & "), at: Date.now() });
+    stories = stories.slice(0, 20); store("luna_stories", stories); renderStoryList();
+    addStar(); readStory();
+  } catch (e) {
+    storyCtl = null;
+    const code = e && e.code;
+    if (code === "cancelled") return;
+    const msg = code === "not_granted" ? "Story Time needs a grown-up to say yes to asking Claude. Tap New story to try again."
+      : code === "rate_limited" || code === "queue_overflow" ? "Rootha needs a little rest. Try again in a minute!"
+      : "The story got lost on the way. Tap New story to try again.";
+    $("storyText").innerHTML = ""; $("storyTitle").textContent = "Oops!";
+    const pEl = document.createElement("p"); pEl.textContent = msg; $("storyText").appendChild(pEl);
+    $("storyBtns").classList.remove("hidden"); say(msg);
+  }
+};
+
+/* ---------- MEMORY MATCH ---------- */
+let mem = [], memOpen = [], memLock = false, memTries = 0;
+function newMemory(){
+  const all = allCards(), petsIn = all.filter(c => c.pet).sort(() => Math.random() - 0.5).slice(0, 2);
+  const rest = all.filter(c => !c.pet).sort(() => Math.random() - 0.5).slice(0, 6 - petsIn.length);
+  const picks = petsIn.concat(rest);
+  mem = picks.concat(picks).map((c, i) => ({ c, k: c.name, done: false, id: i })).sort(() => Math.random() - 0.5);
+  memOpen = []; memLock = false; memTries = 0; $("memAgain").classList.add("hidden"); renderMemory();
+  say("Memory match! Flip two cards. Can you find the pairs?");
+}
+function renderMemory(){
+  const g = $("memGrid"); g.innerHTML = "";
+  mem.forEach((m, i) => {
+    const b = document.createElement("button"); b.className = "mcard" + (m.done ? " done" : memOpen.includes(i) ? " up" : "");
+    b.setAttribute("aria-label", m.done || memOpen.includes(i) ? m.c.name : "Hidden card");
+    b.innerHTML = `<div class="in"><div class="b">✦</div><div class="f"><img src="${m.c.img}" alt=""></div></div>`;
+    b.onclick = () => flipMem(i); g.appendChild(b);
+  });
+  $("memTries").textContent = `Tries: ${memTries}`;
+  const left = mem.filter(m => !m.done).length / 2; $("memLeft").textContent = left ? `${left} pair${left > 1 ? "s" : ""} to find` : "All found!";
+}
+function flipMem(i){
+  if (memLock || mem[i].done || memOpen.includes(i)) return;
+  memOpen.push(i); tick(memOpen.length + 3);
+  const cards = document.querySelectorAll("#memGrid .mcard"); cards[i].classList.add("up");
+  if (memOpen.length < 2) return;
+  memTries++; memLock = true; const [a, b] = memOpen;
+  if (mem[a].k === mem[b].k){
+    setTimeout(() => {
+      mem[a].done = mem[b].done = true; memOpen = []; memLock = false; chime(); burst(10); renderMemory();
+      if (mem.every(m => m.done)){
+        addStar(); addStar(); $("memAgain").classList.remove("hidden");
+        setTimeout(() => showCelebrate({ emo: "🎉", title: "You found them all!", sub: `${memTries} tries. Two stars!`, spoken: `You found them all in ${memTries} tries! Two stars for you!` }), 500);
+      } else say(`${mem[a].c.say}! A match!`);
+    }, 450);
+  } else {
+    setTimeout(() => { memOpen = []; memLock = false; renderMemory(); }, 1100);
+  }
+  $("memTries").textContent = `Tries: ${memTries}`;
+}
+$("memAgain").onclick = newMemory;
+
+/* ---------- PRINT MY CREATURES (real card size PDF) ---------- */
+const SYM_PATH = { U: "M12 4.6c1.6 3 4.9 5.4 4.9 8.6a4.9 4.9 0 0 1-9.8 0c0-3.2 3.3-5.6 4.9-8.6z", R: "M12 19.2c-3.4 0-5.3-2.4-5.3-5 0-2.4 1.6-3.6 2.3-5.6.8 1.2 1.2 2 1.3 3 .9-2.2 2.3-4 2.1-6.8 2.8 2 5 5.2 5 9.4 0 2.6-2 5-5.4 5z" };
+function drawSym(x, kind, n, cx, cy, r){
+  x.save(); x.beginPath(); x.arc(cx, cy, r, 0, Math.PI * 2);
+  x.fillStyle = kind === "U" ? "#2E8FE0" : kind === "R" ? "#EF5A31" : "#C9C2D6"; x.fill();
+  if (kind === "N"){ x.fillStyle = "#2B1650"; x.font = `700 ${r * 1.25}px Fredoka, Arial, sans-serif`; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(String(n), cx, cy + r * 0.06); }
+  else { x.translate(cx - r, cy - r); x.scale(r / 12, r / 12); x.fillStyle = "#fff"; x.fill(new Path2D(SYM_PATH[kind])); }
+  x.restore();
+}
+function rr(x, X, Y, w, h, r){ x.beginPath(); x.moveTo(X + r, Y); x.arcTo(X + w, Y, X + w, Y + h, r); x.arcTo(X + w, Y + h, X, Y + h, r); x.arcTo(X, Y + h, X, Y, r); x.arcTo(X, Y, X + w, Y, r); x.closePath(); }
+function wrapText(x, text, X, Y, maxW, lh){
+  const words = text.split(/\s+/); let line = "", y = Y;
+  for (const w of words){ const t = line ? line + " " + w : w; if (x.measureText(t).width > maxW && line){ x.fillText(line, X, y); line = w; y += lh; } else line = t; }
+  if (line) x.fillText(line, X, y);
+}
+function cardCanvas(p){
+  const W_ = 750, H_ = 1050, cv = document.createElement("canvas"); cv.width = W_; cv.height = H_; const x = cv.getContext("2d");
+  const k = KINDS.find(z => z.id === p.kind), pw = POWERS.find(z => z.id === p.power), c = petCost(p);
+  x.fillStyle = "#1E1033"; rr(x, 0, 0, W_, H_, 36); x.fill();
+  x.fillStyle = COLORS[p.color].frame; rr(x, 22, 22, W_ - 44, H_ - 44, 26); x.fill();
+  x.fillStyle = "#FBF7FF"; rr(x, 44, 44, W_ - 88, H_ - 120, 16); x.fill();
+  x.fillStyle = "#fff"; x.strokeStyle = "rgba(0,0,0,.25)"; x.lineWidth = 3; rr(x, 58, 58, W_ - 116, 84, 16); x.fill(); x.stroke();
+  const parts = costParts(c), r = 26; let cx = W_ - 58 - 16 - r;
+  for (let i = parts.length - 1; i >= 0; i--){ drawSym(x, parts[i][0], parts[i][1], cx, 100, r); cx -= r * 2 + 6; }
+  x.fillStyle = "#2B1650"; let fs = 46; x.font = `700 ${fs}px Fredoka, Arial, sans-serif`;
+  const maxN = cx + r - 82; while (x.measureText(p.name).width > maxN && fs > 24){ fs -= 2; x.font = `700 ${fs}px Fredoka, Arial, sans-serif`; }
+  x.textBaseline = "middle"; x.fillText(p.name, 78, 102);
+  x.save(); rr(x, 58, 156, W_ - 116, 474, 10); x.clip(); x.drawImage(petArt(p), 58, 156, W_ - 116, 474); x.restore();
+  x.fillStyle = "#fff"; rr(x, 58, 644, W_ - 116, 70, 14); x.fill(); x.stroke();
+  x.fillStyle = "#2B1650"; x.font = `600 36px Fredoka, Arial, sans-serif`; x.fillText(`Creature — ${k.name}`, 78, 680);
+  x.textBaseline = "alphabetic"; x.font = `500 38px Fredoka, Arial, sans-serif`; wrapText(x, pw.text, 78, 776, W_ - 156, 48);
+  x.fillStyle = "#fff"; rr(x, W_ - 216, 900, 158, 76, 16); x.fill(); x.stroke();
+  x.fillStyle = "#2B1650"; x.font = `700 50px Fredoka, Arial, sans-serif`; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(`${p.p}/${p.t}`, W_ - 137, 940);
+  x.textAlign = "left"; x.fillStyle = "rgba(255,255,255,.9)"; x.font = `600 26px Fredoka, Arial, sans-serif`; x.fillText("✦ Made by Luna", 60, H_ - 50);
+  return cv;
+}
+function loadScript(src){ return new Promise((res, rej) => { if (window.jspdf) return res(); const s = document.createElement("script"); s.src = src; s.onload = res; s.onerror = rej; document.head.appendChild(s); }); }
+$("printBtn").onclick = async () => {
+  if (!downloadsCap || !pets.length) return;
+  const btn = $("printBtn"); btn.disabled = true; btn.textContent = "Making your cards…";
+  try {
+    await loadScript(window.AndroidBridge ? "vendor/jspdf.umd.min.js" : "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+    try { await document.fonts.load("700 40px Fredoka"); await document.fonts.load("500 40px Fredoka"); } catch (e) {}
+    const { jsPDF } = window.jspdf, pdf = new jsPDF({ unit: "mm", format: "letter" });
+    const cw = 63, ch = 88, mx = (215.9 - cw * 3) / 2, my = (279.4 - ch * 3) / 2;
+    pets.forEach((p, i) => {
+      const slot = i % 9; if (i && slot === 0) pdf.addPage();
+      const X = mx + (slot % 3) * cw, Y = my + Math.floor(slot / 3) * ch;
+      pdf.addImage(cardCanvas(p).toDataURL("image/jpeg", 0.92), "JPEG", X, Y, cw, ch);
+      pdf.setDrawColor(190); pdf.setLineWidth(0.15); pdf.rect(X, Y, cw, ch);
+    });
+    await downloadsCap.save({ filename: "Lunas_Creature_Cards.pdf", data: pdf.output("blob") });
+    say("Your cards are ready to print!");
+  } catch (e) {
+    if (!(e && e.code === "declined")) say("Hmm, the cards didn't save. Ask a grown-up to try again.");
+  } finally { btn.disabled = false; btn.textContent = "🖨️ Print my creatures"; }
+};
+
+go("home", true);
+</script>
+</body>
+</html>
