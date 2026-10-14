@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+
+## 1.5.0 (2026-10-14)
 - 🎬 Magic movies with Google Veo: tap a card in My Spellbook (or 🎬 on a creature) → Make it move. Clips play
   in the cast celebration, stretch 8 s → 10 s, keep a sound toggle, and are stored on the device for offline play.
   Grown-ups can make all 14 deck cards move at once. Clips are shared across devices without paying twice.
