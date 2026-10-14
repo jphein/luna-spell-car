@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+
+## 1.4.0 (2026-10-14)
 - Mana Bubbles: 🐢 Slow / 🐇 Normal / ⚡ Fast speed, remembered; switching restarts the bubbles at the new speed.
 - Game Night: turn helper. "Next turn" passes to the next player who's still in, highlights their panel, and reads the turn steps (Untap, Draw, Land, Cast spells, Attack!, Done); "Who goes first?" starts the first turn.
 - Quiet car mode in For grown-ups: voice only, no chimes.
