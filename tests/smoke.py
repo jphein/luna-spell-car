@@ -244,6 +244,31 @@ async def cloud_voice(pg, mode):
     await pg.evaluate("say('Back to the tablet voice')"); await pg.wait_for_timeout(200)
     assert await pg.evaluate(f"window.__calls.slice({calls0}).some(c => c && c.t === 'Back to the tablet voice')"), "tablet voice not used when cloud voice is off"
 
+@test
+async def magic_movies(pg, mode):
+    if mode != "android": return
+    await pg.evaluate("clipPollMs = 300")
+    starts0 = len([x for x in FakeAzure.seen if "predictLongRunning" in x[0]])
+    await pg.evaluate("openViewer(CARDS.find(c => c.name === 'Goldspan Dragon'))")
+    assert await pg.is_visible("#vMake"), "Make it move button missing"
+    await pg.click("#vMake")
+    await pg.wait_for_function("clipKeys.has('card:Goldspan Dragon')", timeout=15000)
+    sent = json.loads([x for x in FakeAzure.seen if "predictLongRunning" in x[0]][-1][1])
+    assert sent["instances"][0]["image"]["inlineData"]["mimeType"] == "image/jpeg", "frame not sent as JPEG"
+    await pg.wait_for_selector("#vMedia video", timeout=5000)
+    await pg.wait_for_function("document.querySelector('#vMedia video').currentTime > 0", timeout=5000)
+    assert await pg.evaluate("document.querySelector('#vMedia video').playbackRate") == 0.8, "clip not stretched to 10s"
+    await pg.click("#vClose")
+    # casting a card that has a movie plays it in the celebration
+    await pg.evaluate("showCelebrate({ img: CARDS[0].img, clip: 'card:Goldspan Dragon', title: 'You cast Goldspan Dragon!' })")
+    await pg.wait_for_selector("#celMedia video", timeout=5000); await pg.click("#celOk")
+    # a fresh device (cleared clip store) gets the clip back without a new paid job
+    await pg.evaluate("clipDB.del('card:Goldspan Dragon').then(() => clipKeys.delete('card:Goldspan Dragon'))")
+    got = await pg.evaluate("syncClips()")
+    assert got >= 1 and await pg.evaluate("clipKeys.has('card:Goldspan Dragon')"), "sync didn't restore the clip"
+    assert len([x for x in FakeAzure.seen if "predictLongRunning" in x[0]]) == starts0 + 1, "sync started a new paid job"
+    await home(pg)
+
 async def run_mode(browser, mode):
     ctx = await browser.new_context(viewport={"width": 400, "height": 860}, has_touch=True)
     await ctx.add_init_script((FAKE_CLAUDE if mode == "web" else FAKE_ANDROID) + "if(!localStorage.getItem('luna_pets')){" + SEED_PETS + "}")

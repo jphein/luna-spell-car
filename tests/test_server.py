@@ -14,7 +14,7 @@ def call(url, path, body=None, token=TOKEN, method=None):
 fails = []
 def check(ok, msg): print(("  ok   " if ok else "  FAIL ") + "server: " + msg); ok or fails.append(msg)
 
-s = Stack(IMAGES_PER_DAY=2, STORIES_PER_DAY=5)
+s = Stack(IMAGES_PER_DAY=2, STORIES_PER_DAY=5, VIDEOS_PER_DAY=3)
 try:
     u = s.url
     st, _, _ = call(u, "/health", token="wrong"); check(st == 401, "rejects a bad token")
@@ -38,6 +38,32 @@ try:
     check("<b>" not in ssml and "rate='-10%'" in ssml, "tts escapes text and maps rate")
     st, _, _ = call(u, "/tts", {"text": "hi", "voice": "en-US-SomeoneElse"}); check(st == 400, "rejects voices outside the allowlist")
     st, _, _ = call(u, "/story", {"characters": ["a" * 100]}, ); check(st == 400, "validates input")
+    import base64, time
+    from stack import png
+    img = "data:image/png;base64," + base64.b64encode(png(32, 18)).decode()
+    st, _, b = call(u, "/animate", {"image": img, "card": "Goldspan Dragon"}); job = json.loads(b)
+    check(st == 200 and job["status"] == "running" and len(job["id"]) == 32, "animate starts a Veo job")
+    sent = json.loads([x for x in FakeAzure.seen if "predictLongRunning" in x[0]][-1][1])
+    check("gold coins" in sent["instances"][0]["prompt"] and sent["parameters"]["durationSeconds"] == 8, "Veo prompt comes from the card's motion template")
+    st2, _, b2 = call(u, "/animate", {"image": img, "card": "Goldspan Dragon"})
+    check(json.loads(b2)["id"] == job["id"] and len([x for x in FakeAzure.seen if "predictLongRunning" in x[0]]) == 1, "the same picture never starts a second paid job")
+    for _ in range(40):
+        st, _, b = call(u, f"/animate/{job['id']}")
+        if json.loads(b)["status"] != "running": break
+        time.sleep(0.25)
+    check(json.loads(b)["status"] == "done", "background poller finishes the clip")
+    st, h, b = call(u, f"/video/{job['id']}.mp4"); check(st == 200 and h["Content-Type"].startswith("video/") and len(b) > 1000, "finished clip downloads")
+    st, _, _ = call(u, f"/video/{job['id']}.mp4", token="nope"); check(st == 401, "clips need the app token")
+    st, _, _ = call(u, "/animate", {"image": img, "card": "Some Other Card"}); check(st == 400, "rejects unknown cards")
+    n0 = len([x for x in FakeAzure.seen if "predictLongRunning" in x[0]])
+    st, _, b = call(u, "/animate", {"card": "Faerie Mastermind", "ref": "card:Faerie Mastermind", "peek": True})
+    check(st == 200 and json.loads(b)["status"] == "none", "peek reports a missing clip without starting a job")
+    call(u, "/animate", {"image": img, "card": "Faerie Mastermind", "ref": "card:Faerie Mastermind"})
+    other = "data:image/png;base64," + base64.b64encode(png(40, 22, (10, 200, 90))).decode()
+    st, _, b = call(u, "/animate", {"image": other, "card": "Faerie Mastermind", "ref": "card:Faerie Mastermind"})
+    check(json.loads(b)["status"] in ("running", "done") and len([x for x in FakeAzure.seen if "predictLongRunning" in x[0]]) == n0 + 1,
+          "a second device's slightly different image reuses the same clip by ref")
+    st, _, _ = call(u, "/animate", {"image": "https://example.com/x.png", "kind": "unicorn"}); check(st == 400, "rejects image URLs (data URLs only)")
 finally:
     s.close()
 print("\n" + ("All server tests passed." if not fails else f"{len(fails)} server test(s) failed.")); sys.exit(1 if fails else 0)

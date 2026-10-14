@@ -296,6 +296,13 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .nt-turnbtns{display:flex;gap:10px;justify-content:center}
 .nt-turnbtns button{padding:12px 18px;border-radius:99px;font-size:18px;font-weight:700;background:var(--violet);color:#fff}
 .nt-turnbtns button.alt{background:var(--chip);color:var(--ink)}
+/* magic movies */
+.vmedia{position:relative;width:100%;border-radius:20px;overflow:hidden;background:#1E1033;aspect-ratio:16/9}
+.vmedia img,.vmedia video{width:100%;height:100%;object-fit:cover;display:block}
+.vmedia .snd{position:absolute;right:8px;bottom:8px;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;font-size:20px}
+.vmedia .brew{position:absolute;inset:0;display:grid;place-items:center;background:rgba(43,22,80,.6);color:#fff;font-size:19px;font-weight:700;text-align:center;padding:12px}
+.celmedia{margin-bottom:4px}
+.bk .mv{position:absolute;bottom:26%;right:6px;background:rgba(0,0,0,.5);color:#fff;font-size:13px;border-radius:99px;padding:2px 7px}
 /* celebration */
 .celebrate{position:fixed;inset:0;background:rgba(20,8,48,.82);display:grid;place-items:center;z-index:20;padding:24px}
 .celebrate .box{background:var(--surface);border-radius:30px;padding:18px;max-width:420px;width:100%;text-align:center;animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
@@ -346,12 +353,13 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
       <p><b>Make a Creature:</b> she designs her own creature card. Stronger creatures cost more. Saved creatures appear in Window Magic, Count the Mana, and Who Wins.</p>
       <p><b>Story Time</b> asks Claude to write a short, gentle story starring the creatures she picks, then reads it aloud (it uses your Claude account, so it asks permission the first time). <b>Memory Match</b> is a flip-and-find pairs game. In <b>My Spellbook</b>, tap one of her creatures to edit it, and use <b>Print my creatures</b> to get a real-card-size PDF to cut out and sleeve.</p>
       <p><b>Rootha Says:</b> Simon Says, read aloud, no screen needed. You're the judge: if she moves when Rootha didn't say it, gotcha! Every correct answer earns a star, and every 10 stars earns a sticker in My Spellbook. Tap any question to hear it again. Everything is saved on this device only.</p>
-      <p><b>Mana Bubbles:</b> pop bubbles to pay a card's cost; colored slots need that color, gray slots take any. <b>Game Night</b> is a life counter (20 or 40 life, 2–4 players) with dice, a coin, and "who goes first." In Make a Creature she can <b>draw her own picture</b>, and <b>Art Studio</b> is free painting with a saved gallery. With a <b>Spell Car server</b> (below), the tablet app also gets Story Time, AI creature pictures, and natural neural voices from your Azure account. <b>Backup</b> in My Spellbook moves her creatures and stars between the tablet and the web version.</p>
+      <p><b>Mana Bubbles:</b> pop bubbles to pay a card's cost; colored slots need that color, gray slots take any. <b>Game Night</b> is a life counter (20 or 40 life, 2–4 players) with dice, a coin, and "who goes first." In Make a Creature she can <b>draw her own picture</b>, and <b>Art Studio</b> is free painting with a saved gallery. With a <b>Spell Car server</b> (below), the tablet app also gets Story Time, AI creature pictures, and natural neural voices from your Azure account. <b>Magic movies</b> (Google Veo, via the same server) let her cards and creatures move: tap a card in My Spellbook, or use "Make all deck cards move" below; each clip is made once, shared by all your devices, and plays offline. <b>Backup</b> in My Spellbook moves her creatures and stars between the tablet and the web version.</p>
       <div class="voiceset hidden" id="cloudSet"><b>Spell Car server (Azure)</b>
         <div class="pnote" style="margin:2px 0 6px">Adds Story Time, AI creature pictures, and natural voices. Uses your self-hosted Spell Car server; the Azure keys stay on the server.</div>
         <input id="cloudUrl" placeholder="Server address, e.g. https://spellcar.example.com" autocomplete="off" inputmode="url">
         <input id="cloudToken" placeholder="App token" type="password" autocomplete="off">
         <div class="rowbtns"><button id="cloudConnect">Connect</button><span class="pnote" id="cloudStatus" style="align-self:center">Not set up</span></div>
+        <div class="rowbtns hidden" id="clipRow"><button id="clipAll">🎬 Make all deck cards move</button></div>
         <div class="rowbtns" id="cloudVoiceRow"><button data-cv="off">Tablet voice</button><button data-cv="stories">Cloud voice for stories</button><button data-cv="all">Cloud voice everywhere</button></div>
         <div class="rowbtns"><select id="cloudVoiceSel" aria-label="Cloud voice">
           <option value="en-US-AnaNeural">Ana (a kid's voice)</option><option value="en-US-JennyNeural">Jenny</option><option value="en-US-AriaNeural">Aria</option>
@@ -530,11 +538,11 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 </div>
 
 <div class="celebrate hidden" id="celebrate" role="dialog" aria-modal="true">
-  <div class="box"><img id="celImg" alt=""><div class="bigemo hidden" id="celEmo"></div><h2 id="celTitle"></h2><p id="celSub"></p><button class="next" id="celOk">Yay!</button></div>
+  <div class="box"><div class="vmedia celmedia hidden" id="celMedia"></div><img id="celImg" alt=""><div class="bigemo hidden" id="celEmo"></div><h2 id="celTitle"></h2><p id="celSub"></p><button class="next" id="celOk">Yay!</button></div>
 </div>
 <div class="pmodal hidden" id="petModal" role="dialog" aria-modal="true">
   <div class="box"><div id="pmCard"></div>
-    <div class="rowbtns"><button id="pmEdit">✏️ Edit</button><button id="pmStory" class="hidden">📖 Story</button><button id="pmSay">🔊</button></div>
+    <div class="rowbtns"><button id="pmMovie">🎬 Magic movie</button><button id="pmEdit">✏️ Edit</button><button id="pmStory" class="hidden">📖 Story</button><button id="pmSay">🔊</button></div>
     <div class="rowbtns"><button id="pmDel" class="danger">Remove</button><button id="pmClose">Close</button></div>
   </div>
 </div>
@@ -549,6 +557,12 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
     <button class="tool" data-size="10"><small>S</small></button><button class="tool on" data-size="22"><small>M</small></button><button class="tool" data-size="44"><small>L</small></button>
     <button class="tool" id="pGuideBtn" aria-label="Show a guide">👻<small>Guide</small></button>
     <button class="tool" id="pUndo" aria-label="Undo">↩️</button><button class="tool" id="pClear" aria-label="Start over">🗑️</button>
+  </div>
+</div>
+<div class="pmodal hidden" id="viewer" role="dialog" aria-modal="true">
+  <div class="box"><div class="vmedia" id="vMedia"></div><h2 id="vName" style="margin:6px 0 0;text-align:center"></h2>
+    <div class="rowbtns"><button id="vPlay">▶ Watch it move</button><button id="vMake" class="hidden">✨ Make it move</button><button id="vClose">Close</button></div>
+    <div class="pnote" id="vNote" style="text-align:center"></div>
   </div>
 </div>
 <div class="spark-layer" id="sparks"></div>
@@ -793,14 +807,16 @@ function burst(n = 18){
     L.appendChild(s); setTimeout(() => s.remove(), 1300);
   }
 }
-function showCelebrate({ img, emo, title, sub, spoken }){
+function showCelebrate({ img, emo, title, sub, spoken, clip }){
   $("celImg").classList.toggle("hidden", !img); if (img) $("celImg").src = img;
+  $("celMedia").classList.add("hidden"); $("celMedia").innerHTML = "";
+  if (clip && clipKeys.has(clip)) playClipIn($("celMedia"), clip, img).then(ok => { if (ok){ $("celMedia").classList.remove("hidden"); $("celImg").classList.add("hidden"); } });
   $("celEmo").classList.toggle("hidden", !emo); $("celEmo").textContent = emo || "";
   $("celTitle").textContent = title; $("celSub").textContent = sub || "";
   $("celebrate").classList.remove("hidden"); burst(28); emo ? fanfare() : chime(); say(spoken || title); $("celOk").focus();
 }
 $("celOk").onclick = () => {
-  $("celebrate").classList.add("hidden");
+  $("celebrate").classList.add("hidden"); $("celMedia").innerHTML = "";
   if (pendingSticker){ const s = pendingSticker; pendingSticker = null; setTimeout(() => stickerParty(s), 250); }
 };
 
@@ -851,7 +867,7 @@ function renderShelf(){
         say(need.length ? `${c.say} needs ${need.join(" and ")}.` : `${c.say} needs ${left} more mana of any color.`); return;
       }
       pay(c); renderPool(); renderShelf(); recordCast(c); addStar();
-      showCelebrate({ img: c.img, title: `You cast ${c.name}!`, sub: c.p !== null ? `Power ${c.p}, toughness ${c.t}` : "A sparkly spell!",
+      showCelebrate({ img: c.img, clip: clipKeyFor(c), title: `You cast ${c.name}!`, sub: c.p !== null ? `Power ${c.p}, toughness ${c.t}` : "A sparkly spell!",
                       spoken: c.pet ? `Hooray! ${c.name} is here!` : `Sparkle sparkle! You cast ${c.say}!` });
     };
     sh.appendChild(b);
@@ -1073,7 +1089,8 @@ function renderBook(){
     const times = cast[c.name] || 0; if (times) n++;
     const d = document.createElement("button"); d.className = "bk" + (times ? "" : " locked");
     d.innerHTML = `<img src="${c.img}" alt="">${times ? `<span class="times">×${times}</span>` : ""}<div class="nm">${times ? c.name : "???"}</div>`;
-    d.onclick = () => say(times ? `${c.say}! You cast it ${times} time${times > 1 ? "s" : ""}.` : "Cast this card in Window Magic to unlock it!");
+    if (times && clipKeys.has(clipKeyFor(c))) d.insertAdjacentHTML("beforeend", '<span class="mv">🎬</span>');
+    d.onclick = () => times ? openViewer(c) : say("Cast this card in Window Magic to unlock it!");
     cb.appendChild(d);
   });
   $("castCount").textContent = `${n} of ${CARDS.length}`;
@@ -1090,6 +1107,7 @@ if (window.AndroidBridge){
   }) };
 }
 window.__back = () => {
+  if (!$("viewer").classList.contains("hidden")){ $("vClose").click(); return "stay"; }
   if (!$("paint").classList.contains("hidden")){ $("pCancel").click(); return "stay"; }
   if (!$("celebrate").classList.contains("hidden")){ $("celOk").click(); return "stay"; }
   if (!$("petModal").classList.contains("hidden")){ $("petModal").classList.add("hidden"); return "stay"; }
@@ -1108,6 +1126,7 @@ window.__back = () => {
 let modalPet = null;
 function openPet(p){
   modalPet = p; $("pmCard").innerHTML = petCardHTML(p); $("petModal").classList.remove("hidden");
+  $("pmMovie").classList.toggle("hidden", !(cloudCaps && cloudCaps.video) && !clipKeys.has(clipKeyFor(petToCard(p))));
   say(`${p.name}. Power ${p.p}, toughness ${p.t}.`);
 }
 $("pmClose").onclick = () => $("petModal").classList.add("hidden");
@@ -1459,10 +1478,11 @@ function updateStoryAvail(){
 }
 function refreshCloudUI(msg){
   if (msg !== undefined) $("cloudStatus").textContent = msg;
-  else if (cloudCaps){ const on = [["story", "stories"], ["image", "pictures"], ["tts", "voices"]].filter(([k]) => cloudCaps[k]).map(x => x[1]);
+  else if (cloudCaps){ const on = [["story", "stories"], ["image", "pictures"], ["tts", "voices"], ["video", "magic movies"]].filter(([k]) => cloudCaps[k]).map(x => x[1]);
     $("cloudStatus").textContent = "✅ Connected: " + (on.join(", ") || "nothing enabled yet"); }
   else if (!cloudBase()) $("cloudStatus").textContent = "Not set up";
   $("artAI").classList.toggle("hidden", !(cloudCaps && cloudCaps.image));
+  $("clipRow").classList.toggle("hidden", !(cloudCaps && cloudCaps.video));
   $("cloudVoiceRow").classList.toggle("hidden", !(cloudCaps && cloudCaps.tts));
   $("cloudVoiceSel").parentElement.classList.toggle("hidden", !(cloudCaps && cloudCaps.tts));
   document.querySelectorAll("[data-cv]").forEach(b => b.classList.toggle("on", b.dataset.cv === cloud.voiceMode));
@@ -1473,7 +1493,7 @@ async function cloudConnect(quiet){
   cloudCaps = null;
   if (!cloudBase()){ refreshCloudUI(); return; }
   if (!quiet) refreshCloudUI("Connecting…");
-  try { cloudCaps = await (await cloudFetch("/health")).json(); refreshCloudUI(); if (!quiet) say("Connected to the Spell Car server!"); }
+  try { cloudCaps = await (await cloudFetch("/health")).json(); refreshCloudUI(); if (!quiet) say("Connected to the Spell Car server!"); syncClips(); }
   catch (e) { refreshCloudUI(e && e.status === 401 ? "❌ The token doesn't match the server." : "❌ Can't reach the server. Check the address and that the tablet is online."); }
 }
 if (!window.claude){
@@ -1510,6 +1530,159 @@ $("artAI").onclick = async () => {
   } catch (e) {
     boop(); say(e && e.status === 429 ? "The magic paintbrush needs a rest. Try again tomorrow!" : e && e.status === 422 ? "Let's try a different creature!" : "The magic paint didn't work this time. Try again!");
   } finally { aiBusy = false; wrap.classList.remove("painting"); }
+};
+
+/* ---------- MAGIC MOVIES (Google Veo via the Spell Car server) ---------- */
+// Clips are made once on the server, then kept on this device in IndexedDB so they play offline in the car.
+const clipDB = (() => {
+  let dbp = null;
+  const open = () => dbp || (dbp = new Promise((res, rej) => {
+    const r = indexedDB.open("spellcar", 1); r.onupgradeneeded = () => r.result.createObjectStore("clips");
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  }));
+  const run = (mode, fn) => open().then(db => new Promise((res, rej) => {
+    const t = db.transaction("clips", mode), q = fn(t.objectStore("clips"));
+    t.oncomplete = () => res(q && q.result); t.onerror = () => rej(t.error);
+  }));
+  return { get: k => run("readonly", st => st.get(k)), put: (k, v) => run("readwrite", st => st.put(v, k)),
+           del: k => run("readwrite", st => st.delete(k)), keys: () => run("readonly", st => st.getAllKeys()) };
+})();
+const clipKeys = new Set(), clipURLs = new Map();
+let clipJobs = load("luna_clipjobs", {}), clipPollMs = 15000, clipTimer = null, clipSound = load("luna_clipsound", false);
+clipDB.keys().then(ks => { (ks || []).forEach(k => clipKeys.add(k)); if (current === "book") renderBook(); }).catch(() => {});
+function hashStr(str){ let h = 2166136261; for (let i = 0; i < str.length; i += 7) h = Math.imul(h ^ str.charCodeAt(i), 16777619); return (h >>> 0).toString(36); }
+function clipKeyFor(c){
+  if (c.pet){ const p = pets.find(x => x.id === c.id); return p ? `pet:${p.id}:${p.art ? hashStr(p.art) : p.kind + p.color + (p.acc || "none")}` : null; }
+  return "card:" + c.full;
+}
+function clipRequestFor(c){
+  if (c.pet){ const p = pets.find(x => x.id === c.id); return p ? { kind: p.kind } : null; }
+  return { card: c.full };
+}
+function frame16x9(src){
+  return new Promise((res, rej) => {
+    const im = new Image();
+    im.onload = () => {
+      const W_ = 1280, H_ = 720, cv = document.createElement("canvas"); cv.width = W_; cv.height = H_; const x = cv.getContext("2d");
+      const cover = Math.max(W_ / im.width, H_ / im.height), fit = Math.min(W_ / im.width, H_ / im.height);
+      x.filter = "blur(28px) brightness(0.85)"; x.drawImage(im, (W_ - im.width * cover) / 2, (H_ - im.height * cover) / 2, im.width * cover, im.height * cover);
+      x.filter = "none"; x.drawImage(im, (W_ - im.width * fit) / 2, (H_ - im.height * fit) / 2, im.width * fit, im.height * fit);
+      res(cv.toDataURL("image/jpeg", 0.86));
+    };
+    im.onerror = rej; im.src = src;
+  });
+}
+async function clipURL(key){
+  if (clipURLs.has(key)) return clipURLs.get(key);
+  const blob = await clipDB.get(key); if (!blob) return null;
+  const u = URL.createObjectURL(blob); clipURLs.set(key, u); return u;
+}
+async function playClipIn(box, key, poster){
+  const url = await clipURL(key); if (!url) return false;
+  box.innerHTML = ""; const v = document.createElement("video");
+  v.src = url; v.muted = !clipSound; v.playsInline = true; v.setAttribute("playsinline", ""); v.autoplay = true; if (poster) v.poster = poster;
+  v.addEventListener("loadedmetadata", () => { v.playbackRate = 0.8; });
+  v.addEventListener("play", () => { v.playbackRate = 0.8; });
+  v.onclick = () => { v.currentTime = 0; v.play().catch(() => {}); };
+  const snd = document.createElement("button"); snd.className = "snd"; snd.textContent = clipSound ? "🔊" : "🔈"; snd.setAttribute("aria-label", "Movie sound");
+  snd.onclick = e => { e.stopPropagation(); clipSound = !clipSound; v.muted = !clipSound; snd.textContent = clipSound ? "🔊" : "🔈"; store("luna_clipsound", clipSound); };
+  box.appendChild(v); box.appendChild(snd);
+  v.play().catch(() => {});
+  return true;
+}
+async function saveClip(key, id){
+  const r = await cloudFetch(`/video/${id}.mp4`); const blob = await r.blob();
+  await clipDB.put(key, blob); clipKeys.add(key);
+}
+function nameForKey(key){
+  if (key.startsWith("card:")){ const c = CARDS.find(x => "card:" + x.full === key); return c ? c.say : "your card"; }
+  const p = pets.find(x => key.startsWith(`pet:${x.id}:`)); return p ? p.name : "your creature";
+}
+async function pollClips(){
+  clipTimer = null;
+  const keys = Object.keys(clipJobs); if (!keys.length || !(cloudCaps && cloudCaps.video)) return;
+  for (const key of keys){
+    const job = clipJobs[key];
+    try {
+      const st = await (await cloudFetch(`/animate/${job.id}`)).json();
+      if (st.status === "done"){
+        await saveClip(key, job.id); delete clipJobs[key]; store("luna_clipjobs", clipJobs);
+        if (!job.quiet){ chime(); burst(16); say(`${nameForKey(key)} can move now! Tap the picture to watch.`); }
+        if (current === "book") renderBook();
+        if (viewerCard && clipKeyFor(viewerCard) === key){ await renderViewer(); playClipIn($("vMedia"), key, viewerCard.img); }
+      } else if (st.status === "failed"){
+        delete clipJobs[key]; store("luna_clipjobs", clipJobs);
+        if (!job.quiet) say(`The magic movie for ${nameForKey(key)} didn't work this time. We can try again later.`);
+        if (viewerCard && clipKeyFor(viewerCard) === key) renderViewer();
+      }
+    } catch (e) { if (e && e.status === 404){ delete clipJobs[key]; store("luna_clipjobs", clipJobs); } }
+  }
+  if (Object.keys(clipJobs).length) clipTimer = setTimeout(pollClips, clipPollMs);
+}
+function kickClips(){ if (!clipTimer && Object.keys(clipJobs).length) clipTimer = setTimeout(pollClips, Math.min(clipPollMs, 2000)); }
+async function makeClip(c, quiet){
+  const key = clipKeyFor(c), req = clipRequestFor(c);
+  if (!key || !req || clipKeys.has(key) || clipJobs[key]) return "skip";
+  const image = await frame16x9(c.img);
+  const r = await (await cloudFetch("/animate", Object.assign({ image, ref: key.slice(0, 120) }, req))).json();
+  clipJobs[key] = { id: r.id, at: Date.now(), quiet: !!quiet }; store("luna_clipjobs", clipJobs);
+  if (r.status === "done"){ await pollClips(); return "done"; }
+  kickClips(); return "started";
+}
+async function syncClips(){
+  // Another device may already have made clips: fetch them without starting new (paid) jobs.
+  if (!(cloudCaps && cloudCaps.video)) return 0;
+  let got = 0;
+  for (const c of allCards()){
+    const key = clipKeyFor(c), req = clipRequestFor(c);
+    if (!key || !req || clipKeys.has(key) || clipJobs[key]) continue;
+    try {
+      const r = await (await cloudFetch("/animate", Object.assign({ ref: key.slice(0, 120), peek: true }, req))).json();
+      if (r.status === "done"){ await saveClip(key, r.id); got++; }
+      else if (r.status === "running"){ clipJobs[key] = { id: r.id, at: Date.now(), quiet: true }; store("luna_clipjobs", clipJobs); }
+    } catch (e) {}
+  }
+  kickClips(); if (got && current === "book") renderBook();
+  return got;
+}
+let viewerCard = null;
+async function renderViewer(){
+  const c = viewerCard; if (!c) return;
+  const key = clipKeyFor(c), has = clipKeys.has(key), brewing = !!clipJobs[key], canMake = !!(cloudCaps && cloudCaps.video);
+  $("vName").textContent = c.name;
+  const box = $("vMedia"); box.innerHTML = `<img src="${c.img}" alt="">`;
+  if (brewing) box.insertAdjacentHTML("beforeend", '<div class="brew">🪄 Making a magic movie…<br>It takes a few minutes.</div>');
+  $("vPlay").classList.toggle("hidden", !has); $("vMake").classList.toggle("hidden", has || brewing || !canMake);
+  $("vNote").textContent = has ? "Tap the movie to watch it again." : brewing ? "You can keep playing. I'll tell you when it's ready!" : canMake ? "" : "";
+}
+function openViewer(c){
+  viewerCard = c; $("viewer").classList.remove("hidden"); renderViewer();
+  const key = clipKeyFor(c);
+  if (clipKeys.has(key)){ playClipIn($("vMedia"), key, c.img); say(`${c.say}!`); }
+  else if (clipJobs[key]) say("The magic movie is still being made.");
+  else if (cloudCaps && cloudCaps.video) say(`Want to see ${c.say} move? Tap make it move!`);
+  else say(`${c.say}!`);
+}
+$("vPlay").onclick = () => { const key = clipKeyFor(viewerCard); playClipIn($("vMedia"), key, viewerCard.img); };
+$("vClose").onclick = () => { $("viewer").classList.add("hidden"); $("vMedia").innerHTML = ""; viewerCard = null; };
+$("vMake").onclick = async () => {
+  const c = viewerCard; $("vMake").classList.add("hidden");
+  say(`Rootha is making a magic movie of ${c.say}! It takes a few minutes. You can keep playing.`);
+  try { await makeClip(c); renderViewer(); }
+  catch (e) { renderViewer(); boop(); say(e && e.status === 429 ? "We've made lots of movies today. Let's make more tomorrow!" : "The movie magic didn't work. Let's try again later."); }
+};
+$("pmMovie").onclick = () => { const c = petToCard(modalPet); $("petModal").classList.add("hidden"); openViewer(c); };
+$("pmCard").onclick = () => { const c = petToCard(modalPet); if (clipKeys.has(clipKeyFor(c))){ $("petModal").classList.add("hidden"); openViewer(c); } };
+$("clipAll").onclick = async () => {
+  const todo = CARDS.filter(c => !clipKeys.has(clipKeyFor(c)) && !clipJobs[clipKeyFor(c)]);
+  if (!todo.length){ refreshCloudUI("🎬 All deck cards can already move."); return; }
+  if (!confirm(`Make ${todo.length} magic movies with Google Veo? Each one uses about 8 seconds of Veo credits.`)) return;
+  let n = 0;
+  for (const c of todo){
+    try { const r = await makeClip(c, true); if (r !== "skip") n++; refreshCloudUI(`🎬 Started ${n} of ${todo.length}…`); }
+    catch (e) { refreshCloudUI(e && e.status === 429 ? `🎬 Started ${n}; the daily movie limit is reached. The rest can go tomorrow.` : `🎬 Started ${n}; one failed (${e.message || "error"}).`); return; }
+  }
+  refreshCloudUI(`🎬 Making ${n} movies. They'll appear in My Spellbook over the next few minutes.`);
 };
 
 /* ---------- ART STUDIO ---------- */
@@ -1601,7 +1774,7 @@ function popBubble(b, k){
   slot.full = true; slot.got = k; renderSlots(); plink(k);
   if (bb.slots.every(s => s.full)){
     stopBubbles(); addStar(); if (!bb.card.pet) recordCast(bb.card);
-    showCelebrate({ img: bb.card.img, title: `You cast ${bb.card.name}!`, sub: "Bubble magic!", spoken: `Pop pop pop! You cast ${bb.card.say}!` });
+    showCelebrate({ img: bb.card.img, clip: clipKeyFor(bb.card), title: `You cast ${bb.card.name}!`, sub: "Bubble magic!", spoken: `Pop pop pop! You cast ${bb.card.say}!` });
     $("bbNext").classList.remove("hidden"); $("bbHint").textContent = "";
   }
 }

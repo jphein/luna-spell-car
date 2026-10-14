@@ -7,6 +7,7 @@ A tiny, dependency-free Python server that gives the tablet app three extras fro
 | Story Time on the tablet | `POST /story` | Azure OpenAI chat deployment (e.g. `gpt-4o-mini`) |
 | 🪄 AI picture in Make a Creature | `POST /image` | Azure OpenAI image deployment (`dall-e-3` or `gpt-image-1`) |
 | Natural neural voices (incl. Ana, a child's voice) | `POST /tts` | Azure AI Speech |
+| 🎬 Magic movies: cards and creatures come to life | `POST /animate`, `GET /animate/{id}`, `GET /video/{id}.mp4` | Google Veo 3.1 (Gemini API) |
 
 Each feature turns on only if its settings are present; `GET /health` tells the app which ones are available.
 
@@ -38,6 +39,24 @@ docker compose up -d --build    # or, without Docker: python3 spellcar_server.py
 
 Then on the tablet: **For grown-ups → Spell Car server** → enter the address and token → **Connect**.
 Pick "Cloud voice for stories" (stories and Rootha Says) or "everywhere," and a voice.
+
+## Magic movies (Google Veo)
+
+Set `GEMINI_API_KEY` (from Google AI Studio, on a paid tier: Veo isn't on the free tier) and optionally `VEO_MODEL`
+(default `veo-3.1-fast-generate-preview`). Each clip is 8 seconds of 720p video; the app plays it at 0.8× so it lasts
+10 seconds. Veo takes from about 11 seconds to a few minutes per clip, so clips are made ahead of time, never live:
+
+- The app sends a 16:9 frame of the card art plus *which* card or creature kind it is. The motion prompt comes from
+  fixed templates on the server (`CARD_MOTION`, `KIND_MOTION`), always gentle and sparkly.
+- Each clip is keyed by a stable reference (card name, or creature id + art), cached in `VIDEO_DIR`, and shared by
+  every device. Asking twice never pays twice; a second device downloads the existing clip (`peek`) without a new job.
+- A background thread polls Veo, so a clip finishes even if the tablet goes offline. Veo deletes generated videos
+  after 2 days, so the server downloads them right away. Devices keep their own copies (IndexedDB) for offline play.
+- `VIDEOS_PER_DAY` (default 16) caps spend. At Veo 3.1 Fast's listed price ($0.10/second at 720p when this was
+  written) a clip costs about $0.80, so all 14 deck cards are about $11 once. Check current pricing on Google's page.
+
+In the app: **For grown-ups → 🎬 Make all deck cards move**, or tap any card in My Spellbook (or 🎬 Magic movie on
+one of her creatures) → **Make it move**. Finished clips play whenever she casts that card.
 
 ## Reaching it from the car
 

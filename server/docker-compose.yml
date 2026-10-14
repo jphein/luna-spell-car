@@ -3,4 +3,7 @@ services:
     build: .
     env_file: .env
     ports: ["8787:8787"]
+    volumes: ["spellcar-videos:/data/videos"]
     restart: unless-stopped
+volumes:
+  spellcar-videos:

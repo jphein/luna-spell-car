@@ -9,6 +9,7 @@ most games work without reading.
 | Game | What it teaches |
 |---|---|
 | **Window Magic** | Spot blue/red/purple things outside to build a mana pool, then cast cards she can afford. Real cost rules: colored symbols need that color, gray numbers take any color. |
+| **Magic movies** | With a Spell Car server + Google Veo: cards and creatures come to life in 10-second clips when cast or tapped; made once, stored for offline play. |
 | **Art Studio** | Free painting with crayon, rainbow, sparkle and heart brushes; saved gallery. |
 | **Make a Creature** | Design a creature card (kind, picture, color, power/toughness, special power, accessory, name). **Draw it myself** opens a paint canvas (crayon, rainbow, sparkle and heart brushes, trace-along guide). Stronger creatures cost more. Saved creatures show up in every other game. |
 | **Mana Bubbles** | Pop floating blue/red bubbles to fill a card's cost slots; colored slots need that color, gray slots take any. |

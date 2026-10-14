@@ -1,5 +1,5 @@
 """Test helper: a fake Azure (OpenAI chat + images + Speech) and a real Spell Car server pointed at it."""
-import base64, io, json, os, socket, struct, subprocess, sys, threading, time, urllib.request, wave, zlib
+import base64, io, json, os, socket, struct, subprocess, sys, tempfile, threading, time, urllib.request, wave, zlib
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 KEY, TOKEN = "fake-azure-key", "test-token-0123456789abcdef"
@@ -13,14 +13,24 @@ def wav(ms=250):
     b = io.BytesIO(); w = wave.open(b, "wb"); w.setnchannels(1); w.setsampwidth(2); w.setframerate(16000)
     w.writeframes(b"\x00\x00" * int(16 * ms)); w.close(); return b.getvalue()
 
+CLIP = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "fake_clip.webm"), "rb").read()
+
 class FakeAzure(BaseHTTPRequestHandler):
+    """Fakes Azure OpenAI, Azure Speech, and Google Veo (Gemini API long-running operations)."""
     seen = []
+    polls = {}
     def log_message(self, *a): pass
     def send(self, code, body, ctype="application/json"):
         data = body if isinstance(body, bytes) else json.dumps(body).encode()
         self.send_response(code); self.send_header("Content-Type", ctype); self.send_header("Content-Length", str(len(data))); self.end_headers(); self.wfile.write(data)
     def do_POST(self):
         body = self.rfile.read(int(self.headers.get("Content-Length") or 0)); FakeAzure.seen.append((self.path, body))
+        if ":predictLongRunning" in self.path:
+            if self.headers.get("x-goog-api-key") != KEY: return self.send(401, {"error": {"code": 401}})
+            inst = json.loads(body)["instances"][0]
+            assert "inlineData" in inst["image"] and "comes to life" in inst["prompt"]
+            n = len(FakeAzure.polls); FakeAzure.polls[f"op{n}"] = 0
+            return self.send(200, {"name": f"operations/op{n}"})
         if "/cognitiveservices/v1" in self.path:
             if self.headers.get("Ocp-Apim-Subscription-Key") != KEY: return self.send(401, {"error": "key"})
             assert b"<voice name=" in body
@@ -37,6 +47,16 @@ class FakeAzure(BaseHTTPRequestHandler):
         if "/images/generations" in self.path:
             return self.send(200, {"data": [{"b64_json": base64.b64encode(png()).decode()}]})
         self.send(404, {"error": "nope"})
+    def do_GET(self):
+        if self.headers.get("x-goog-api-key") != KEY: return self.send(401, {"error": {"code": 401}})
+        if "/operations/" in self.path:
+            op = self.path.rsplit("/", 1)[1]; FakeAzure.polls[op] = FakeAzure.polls.get(op, 0) + 1
+            if FakeAzure.polls[op] < 2: return self.send(200, {"name": "operations/" + op, "done": False})
+            base = f"http://127.0.0.1:{self.server.server_address[1]}"
+            return self.send(200, {"name": "operations/" + op, "done": True, "response": {"generateVideoResponse": {
+                "generatedSamples": [{"video": {"uri": f"{base}/v1beta/files/{op}:download?alt=media"}}]}}})
+        if "/files/" in self.path: return self.send(200, CLIP, "video/webm")
+        self.send(404, {"error": "nope"})
 
 def free_port():
     s = socket.socket(); s.bind(("127.0.0.1", 0)); p = s.getsockname()[1]; s.close(); return p
@@ -49,7 +69,8 @@ class Stack:
         az = f"http://127.0.0.1:{self.az_port}"
         env = {**os.environ, "SPELLCAR_TOKEN": TOKEN, "AZURE_OPENAI_ENDPOINT": az, "AZURE_OPENAI_KEY": KEY,
                "AZURE_OPENAI_CHAT_DEPLOYMENT": "chat", "AZURE_OPENAI_IMAGE_DEPLOYMENT": "img", "AZURE_SPEECH_KEY": KEY,
-               "AZURE_SPEECH_ENDPOINT": az + "/cognitiveservices/v1", "PORT": str(self.port), **{k: str(v) for k, v in limits.items()}}
+               "AZURE_SPEECH_ENDPOINT": az + "/cognitiveservices/v1", "PORT": str(self.port),
+               "GEMINI_API_KEY": KEY, "VEO_BASE": az + "/v1beta", "VEO_POLL_SECONDS": "0.3", "VIDEO_DIR": tempfile.mkdtemp(prefix="spellcar-videos-"), **{k: str(v) for k, v in limits.items()}}
         self.proc = subprocess.Popen([sys.executable, os.path.join(ROOT, "server", "spellcar_server.py")], env=env,
                                      stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         self.url = f"http://127.0.0.1:{self.port}"

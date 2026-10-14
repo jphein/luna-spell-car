@@ -1,6 +1,11 @@
 # Changelog
 
 ## Unreleased
+- 🎬 Magic movies with Google Veo: tap a card in My Spellbook (or 🎬 on a creature) → Make it move. Clips play
+  in the cast celebration, stretch 8 s → 10 s, keep a sound toggle, and are stored on the device for offline play.
+  Grown-ups can make all 14 deck cards move at once. Clips are shared across devices without paying twice.
+- Spell Car server: `/animate` + background Veo poller, disk cache, `VIDEOS_PER_DAY` cap, Docker volume for clips.
+- Tests: fake Veo (long-running operations + a real WebM clip), 11 new server tests, end-to-end movie smoke test.
 
 ## 1.4.0 (2026-10-14)
 - Mana Bubbles: 🐢 Slow / 🐇 Normal / ⚡ Fast speed, remembered; switching restarts the bubbles at the new speed.

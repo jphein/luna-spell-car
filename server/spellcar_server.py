@@ -15,11 +15,15 @@ and speech. Standard library only. Configure with environment variables (or serv
   AZURE_OPENAI_IMAGE_API_VERSION   default 2024-10-21 (gpt-image-1 needs 2025-04-01-preview)
   AZURE_SPEECH_KEY + AZURE_SPEECH_REGION (e.g. westus2)      (enables neural voices)
   AZURE_SPEECH_ENDPOINT            optional full override of the TTS URL
+  GEMINI_API_KEY                   enables "Make it move" (Google Veo image-to-video)
+  VEO_MODEL                        default veo-3.1-fast-generate-preview
+  VEO_BASE                         default https://generativelanguage.googleapis.com/v1beta
+  VIDEO_DIR                        where finished clips are kept (default server/videos)
   KID_NAME                         default Luna
-  STORIES_PER_DAY / IMAGES_PER_DAY / TTS_CHARS_PER_DAY   daily caps (40 / 20 / 60000)
+  STORIES_PER_DAY / IMAGES_PER_DAY / TTS_CHARS_PER_DAY / VIDEOS_PER_DAY   daily caps (40 / 20 / 60000 / 16)
   PORT                             default 8787
 """
-import base64, datetime, hmac, json, os, re, sys, threading, urllib.error, urllib.request
+import base64, datetime, hashlib, hmac, json, os, re, sys, threading, time, urllib.error, urllib.request
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from xml.sax.saxutils import escape
 
@@ -37,9 +41,15 @@ CHAT_DEP, IMG_DEP = E("AZURE_OPENAI_CHAT_DEPLOYMENT", ""), E("AZURE_OPENAI_IMAGE
 API_VER, IMG_API_VER = E("AZURE_OPENAI_API_VERSION", "2024-10-21"), E("AZURE_OPENAI_IMAGE_API_VERSION", "2024-10-21")
 SPEECH_KEY, SPEECH_REGION = E("AZURE_SPEECH_KEY", ""), E("AZURE_SPEECH_REGION", "")
 SPEECH_URL = E("AZURE_SPEECH_ENDPOINT", "") or (f"https://{SPEECH_REGION}.tts.speech.microsoft.com/cognitiveservices/v1" if SPEECH_REGION else "")
+GEMINI_KEY = E("GEMINI_API_KEY", "")
+VEO_MODEL = E("VEO_MODEL", "veo-3.1-fast-generate-preview")
+VEO_BASE = E("VEO_BASE", "https://generativelanguage.googleapis.com/v1beta").rstrip("/")
+VIDEO_DIR = E("VIDEO_DIR", os.path.join(HERE, "videos"))
 KID = re.sub(r"[^A-Za-z \-']", "", E("KID_NAME", "Luna"))[:20] or "Luna"
-LIMITS = {"story": int(E("STORIES_PER_DAY", "40")), "image": int(E("IMAGES_PER_DAY", "20")), "tts": int(E("TTS_CHARS_PER_DAY", "60000"))}
-CAPS = {"story": bool(AOAI[0] and AOAI[1] and CHAT_DEP), "image": bool(AOAI[0] and AOAI[1] and IMG_DEP), "tts": bool(SPEECH_KEY and SPEECH_URL)}
+LIMITS = {"story": int(E("STORIES_PER_DAY", "40")), "image": int(E("IMAGES_PER_DAY", "20")), "tts": int(E("TTS_CHARS_PER_DAY", "60000")),
+          "video": int(E("VIDEOS_PER_DAY", "16"))}
+CAPS = {"story": bool(AOAI[0] and AOAI[1] and CHAT_DEP), "image": bool(AOAI[0] and AOAI[1] and IMG_DEP), "tts": bool(SPEECH_KEY and SPEECH_URL),
+        "video": bool(GEMINI_KEY)}
 
 PLACES = {
     "castle": "a sparkly castle on a hill", "meadow": "a rainbow meadow full of flowers and butterflies",
@@ -148,7 +158,120 @@ def do_tts(b):
                                            "X-Microsoft-OutputFormat": "audio-24khz-48kbitrate-mono-mp3"}, timeout=30, raw=True)
     return audio, (ctype or "audio/mpeg")
 
-ROUTES = {"/story": ("story", do_story), "/image": ("image", do_image), "/tts": ("tts", do_tts)}
+
+# ---------- "Make it move": Google Veo image-to-video ----------
+# Clips are generated once, cached on disk by a hash of (image, prompt, model), and served to every device.
+# A background thread polls Veo, so a clip finishes even if the tablet goes offline mid-wait.
+CARD_MOTION = {
+    "Rootha, Mastering the Moment": "the sorceress swirls ribbons of blue water and red fire that twist together into purple sparkles",
+    "Muddle, the Ever-Changing": "the otter giggles and shimmers, its colors gently shifting like a soap bubble",
+    "Faerie Mastermind": "the faerie flutters her glittering wings and a trail of tiny lights drifts behind her",
+    "Goldspan Dragon": "the golden dragon spreads its wings and gold coins and sparkles float gently down",
+    "Mirrorwing Dragon": "the dragon's mirror-like wings shimmer and reflect twinkling rainbow light",
+    "Thunderclap Drake": "the little drake flaps its wings and tiny friendly sparks crackle around it",
+    "Stormcatch Mentor": "the otter wizard lifts its paw and a glowing ball of soft lightning twinkles",
+    "Prismari Pianist": "the musician plays and glowing musical notes float up and twinkle",
+    "Prismari Command": "colorful magic swirls in a gentle spiral of blue and red light",
+    "Galazeth Prismari": "the elder dragon breathes a soft cloud of glittering purple stars",
+    "Archmage Emeritus": "the wizard opens a book and pages of light flutter out like butterflies",
+    "Curiosity Crafter": "the bird wizard tilts its head curiously and tiny glowing gears spin around it",
+    "Storm-Kiln Artist": "the artist paints and the brush strokes glow and float into the air",
+    "Renegade Bull": "the bull snorts a little puff of glittering dust and stamps one hoof playfully",
+}
+KIND_MOTION = {"unicorn": "the unicorn tosses its mane and its horn glows", "horse": "the horse swishes its tail and trots in place",
+               "kitty": "the kitten blinks, purrs, and swishes its tail", "puppy": "the puppy wags its tail and tilts its head",
+               "fairy": "the fairy flutters her wings and sprinkles glitter", "dragon": "the little dragon flaps its wings and puffs a sparkle",
+               "owl": "the owl blinks slowly and ruffles its feathers", "otter": "the otter waves a paw and splashes a sparkle",
+               "bunny": "the bunny wiggles its nose and hops", "butterfly": "the butterfly opens and closes its wings"}
+VIDEO_STYLE = ("Gentle, magical, happy animation for a young child. Slow, soft movement, twinkling sparkles, a slow camera push-in. "
+               "Keep the same art style and colors as the picture. Nothing scary, no sudden movements, no text. "
+               "Audio: soft magical chimes and sparkles, no speech, no music with words.")
+jobs, jobs_lock = {}, threading.Lock()
+JOBS_FILE = os.path.join(VIDEO_DIR, "jobs.json")
+
+def jobs_save():
+    tmp = JOBS_FILE + ".tmp"
+    with open(tmp, "w") as f: json.dump(jobs, f)
+    os.replace(tmp, JOBS_FILE)
+
+def veo_get(url, raw=False):
+    req = urllib.request.Request(url, headers={"x-goog-api-key": GEMINI_KEY, "User-Agent": "spellcar/1"})
+    with urllib.request.urlopen(req, timeout=120) as r:
+        return r.read() if raw else json.loads(r.read())
+
+def veo_start(img_b64, mime, prompt):
+    url = f"{VEO_BASE}/models/{VEO_MODEL}:predictLongRunning"
+    params = {"aspectRatio": "16:9", "durationSeconds": 8, "personGeneration": "allow_adult"}
+    hdr = {"x-goog-api-key": GEMINI_KEY, "Content-Type": "application/json"}
+    try:
+        r = post(url, {"instances": [{"prompt": prompt, "image": {"inlineData": {"mimeType": mime, "data": img_b64}}}], "parameters": params}, hdr)
+    except Fail as f:
+        if "400" not in str(f): raise
+        # Older request shape used by earlier Veo releases.
+        r = post(url, {"instances": [{"prompt": prompt, "image": {"bytesBase64Encoded": img_b64, "mimeType": mime}}], "parameters": params}, hdr)
+    if not r.get("name"): raise Fail(502, "veo returned no operation")
+    return r["name"]
+
+def veo_poll_once():
+    with jobs_lock: running = [(k, j) for k, j in jobs.items() if j["status"] == "running"]
+    for key, j in running:
+        try:
+            op = veo_get(f"{VEO_BASE}/{j['op']}")
+            if not op.get("done"):
+                if time.time() - j["started"] > 1200: raise Fail(504, "timed out")
+                continue
+            if op.get("error"): raise Fail(502, str(op["error"].get("message", "veo error"))[:200])
+            resp = op.get("response", {}).get("generateVideoResponse", {})
+            samples = resp.get("generatedSamples") or []
+            if not samples:
+                raise Fail(422, "filtered" if resp.get("raiMediaFilteredCount") else "no video returned")
+            data = veo_get(samples[0]["video"]["uri"], raw=True)
+            with open(os.path.join(VIDEO_DIR, key + ".mp4"), "wb") as f: f.write(data)
+            with jobs_lock: j.update(status="done", finished=time.time()); jobs_save()
+        except Fail as f:
+            with jobs_lock: j.update(status="failed", error=str(f)); jobs_save()
+        except Exception as e:
+            sys.stderr.write(f"veo poll {key}: {e!r}\n")
+
+def veo_poller():
+    while True:
+        time.sleep(float(E("VEO_POLL_SECONDS", "10")))
+        try: veo_poll_once()
+        except Exception as e: sys.stderr.write(f"veo poller: {e!r}\n")
+
+def do_animate(b):
+    card, kind = b.get("card"), b.get("kind")
+    if card is not None:
+        if card not in CARD_MOTION: raise Fail(400, "unknown card")
+        motion = CARD_MOTION[card]
+    elif kind in KIND_MOTION: motion = KIND_MOTION[kind]
+    else: raise Fail(400, "need a card or a creature kind")
+    prompt = f"The picture comes to life: {motion}. {VIDEO_STYLE}"
+    ref = b.get("ref")
+    if ref is not None and not re.fullmatch(r"[\w:,'\- .]{1,120}", str(ref)): raise Fail(400, "bad ref")
+    m = re.match(r"^data:(image/(?:jpeg|png));base64,([A-Za-z0-9+/=]+)$", str(b.get("image", "")))
+    if ref is None and not m: raise Fail(400, "image must be a jpeg/png data URL")
+    # A stable ref (card name, or creature id + art hash) lets every device share one clip.
+    seed = ("ref|" + ref).encode() if ref else base64.b64decode(m.group(2))
+    key = hashlib.sha256((VEO_MODEL + "|" + prompt + "|").encode() + seed).hexdigest()[:32]
+    with jobs_lock:
+        j = jobs.get(key)
+        if j and (j["status"] in ("running", "done")): return {"id": key, "status": j["status"]}
+    if b.get("peek"): return {"id": key, "status": "none"}
+    if not m or len(m.group(2)) > 1_400_000: raise Fail(400, "image must be a jpeg/png data URL under ~1 MB")
+    mime, img_b64 = m.group(1), m.group(2)
+    if not spend("video"): raise Fail(429, "daily video limit reached")
+    op = veo_start(img_b64, mime, prompt)
+    with jobs_lock:
+        jobs[key] = {"status": "running", "op": op, "started": time.time()}; jobs_save()
+    return {"id": key, "status": "running"}
+
+def animate_status(key):
+    with jobs_lock: j = jobs.get(key)
+    if not j: raise Fail(404, "unknown clip")
+    return {"id": key, "status": j["status"], **({"error": j.get("error")} if j["status"] == "failed" else {})}
+
+ROUTES = {"/animate": ("video", do_animate), "/story": ("story", do_story), "/image": ("image", do_image), "/tts": ("tts", do_tts)}
 
 class Handler(BaseHTTPRequestHandler):
     server_version = "SpellCar/1"
@@ -167,9 +290,19 @@ class Handler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
         self.send_response(204); self.cors(); self.send_header("Content-Length", "0"); self.end_headers()
     def do_GET(self):
-        if self.path != "/health": return self.reply(404, {"error": "not found"})
+        m = re.match(r"^/(animate|video)/([0-9a-f]{32})(\.mp4)?$", self.path)
+        if self.path != "/health" and not m: return self.reply(404, {"error": "not found"})
         if not self.authed(): return self.reply(401, {"error": "bad token"})
-        self.reply(200, {**CAPS, "kid": KID, "voices": sorted(VOICES)})
+        if self.path == "/health": return self.reply(200, {**CAPS, "kid": KID, "voices": sorted(VOICES)})
+        try:
+            if m.group(1) == "animate": return self.reply(200, animate_status(m.group(2)))
+            path = os.path.join(VIDEO_DIR, m.group(2) + ".mp4")
+            if not os.path.exists(path): return self.reply(404, {"error": "not ready"})
+            with open(path, "rb") as f: data = f.read()
+            ctype = "video/webm" if data[:4] == b"\x1aE\xdf\xa3" else "video/mp4"
+            return self.reply(200, data, ctype)
+        except Fail as f:
+            return self.reply(f.status, {"error": str(f)})
     def do_POST(self):
         route = ROUTES.get(self.path)
         if not route: return self.reply(404, {"error": "not found"})
@@ -177,7 +310,7 @@ class Handler(BaseHTTPRequestHandler):
         cap, fn = route
         if not CAPS[cap]: return self.reply(503, {"error": f"{cap} is not configured on this server"})
         n = int(self.headers.get("Content-Length") or 0)
-        if n > 8192: return self.reply(413, {"error": "request too large"})
+        if n > (1_600_000 if self.path == "/animate" else 8192): return self.reply(413, {"error": "request too large"})
         try: body = json.loads(self.rfile.read(n) or b"{}")
         except ValueError: return self.reply(400, {"error": "bad json"})
         if not isinstance(body, dict): return self.reply(400, {"error": "bad json"})
@@ -193,7 +326,12 @@ class Handler(BaseHTTPRequestHandler):
 def main():
     if len(TOKEN) < 16: sys.exit("Set SPELLCAR_TOKEN to a random string of 16+ characters (e.g. `openssl rand -hex 24`).")
     port = int(E("PORT", "8787"))
-    print(f"Spell Car server on :{port}  story={CAPS['story']} image={CAPS['image']} tts={CAPS['tts']}  limits={LIMITS}", flush=True)
+    if CAPS["video"]:
+        os.makedirs(VIDEO_DIR, exist_ok=True)
+        if os.path.exists(JOBS_FILE):
+            with open(JOBS_FILE) as f: jobs.update(json.load(f))
+        threading.Thread(target=veo_poller, daemon=True).start()
+    print(f"Spell Car server on :{port}  story={CAPS['story']} image={CAPS['image']} tts={CAPS['tts']} video={CAPS['video']}  limits={LIMITS}", flush=True)
     ThreadingHTTPServer(("0.0.0.0", port), Handler).serve_forever()
 
 if __name__ == "__main__":
