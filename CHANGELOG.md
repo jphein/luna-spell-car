@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- `make dev` prints the computer's real LAN address for opening on the tablet.
 
 ## 1.2.0 (2026-10-14)
 - Art Studio: free painting with a saved gallery (tap a painting to keep working on it); paintings are included in backups.

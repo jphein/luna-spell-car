@@ -41,8 +41,9 @@ class H(http.server.SimpleHTTPRequestHandler):
 
 if __name__ == "__main__":
     build(); threading.Thread(target=watch, daemon=True).start()
-    try: ip = socket.gethostbyname(socket.gethostname())
-    except Exception: ip = "<lan-ip>"
+    try:
+        u = socket.socket(socket.AF_INET, socket.SOCK_DGRAM); u.connect(("10.255.255.255", 1)); ip = u.getsockname()[0]; u.close()
+    except Exception: ip = "<this-computer's-ip>"
     print(f"Serving on http://localhost:{PORT}  (tablet: http://{ip}:{PORT})  Ctrl+C to stop", flush=True)
     socketserver.ThreadingTCPServer.allow_reuse_address = True
     with socketserver.ThreadingTCPServer(("0.0.0.0", PORT), H) as s: s.serve_forever()
