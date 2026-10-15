@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- 🗓️ Weekly challenge: a different goal each week (catch 20 faeries, cast 5 spells, win Memory Match twice, …) shown on
+  home and read aloud when tapped. Finishing earns a special sticker (its own row in My Spellbook) and +5 stars.
+  Missing a week costs nothing. Progress and challenge stickers are in backups.
 - New static check: released CHANGELOG sections must match what the last tag shipped (the `merge=union` rule can
   slide an Unreleased line into a release during a rebase; this catches it).
 - 🌞 Daily hello: the first time she opens Spell Car each day, Rootha says good morning, afternoon, or evening with a

@@ -381,6 +381,13 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .hole .popwho{position:absolute;inset:0;display:grid;place-items:center;font-size:clamp(40px,11vmin,110px);transform:translateY(105%);transition:transform .16s ease-out}
 .hole.up .popwho{transform:translateY(0)}
 .hole.got{box-shadow:0 0 0 5px var(--gold),inset 0 -8px 16px rgba(0,0,0,.35)}
+/* weekly challenge */
+.chalcard{display:flex;gap:12px;align-items:center;width:100%;max-width:560px;margin:14px auto 0;padding:12px 16px;border-radius:22px;background:var(--surface);box-shadow:0 4px 0 var(--line);text-align:left}
+.chalcard .ce{font-size:44px;line-height:1;flex:none}
+.chalcard .ct{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.chalcard .ct b{font-size:17px}
+.chalcard .ct small{color:var(--muted);font-size:15px}
+.chalcard.done{box-shadow:0 0 0 3px var(--gold),0 4px 0 var(--line)}
 /* treasure catch */
 .catchfield{position:relative;height:min(60vh,880px);border-radius:26px;overflow:hidden;background:radial-gradient(120% 90% at 50% 0%,#3B2386,#120C33 75%);touch-action:none;margin:0 0 4px}
 .catchdragon{position:absolute;top:10px;left:0;width:clamp(76px,12vmin,120px);aspect-ratio:1;border-radius:50%;object-fit:cover;border:4px solid #FFD976;box-shadow:0 0 22px rgba(255,217,118,.55);pointer-events:none;animation:dragonfly 7s ease-in-out infinite alternate}
@@ -522,6 +529,7 @@ body.theme-forest{--bg:#ECF8EE;--bg2:#D5F0DA;--violet:#2E9B5C;--line:#C6E8CE;--c
       <h1>Luna's Spell Car <span class="spark" id="titleSpark">✦</span></h1>
       <div class="lvl-line" id="lvlLine"></div><div class="pbar lvlbar"><i id="lvlBar"></i></div>
       <p>Pick a magic game!</p>
+      <button class="chalcard" id="chalCard"><span class="ce" id="chalEmo"></span><span class="ct"><b id="chalTitle">This week's challenge</b><small id="chalText"></small><span class="pbar"><i id="chalBar"></i></span></span></button>
     </div>
     <div class="games">
       <button class="game-btn" data-go="window"><div class="ico" style="background:linear-gradient(135deg,#2E8FE0,#8A4FE6,#EF5A31)" id="icoWin"></div><b>Window Magic</b><span>Spot colors outside</span></button>
@@ -793,6 +801,8 @@ body.theme-forest{--bg:#ECF8EE;--bg2:#D5F0DA;--violet:#2E9B5C;--line:#C6E8CE;--c
     <h3 class="sec-h">My stickers</h3>
     <div class="stickers" id="stickers"></div>
     <div class="progress"><span id="stkNote"></span><div class="pbar"><i id="stkBar"></i></div></div>
+    <h3 class="sec-h">Challenge stickers <span id="badgeCount" style="color:var(--muted);font-size:16px"></span></h3>
+    <div class="stickers" id="badges"></div>
     <div class="rowbtns"><button id="scOpen">🖼️ My sticker scene</button></div>
     <h3 class="sec-h">Secrets <span id="eggCount" style="color:var(--muted);font-size:16px"></span></h3>
     <div class="secrets" id="secrets"></div>
@@ -1170,7 +1180,7 @@ function go(id, quiet){
   current = id; markSeen(id);
   Object.keys(screens).forEach(k => $(k).classList.toggle("hidden", k !== id));
   $("homeBtn").classList.toggle("hidden", id === "home"); $("screenTitle").textContent = screens[id];
-  document.querySelector(".app").classList.toggle("homeview", id === "home"); if (id === "home") updateHomeGrid();
+  document.querySelector(".app").classList.toggle("homeview", id === "home"); if (id === "home"){ updateHomeGrid(); renderChal(); }
   scrollTo(0, 0);
   if (id === "window"){ renderShelf(); say("Window magic! Look outside. Tap blue when you see something blue, red for red, and purple for purple!"); }
   if (id === "maker"){ startMaker(quiet); }
@@ -1228,7 +1238,7 @@ function renderShelf(){
         const left = Math.max(0, total(c) - pool.U - pool.R);
         say(need.length ? `${c.say} needs ${need.join(" and ")}.` : `${c.say} needs ${left} more mana of any color.`); return;
       }
-      pay(c); renderPool(); renderShelf(); recordCast(c); addStar();
+      pay(c); renderPool(); renderShelf(); recordCast(c); addStar(); chal("casts");
       showCelebrate({ img: c.img, clip: clipKeyFor(c), title: `You cast ${c.name}!`, sub: c.p !== null ? `Power ${c.p}, toughness ${c.t}` : "A sparkly spell!",
                       spoken: c.pet ? `Hooray! ${c.name} is here!` : `Sparkle sparkle! You cast ${c.say}!` });
     };
@@ -1357,7 +1367,7 @@ function newCount(){
     b.onclick = () => {
       if (!$("cNext").classList.contains("hidden")) return;
       if (n === t){
-        if (!cMissed) bumpStat("countStreak"); cMissed = true;
+        if (!cMissed) bumpStat("countStreak"); cMissed = true; chal("count");
         b.classList.add("right"); addStar(); burst(); chime();
         const parts = []; if (cCur.g) parts.push(`${cCur.g} of any color`); if (cCur.u) parts.push(`${cCur.u} blue`); if (cCur.r) parts.push(`${cCur.r} red`);
         $("cExplain").textContent = parts.join(" + ") + ` = ${t}`; $("cNext").classList.remove("hidden");
@@ -1458,7 +1468,7 @@ function renderBook(){
   const left = 10 - (xp % 10);
   $("stkNote").textContent = `${left} more star${left > 1 ? "s" : ""} to your next sticker!`;
   $("stkBar").style.width = ((xp % 10) * 10) + "%";
-  renderSecrets();
+  renderSecrets(); renderBadges();
   const pb = $("petBook"); pb.innerHTML = "";
   if (!pets.length) pb.innerHTML = `<div class="empty-note">No creatures yet. Go to Make a Creature!</div>`;
   pets.slice().reverse().forEach(p => {
@@ -1701,7 +1711,7 @@ function flipMem(i){
     setTimeout(() => {
       mem[a].done = mem[b].done = true; memOpen = []; memLock = false; chime(); burst(10); renderMemory();
       if (mem.every(m => m.done)){
-        addStar(); addStar(); $("memAgain").classList.remove("hidden");
+        addStar(); addStar(); chal("memory"); $("memAgain").classList.remove("hidden");
         setTimeout(() => showCelebrate({ emo: "🎉", title: "You found them all!", sub: `${memTries} tries. Two stars!`, spoken: `You found them all in ${memTries} tries! Two stars for you!` }), 500);
       } else say(`${mem[a].c.say}! A match!`);
     }, 450);
@@ -2316,6 +2326,7 @@ document.querySelectorAll("[data-pad]").forEach(b => b.onclick = () => {
     if (echo.pos === echo.seq.length){
       echo.busy = true; const r = echo.seq.length;
       if (r >= 3) addStar();
+      chal("echo", r, true);
       if (r > echo.best){ echo.best = r; store("luna_echo_best", r); }
       renderEchoTop(); burst(8);
       say(r % 5 === 0 ? `Wow! ${r} in a row!` : rnd(["Yes!", "Perfect!", "Great memory!", "Sparkly!", "You got it!"]));
@@ -2364,7 +2375,7 @@ function popStop(){
 }
 function popEnd(){
   const prevBest = pop.best; popStop();
-  const earned = Math.max(1, Math.floor(pop.score / 5)); addStar(earned);
+  const earned = Math.max(1, Math.floor(pop.score / 5)); addStar(earned); chal("faeries", pop.score);
   if (pop.score > pop.best){ pop.best = pop.score; store("luna_pop_best", pop.score); }
   renderPopTop(); $("popGo").classList.remove("hidden"); $("popGo").textContent = "Play again ▶";
   showCelebrate({ emo: pop.score > prevBest && pop.score > 0 ? "🏆" : "🧚", title: `You caught ${pop.score}!`,
@@ -2456,7 +2467,7 @@ function catchStep(t){
 function catchStop(){ tc.on = false; cancelAnimationFrame(tc.raf); tc.items.forEach(it => it.el.remove()); tc.items = []; }
 function catchEnd(){
   const prevBest = stats.catchBest || 0; catchStop();
-  const earned = Math.max(1, Math.floor(tc.score / 5)); addStar(earned);
+  const earned = Math.max(1, Math.floor(tc.score / 5)); addStar(earned); chal("treasure", tc.score);
   if (tc.score > prevBest) setStat("catchBest", tc.score);
   renderCatchTop(); $("catchGo").classList.remove("hidden"); $("catchGo").textContent = "Play again ▶";
   const rec = tc.score > prevBest && tc.score > 0;
@@ -2467,6 +2478,53 @@ $("catchGo").onclick = () => {
   catchStop(); tc.on = true; tc.score = 0; tc.last = 0; tc.spawnIn = 0.6; tc.end = Date.now() + tc.dur; renderCatchTop(); $("catchGo").classList.add("hidden");
   say("Ready, set, catch!"); tc.raf = requestAnimationFrame(catchStep);
 };
+
+/* ---------- WEEKLY CHALLENGE ---------- */
+/* One goal per Monday-to-Sunday week, rotating, with its own special sticker. Missing a week costs nothing. */
+const CHALLENGES = [
+  { id: "faeries", emo: "🧚", text: "Catch 20 faeries in Faerie Pop", goal: 20, sticker: "🍄" },
+  { id: "casts", emo: "🔮", text: "Cast 5 spells in Window Magic", goal: 5, sticker: "🌻" },
+  { id: "treasure", emo: "💰", text: "Catch 25 treasures in Treasure Catch", goal: 25, sticker: "🐚" },
+  { id: "memory", emo: "🃏", text: "Win Memory Match 2 times", goal: 2, sticker: "🐞" },
+  { id: "count", emo: "🔢", text: "Count the mana right 8 times", goal: 8, sticker: "🍓" },
+  { id: "lessons", emo: "🎓", text: "Finish 2 Magic School lessons", goal: 2, sticker: "🦢" },
+  { id: "paint", emo: "🎨", text: "Make 2 paintings in Art Studio", goal: 2, sticker: "🪐" },
+  { id: "echo", emo: "🎵", text: "Remember 5 colors in a row in Spell Echo", goal: 5, sticker: "🐬", best: true },
+];
+const weekNo = () => Math.floor((Math.floor((Date.now() - new Date().getTimezoneOffset() * 60000) / 864e5) + 3) / 7);  // weeks start on Monday
+const chalNow = () => CHALLENGES[(window.__chalIdx ?? weekNo()) % CHALLENGES.length];
+function loadWeek(){ const w = load("luna_week", null); return w && w.w === weekNo() && w.c === chalNow().id ? w : { w: weekNo(), c: chalNow().id, n: 0 }; }
+let week = loadWeek(), badges = load("luna_badges", {});
+function chal(kind, n = 1){
+  const c = chalNow(); if (c.id !== kind) return;
+  if (week.w !== weekNo() || week.c !== c.id) week = loadWeek();
+  if (badges[week.w]) return;
+  week.n = c.best ? Math.max(week.n, n) : week.n + n; store("luna_week", week);
+  if (week.n >= c.goal){
+    badges[week.w] = { c: c.id, s: c.sticker }; store("luna_badges", badges);
+    queueCelebrate({ emo: c.sticker, title: "Weekly challenge done!", sub: `${c.text}. A special sticker and +5 stars!`,
+                     spoken: `You did it! ${c.text}! You earned a special sticker, and five stars!` });
+    addStar(5);  // after the celebration, so a sticker or level it earns comes second
+  }
+  renderChal();
+}
+function chalWords(){
+  const c = chalNow(), done = !!badges[weekNo()], n = Math.min(c.goal, week.w === weekNo() && week.c === c.id ? week.n : 0);
+  return { c, done, n, text: done ? `Done! You earned the ${c.sticker} sticker.` : `${c.text}. ${n} of ${c.goal}.` };
+}
+function renderChal(){
+  const w = chalWords();
+  $("chalEmo").textContent = w.done ? w.c.sticker : w.c.emo; $("chalText").textContent = w.text;
+  $("chalBar").style.width = Math.round(100 * w.n / w.c.goal) + "%"; $("chalCard").classList.toggle("done", w.done);
+}
+$("chalCard").onclick = () => { const w = chalWords(); tick(4);
+  say(w.done ? `This week's challenge is done! You earned the special sticker. A new challenge comes on Monday.` : `This week's challenge: ${w.c.text}. You have ${w.n} so far!`); };
+function renderBadges(){
+  const ks = Object.keys(badges).sort(), B = $("badges"); B.innerHTML = "";
+  ks.forEach(k => { const sp = document.createElement("span"); sp.className = "stk"; sp.textContent = badges[k].s; B.appendChild(sp); });
+  if (!ks.length) B.innerHTML = `<span class="empty-note">Finish a weekly challenge to earn one!</span>`;
+  $("badgeCount").textContent = ks.length ? String(ks.length) : "";
+}
 
 /* ---------- PROGRESS STATS ---------- */
 let stats = load("luna_stats", {});
@@ -2793,7 +2851,7 @@ function renderListenPage(){
   $("lText").onclick = () => say(question); say(question);
 }
 function finishListen(){
-  const l = lsn.l; go("school", true); addStar();
+  const l = lsn.l; go("school", true); addStar(); chal("lessons");
   showCelebrate({ emo: "🎧", title: "Great listening!", sub: `${l.title}. +1 star`, spoken: `Great listening! You did ${l.title} with your ears! One star for you!` });
 }
 function renderLessonPage(){
@@ -2889,6 +2947,7 @@ function finishLesson(){
   store("luna_stats", stats);
   go("school", true);
   if (first) addStar(3);
+  chal("lessons");
   showCelebrate({ emo: l.emo, title: `Lesson done: ${l.title}!`, sub: first ? "+3 stars" : "Great practice!",
     spoken: `You finished ${l.title}! ${first ? "Three stars for you!" : "Great practice!"}` });
 }
@@ -2980,7 +3039,7 @@ function finishStudio(){
                          : drawings.concat([{ id: Date.now().toString(36), img, at: Date.now() }]).slice(-40);
   if (!store("luna_drawings", drawings)){ drawings = before; boop(); say("The art studio is full! Ask a grown-up to remove a painting."); return; }
   $("paint").classList.add("hidden"); renderStudio();
-  if (!paintEditId){ bumpStat("paintings"); addStar(); }
+  if (!paintEditId){ bumpStat("paintings"); addStar(); chal("paint"); }
   showCelebrate({ img, title: paintEditId ? "Painting saved!" : "What a masterpiece!", sub: "It's in your Art Studio.", spoken: paintEditId ? "Saved!" : "What a masterpiece! I love it!" });
 }
 $("stNew").onclick = () => openStudioPaint(null);
@@ -3217,7 +3276,7 @@ $("scOpen").onclick = () => go("scene");
 
 /* ---------- BACKUP & RESTORE ---------- */
 $("bkSave").onclick = async () => {
-  const data = JSON.stringify({ app: "luna-spell-car", v: 4, at: new Date().toISOString(), stars, xp, owned, eggs, theme, stats, treasures, cast, pets, stories, scene, drawings, seen: seenGames });
+  const data = JSON.stringify({ app: "luna-spell-car", v: 4, at: new Date().toISOString(), stars, xp, owned, eggs, theme, stats, treasures, cast, pets, stories, scene, drawings, seen: seenGames, week, badges });
   const name = `luna-spellbook-${new Date().toISOString().slice(0, 10)}.json`;
   try {
     if (downloadsCap) await downloadsCap.save({ filename: name, data: new Blob([data], { type: "application/json" }) });
@@ -3259,6 +3318,10 @@ $("bkFile").onchange = () => {
     if (d.eggs && typeof d.eggs === "object") Object.keys(d.eggs).forEach(k => { if (EGGS.some(e => e.id === k)) eggs[k] = eggs[k] || Date.now(); });
     if (d.seen && typeof d.seen === "object") Object.keys(d.seen).forEach(k => { if (screens[k] !== undefined) seenGames[k] = seenGames[k] || Date.now(); });
     store("luna_seen", seenGames); renderNewTags();
+    if (d.badges && typeof d.badges === "object") Object.entries(d.badges).forEach(([k, b]) => { const c = b && CHALLENGES.find(x => x.id === b.c);
+      if (/^\d+$/.test(k) && c && b.s === c.sticker && !badges[k]) badges[k] = { c: c.id, s: c.sticker }; });
+    store("luna_badges", badges);
+    if (d.week && d.week.w === week.w && d.week.c === week.c && Number.isFinite(d.week.n) && d.week.n > week.n){ week.n = Math.floor(d.week.n); store("luna_week", week); }
     store("luna_eggs", eggs); renderKindRow(); renderAccRow(); renderBrushes(); renderStars();
     if (Array.isArray(d.drawings)){ const have2 = new Set(drawings.map(x => x.id)), merged2 = drawings.slice();
       d.drawings.filter(x => x && typeof x.img === "string" && /^data:image\/(jpeg|png);base64,/.test(x.img) && x.img.length < 800000)

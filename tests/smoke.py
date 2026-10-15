@@ -668,6 +668,37 @@ async def daily_hello(pg, mode):
         await pg.evaluate("window.__quietCelebrations = true")
     await dismiss(pg); await home(pg)
 
+@test
+async def weekly_challenge(pg, mode):
+    # One goal per week (rotating) with a special sticker; progress shows on home and is read aloud.
+    await pg.evaluate("window.__chalIdx = CHALLENGES.findIndex(c => c.id === 'casts'); store('luna_week', null); week = loadWeek(); delete badges[weekNo()]; store('luna_badges', badges); go('home', true)")
+    assert "Window Magic" in await pg.inner_text("#chalCard"), "home doesn't show this week's challenge"
+    s0 = await pg.evaluate("stars")
+    await pg.evaluate("chal('faeries', 50)"); assert await pg.evaluate("week.n") == 0, "another game's progress counted"
+    for _ in range(4): await pg.evaluate("chal('casts')")
+    assert await pg.evaluate("week.n") == 4 and not await pg.evaluate("!!badges[weekNo()]"), "finished too early"
+    assert "4" in await pg.inner_text("#chalCard"), "progress not shown on home"
+    if mode == "android":
+        await pg.click("#chalCard")
+        spoken = [c["t"] for c in await pg.evaluate("window.__calls") if isinstance(c, dict) and "t" in c]
+        assert "challenge" in spoken[-1].lower() and "4" in spoken[-1], f"challenge not read aloud: {spoken[-1:]}"
+    await pg.evaluate("chal('casts')")
+    assert await pg.evaluate("badges[weekNo()] && badges[weekNo()].s === CHALLENGES[__chalIdx].sticker"), "no special sticker"
+    assert await pg.evaluate("stars") >= s0 + 5, "no bonus stars"
+    assert await pg.locator("#chalCard.done").count() == 1, "home card doesn't show it's done"
+    s1 = await pg.evaluate("stars"); await pg.evaluate("chal('casts')"); assert await pg.evaluate("stars") == s1, "rewarded twice"
+    await pg.evaluate("go('book', true)")
+    assert await pg.evaluate("CHALLENGES[__chalIdx].sticker") in await pg.inner_text("#badges"), "challenge sticker not in My Spellbook"
+    if mode == "web":
+        await pg.evaluate("go('book', true)"); d = await fresh_backup(pg)
+        assert d.get("badges", {}).get(str(await pg.evaluate("weekNo()"))) and d.get("week"), "backup is missing challenge stickers or progress"
+    # a real game feeds it: Count the Mana
+    await pg.evaluate("window.__chalIdx = CHALLENGES.findIndex(c => c.id === 'count'); store('luna_week', null); week = loadWeek(); delete badges[weekNo()]")
+    await pg.evaluate("go('count', true)")
+    await pg.evaluate("[...document.querySelectorAll('#cAns .ans')].find(b => +b.textContent === total(cCur)).click()")
+    assert await pg.evaluate("week.n") == 1, "Count the Mana didn't count toward the challenge"
+    await pg.evaluate("delete window.__chalIdx; week = loadWeek(); go('home', true)")
+
 STACK = None
 
 async def stroke(pg):

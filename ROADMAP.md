@@ -18,7 +18,7 @@ Reorder freely; each item should be small enough for one PR, with a clear "done 
 
 ## Later
 - [x] Treasure Catch: catch Goldspan Dragon's falling coins in a basket (drag game).
-- [ ] Weekly challenge: a different goal each week ("catch 20 faeries") with a special sticker.
+- [x] Weekly challenge: a different goal each week ("catch 20 faeries") with a special sticker.
 - [ ] More secrets and a hidden "Secret Garden" theme unlocked by finding all six.
 - [ ] Magic movies for Art Studio paintings ("make my painting move").
 - [ ] A "movie theater" page in My Spellbook that plays all her clips back to back.
