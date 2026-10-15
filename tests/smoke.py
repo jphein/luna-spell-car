@@ -317,7 +317,7 @@ async def secrets(pg, mode):
     await pg.click("#savePet"); await pg.wait_for_timeout(1500); await dismiss(pg)
     assert await pg.evaluate("!!eggs.luna && !!eggs.mega"), "creature secrets not found"
     await pg.evaluate("go('book', true)")
-    assert "6 of 6" in await pg.inner_text("#eggCount"), "spellbook secret count wrong"
+    assert f"6 of {await pg.evaluate('EGGS.length')}" in await pg.inner_text("#eggCount"), "spellbook secret count wrong"
     await home(pg)
 
 @test
@@ -645,6 +645,8 @@ async def treasure_catch(pg, mode):
     await dismiss(pg)
     await pg.click("#catchGo"); await home(pg)
     assert not await pg.evaluate("tc.on") and await pg.locator("#catchField .tcoin").count() == 0, "round kept running after leaving"
+    await pg.click("[data-go=catch]"); assert await pg.is_visible("#catchGo"), "no Start button after leaving mid-round and coming back"
+    await home(pg)
 
 @test
 async def daily_hello(pg, mode):
@@ -698,6 +700,35 @@ async def weekly_challenge(pg, mode):
     await pg.evaluate("[...document.querySelectorAll('#cAns .ans')].find(b => +b.textContent === total(cCur)).click()")
     assert await pg.evaluate("week.n") == 1, "Count the Mana didn't count toward the challenge"
     await pg.evaluate("delete window.__chalIdx; week = loadWeek(); go('home', true)")
+
+@test
+async def secret_garden(pg, mode):
+    # Three more secrets live inside games; finding every secret opens the hidden Secret Garden colors.
+    await pg.click("[data-go=pop]"); await pg.click("#popGo")
+    await pg.evaluate("for (let k = 0; k < 3; k++){ pop.up[0] = { who: POP_WHO.find(w => w[1] === 0), t: 0 }; popHit(0); }")
+    assert await pg.evaluate("pop.on"), "waking the owl stopped the game"
+    await pg.evaluate("pop.end = Date.now()"); await pg.wait_for_function("!pop.on", timeout=5000)
+    await pg.wait_for_function("!!eggs.owl", timeout=3000)  # recorded just after the round's own celebration
+    await dismiss(pg); await home(pg)
+    await pg.click("[data-go=catch]"); await pg.click("#catchGo")
+    await pg.evaluate("for (let k = 0; k < 3; k++){ const el = document.createElement('div'); catchGot({ el, pts: 3 }); }")
+    assert await pg.evaluate("tc.on"), "a gem secret interrupted the round"
+    await pg.evaluate("tc.end = Date.now()"); await pg.wait_for_function("!tc.on", timeout=5000)
+    await pg.wait_for_function("!!eggs.gems", timeout=3000)  # recorded just after the round's own celebration
+    await dismiss(pg); await home(pg)
+    # with every other secret already found, the last one opens the garden
+    await pg.evaluate("EGGS.forEach(e => { if (e.id !== 'ears' && !eggs[e.id]) eggs[e.id] = 1; }); delete eggs.ears; delete owned['theme:garden']; store('luna_eggs', eggs)")
+    assert await pg.evaluate("shopHidden(SHOP.find(i => i.id === 'theme:garden'))"), "garden visible before it's unlocked"
+    await pg.evaluate("go('school', true); listenMode = true; renderSchool()"); await pg.click('[data-lesson="win"]', force=True)
+    while await pg.evaluate("current === 'lesson'"):
+        await pg.wait_for_function("current !== 'lesson' || (lsn.lp[lsn.i].t === 'quiz' && !lsn.answered)", timeout=15000)
+        if await pg.evaluate("current === 'lesson'"): await pg.click("#lPage .lhalf[data-ok]")
+    await pg.wait_for_function("!!eggs.ears", timeout=3000)
+    assert await pg.evaluate("!!owned['theme:garden']"), "finding every secret didn't open the Secret Garden"
+    await dismiss(pg); await pg.evaluate("listenMode = false; go('shop', true)")
+    await pg.click('[data-item="theme:garden"] button')
+    assert await pg.evaluate("theme") == "garden" and await pg.evaluate("document.body.classList.contains('theme-garden')"), "garden colors don't apply"
+    await pg.click('[data-item="theme:night"] button'); await home(pg)
 
 STACK = None
 

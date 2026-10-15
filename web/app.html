@@ -35,7 +35,7 @@ body{background:radial-gradient(120% 80% at 50% 0%,var(--bg2),var(--bg) 70%);bac
   user-select:none;-webkit-user-select:none;overflow-x:hidden}
 button{font-family:inherit;color:inherit;cursor:pointer;border:0;-webkit-tap-highlight-color:transparent;background:none}
 button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-offset:3px}
-.app{max-width:760px;margin:0 auto;padding:14px 16px 28px;min-height:100%;display:flex;flex-direction:column}
+.app{max-width:760px;margin:0 auto;padding:14px 16px 28px;min-height:100%;display:flex;flex-direction:column;position:relative;z-index:1}  /* above seasonal/petal decor */
 .top{display:flex;align-items:center;gap:10px;margin-bottom:12px}
 #voiceBtn{margin-left:auto}
 .home-btn,.icon-btn{width:52px;height:52px;border-radius:50%;background:var(--surface);box-shadow:0 3px 0 var(--line);font-size:24px;display:grid;place-items:center;flex:none}
@@ -409,12 +409,14 @@ body.theme-rainbow{--bg:#FFF1F8;--bg2:#E6F3FF;--violet:#D9418F;--line:#F3CDE3;--
 body.theme-ocean{--bg:#E6F7FF;--bg2:#C9EEFF;--violet:#1C7FB8;--line:#BDE3F5;--chip:#E9F7FD}
 body.theme-candy{--bg:#FFF0F5;--bg2:#FFE0EE;--violet:#E05A9A;--line:#F8CADF;--chip:#FFF0F5}
 body.theme-starlight{--bg:#E8E4FF;--bg2:#FFF4D6;--violet:#5B3FD6;--line:#D9CFFF;--chip:#F1EDFF;--gold:#D9930F}
+body.theme-garden{--bg:#F2FBF1;--bg2:#FFE6F0;--violet:#C93F82;--line:#CDEBCF;--chip:#F5FCF2}
 body.theme-forest{--bg:#ECF8EE;--bg2:#D5F0DA;--violet:#2E9B5C;--line:#C6E8CE;--chip:#EEF9F0}
 @media (prefers-color-scheme:dark){
   body.theme-rainbow{--bg:#2A1236;--bg2:#123A52;--surface:#3A1F4E;--violet:#FF7AC3;--line:#5B3470;--chip:#4A2A60}
   body.theme-ocean{--bg:#06263A;--bg2:#0C4A66;--surface:#0F3550;--violet:#4FC3F7;--line:#1F5878;--chip:#164563}
   body.theme-candy{--bg:#33142A;--bg2:#4A1A3C;--surface:#451E3D;--violet:#FF8CC6;--line:#6A2C58;--chip:#5A2550}
   body.theme-starlight{--bg:#0B0A24;--bg2:#2A1F66;--surface:#1D1747;--violet:#B6A2FF;--line:#3A2F7A;--chip:#2A2263;--gold:#FFD976}
+  body.theme-garden{--bg:#13261A;--bg2:#3A1830;--surface:#1E3A27;--violet:#FF8FC4;--line:#2E5A3B;--chip:#244630}
   body.theme-forest{--bg:#0F2A1A;--bg2:#18412A;--surface:#183A26;--violet:#5CD68E;--line:#2A5C3D;--chip:#224D33}
 }
 @media (prefers-reduced-motion:reduce){.season,.starfall{display:none}.rootha.spin{animation:none}}
@@ -557,7 +559,7 @@ body.theme-forest{--bg:#ECF8EE;--bg2:#D5F0DA;--violet:#2E9B5C;--line:#C6E8CE;--c
       <p><b>Make a Creature:</b> she designs her own creature card. Stronger creatures cost more. Saved creatures appear in Window Magic, Count the Mana, and Who Wins.</p>
       <p><b>Story Time</b> asks Claude to write a short, gentle story starring the creatures she picks, then reads it aloud (it uses your Claude account, so it asks permission the first time). <b>Memory Match</b> is a flip-and-find pairs game. In <b>My Spellbook</b>, tap one of her creatures to edit it, and use <b>Print my creatures</b> to get a real-card-size PDF to cut out and sleeve.</p>
       <p><b>Rootha Says:</b> Simon Says, read aloud, no screen needed. You're the judge: if she moves when Rootha didn't say it, gotcha! Every correct answer earns a star, and every 10 stars earns a sticker in My Spellbook. Tap any question to hear it again. Everything is saved on this device only.</p>
-      <p><b>Mana Bubbles:</b> pop bubbles to pay a card's cost; colored slots need that color, gray slots take any. <b>Treasure Catch:</b> slide a basket to catch Goldspan Dragon's falling coins and gems (30 seconds, nothing to lose). <b>Game Night</b> is a life counter (20 or 40 life, 2–4 players) with dice, a coin, and "who goes first." In Make a Creature she can <b>draw her own picture</b>, and <b>Art Studio</b> is free painting with a saved gallery. With a <b>Spell Car server</b> (below), the tablet app also gets Story Time, AI creature pictures, and natural neural voices from your Azure account. <b>Magic movies</b> (Google Veo, via the same server) let her cards and creatures move: tap a card in My Spellbook, or use "Make all deck cards move" below; each clip is made once, shared by all your devices, and plays offline. <b>Magic School</b> turns the printed Spellbook into twelve spoken, tappable lessons (zones, card parts, mana, the turn, combat, prowess and magecraft, Treasure, Rootha's Elemental trick, and a full practice turn), ending in a printable diploma. The <b>Star Map</b> holds twelve harder treasures (long streaks, high scores, collecting every card) that light up a dragon constellation. <b>Levels</b> come from every star she has ever earned, so spending stars in the <b>Star Shop</b> never lowers her level or stickers. There are six hidden <b>secrets</b>; the ❓ tiles in My Spellbook give hints. <b>Backup</b> in My Spellbook moves her creatures and stars between the tablet and the web version.</p>
+      <p><b>Mana Bubbles:</b> pop bubbles to pay a card's cost; colored slots need that color, gray slots take any. <b>Treasure Catch:</b> slide a basket to catch Goldspan Dragon's falling coins and gems (30 seconds, nothing to lose). <b>Game Night</b> is a life counter (20 or 40 life, 2–4 players) with dice, a coin, and "who goes first." In Make a Creature she can <b>draw her own picture</b>, and <b>Art Studio</b> is free painting with a saved gallery. With a <b>Spell Car server</b> (below), the tablet app also gets Story Time, AI creature pictures, and natural neural voices from your Azure account. <b>Magic movies</b> (Google Veo, via the same server) let her cards and creatures move: tap a card in My Spellbook, or use "Make all deck cards move" below; each clip is made once, shared by all your devices, and plays offline. <b>Magic School</b> turns the printed Spellbook into twelve spoken, tappable lessons (zones, card parts, mana, the turn, combat, prowess and magecraft, Treasure, Rootha's Elemental trick, and a full practice turn), ending in a printable diploma. The <b>Star Map</b> holds twelve harder treasures (long streaks, high scores, collecting every card) that light up a dragon constellation. <b>Levels</b> come from every star she has ever earned, so spending stars in the <b>Star Shop</b> never lowers her level or stickers. There are nine hidden <b>secrets</b>; the ❓ tiles in My Spellbook give hints, and finding them all opens the hidden Secret Garden colors. <b>Backup</b> in My Spellbook moves her creatures and stars between the tablet and the web version.</p>
       <div class="voiceset hidden" id="cloudSet"><b>Spell Car server (Azure)</b>
         <div class="pnote" style="margin:2px 0 6px">Adds Story Time, AI creature pictures, and natural voices. Uses your self-hosted Spell Car server; the Azure keys stay on the server.</div>
         <input id="cloudUrl" placeholder="Server address, e.g. https://spellcar.example.com" autocomplete="off" inputmode="url">
@@ -2180,13 +2182,24 @@ const EGGS = [
   { id: "luna", emo: "💖", name: "Name twin", hint: "Make a creature that has your name in its name." },
   { id: "mega", emo: "🦖", name: "Mega monster", hint: "Make a creature with nine power and nine toughness." },
   { id: "shower", emo: "🌠", name: "Star shower", hint: "Tap the little sparkle next to the app's name five times fast." },
+  { id: "owl", emo: "🦉", name: "Wide-awake owl", hint: "In Faerie Pop, the sleepy owl might wake up if you tap it three times in one game." },
+  { id: "gems", emo: "💎", name: "Gem collector", hint: "In Treasure Catch, catch three gems in one game." },
+  { id: "ears", emo: "🎧", name: "Wise ears", hint: "Finish a Magic School lesson with your eyes closed." },
 ];
 let spellSeq = "";
-function findEgg(id){
+/* later: found in the middle of a game, so celebrate after that game's own celebration instead of covering the game */
+function findEgg(id, later){
   if (eggs[id]) return false;
   const e = EGGS.find(x => x.id === id); if (!e) return false;
-  eggs[id] = Date.now(); store("luna_eggs", eggs); addStar(5);
-  burst(30); showCelebrate({ emo: e.emo, title: "You found a secret!", sub: `${e.name}. +5 stars!`, spoken: `You found a secret! ${e.name}! Five bonus stars!` });
+  eggs[id] = Date.now(); store("luna_eggs", eggs);
+  const o = { emo: e.emo, title: "You found a secret!", sub: `${e.name}. +5 stars!`, spoken: `You found a secret! ${e.name}! Five bonus stars!` };
+  if (later) queueCelebrate(o); else { burst(30); showCelebrate(o); }
+  addStar(5);
+  if (EGGS.every(x => eggs[x.id]) && !owned["theme:garden"]){  // every secret found: the hidden garden opens
+    owned["theme:garden"] = Date.now(); store("luna_owned", owned);
+    queueCelebrate({ emo: "🌷", title: "The Secret Garden is open!", sub: "You found every secret. New colors in the Star Shop!",
+                     spoken: "You found every single secret! The Secret Garden is open! Look for its colors in the Star Shop." });
+  }
   return true;
 }
 function renderSecrets(){
@@ -2234,21 +2247,29 @@ $("titleSpark").onclick = () => {
 })();
 
 /* ---------- STAR SHOP ---------- */
-const THEMES = { night: "Night sky", rainbow: "Rainbow", ocean: "Ocean", candy: "Candy", forest: "Forest", starlight: "Starlight" };
+const THEMES = { night: "Night sky", rainbow: "Rainbow", ocean: "Ocean", candy: "Candy", forest: "Forest", starlight: "Starlight", garden: "Secret Garden" };
 let theme = load("luna_theme", "night");
-function applyTheme(){ Object.keys(THEMES).forEach(t => document.body.classList.toggle("theme-" + t, t === theme && t !== "night")); }
+function applyTheme(){ Object.keys(THEMES).forEach(t => document.body.classList.toggle("theme-" + t, t === theme && t !== "night")); gardenPetals(theme === "garden"); }
+function gardenPetals(on){
+  const old = $("petals"); if (old) old.remove();
+  if (!on || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const box = document.createElement("div"); box.className = "season"; box.id = "petals"; box.setAttribute("aria-hidden", "true");
+  for (let i = 0; i < 8; i++){ const sp = document.createElement("span"); sp.textContent = ["🌸", "🌼", "🦋", "🌷"][i % 4];
+    sp.style.left = (i * 12.5 + Math.random() * 8) + "vw"; sp.style.animationDuration = (11 + Math.random() * 8) + "s"; sp.style.animationDelay = (-Math.random() * 14) + "s"; box.appendChild(sp); }
+  document.body.prepend(box);
+}
 applyTheme();
 const SHOP = [].concat(
   KINDS.filter(k => k.shop).map(k => ({ id: "kind:" + k.id, cat: "New creatures", emo: k.emo, name: k.name, price: k.shop })),
   ACCS.filter(a => a.shop).map(a => ({ id: "acc:" + a.id, cat: "Accessories", emo: a.emo, name: a.label, price: a.shop })),
   [{ id: "theme:night", emo: "🌙", price: 0 }, { id: "theme:rainbow", emo: "🌈", price: 25 }, { id: "theme:ocean", emo: "🌊", price: 25 },
-   { id: "theme:candy", emo: "🍬", price: 25 }, { id: "theme:forest", emo: "🌳", price: 25 }, { id: "theme:starlight", emo: "🌌", price: 999 }].map(t => ({ ...t, cat: "App colors", name: THEMES[t.id.slice(6)] })),
+   { id: "theme:candy", emo: "🍬", price: 25 }, { id: "theme:forest", emo: "🌳", price: 25 }, { id: "theme:starlight", emo: "🌌", price: 999 }, { id: "theme:garden", emo: "🌷", price: 999 }].map(t => ({ ...t, cat: "App colors", name: THEMES[t.id.slice(6)] })),
   [{ id: "brush:gold", emo: "🌟", name: "Gold glitter crayon", price: 12 }, { id: "brush:unicorn", emo: "🦄", name: "Unicorn stamp", price: 12 },
    { id: "brush:star", emo: "⭐", name: "Star stamp", price: 12 }].map(b => ({ ...b, cat: "Art Studio" }))
 );
 let shopArmed = null;
 function itemOwned(it){ return it.price === 0 || isOwned(it.id); }
-function shopHidden(it){ return it.id === "theme:starlight" && !isOwned(it.id); }
+function shopHidden(it){ return (it.id === "theme:starlight" || it.id === "theme:garden") && !isOwned(it.id); }
 function renderShop(){
   renderStars();
   const L = $("shopList"); L.innerHTML = "";
@@ -2365,7 +2386,9 @@ function popLoop(){ if (!pop.on) return; popShow(); pop.timer = setTimeout(popLo
 function popHit(i){
   const u = pop.up[i]; if (!pop.on || !u) return;
   clearTimeout(u.t); const h = $("popGrid").children[i];
-  if (u.who[1] === 0){ boop(); say("Shh! The owl is sleeping."); popHide(i); return; }
+  if (u.who[1] === 0){ popHide(i); pop.owl = (pop.owl || 0) + 1;
+    if (pop.owl === 3 && !eggs.owl){ pop.owlEgg = true; tone([392, 523], 0.1); say("Hoo hoo! I'm awake!"); } else { boop(); say("Shh! The owl is sleeping."); }
+    return; }
   pop.score += u.who[1]; h.classList.add("got"); plink(u.who[1] > 1 ? "R" : "U"); if (u.who[1] > 1) burst(10);
   renderPopTop(); setTimeout(() => popHide(i), 120);
 }
@@ -2376,6 +2399,7 @@ function popStop(){
 function popEnd(){
   const prevBest = pop.best; popStop();
   const earned = Math.max(1, Math.floor(pop.score / 5)); addStar(earned); chal("faeries", pop.score);
+  if (pop.owlEgg) setTimeout(() => findEgg("owl", true), 50);
   if (pop.score > pop.best){ pop.best = pop.score; store("luna_pop_best", pop.score); }
   renderPopTop(); $("popGo").classList.remove("hidden"); $("popGo").textContent = "Play again ▶";
   showCelebrate({ emo: pop.score > prevBest && pop.score > 0 ? "🏆" : "🧚", title: `You caught ${pop.score}!`,
@@ -2383,7 +2407,7 @@ function popEnd(){
                   spoken: `Time's up! You caught ${pop.score}! ${pop.score > prevBest && pop.score > 0 ? "That's a new record!" : ""}` });
 }
 $("popGo").onclick = () => {
-  pop.on = true; pop.score = 0; pop.up = {}; renderPopTop(); $("popGo").classList.add("hidden");
+  pop.on = true; pop.score = 0; pop.up = {}; pop.owl = 0; pop.owlEgg = false; renderPopTop(); $("popGo").classList.add("hidden");
   pop.end = Date.now() + pop.dur;
   pop.tick = setInterval(() => {
     const left = Math.max(0, pop.end - Date.now()); $("popTime").style.width = (100 * left / pop.dur) + "%";
@@ -2430,7 +2454,7 @@ const tc = { on: false, score: 0, items: [], x: 0.5, raf: 0, last: 0, spawnIn: 0
 $("catchDragon").src = CARDS.find(c => c.name === "Goldspan Dragon").img;
 function renderCatchTop(){ $("catchScore").textContent = `💰 ${tc.score}`; $("catchBest").textContent = stats.catchBest ? `Best: ${stats.catchBest}` : ""; }
 function placeBasket(){ $("catchBasket").style.left = (tc.x * 100) + "%"; }
-function openCatch(){ catchStop(); tc.score = 0; tc.x = 0.5; placeBasket(); renderCatchTop(); $("catchTime").style.width = "100%"; $("catchGo").textContent = "Start ▶";
+function openCatch(){ catchStop(); tc.score = 0; tc.x = 0.5; placeBasket(); renderCatchTop(); $("catchTime").style.width = "100%"; $("catchGo").textContent = "Start ▶"; $("catchGo").classList.remove("hidden");
   say("Treasure catch! Goldspan Dragon is dropping treasure. Slide the basket to catch it. Tap start!"); }
 function catchAim(e){ const r = $("catchField").getBoundingClientRect(); tc.x = Math.max(0.08, Math.min(0.92, (e.clientX - r.left) / r.width)); placeBasket(); }
 $("catchField").addEventListener("pointerdown", e => { e.preventDefault(); catchAim(e); });
@@ -2444,7 +2468,7 @@ function catchSpawn(){
 function catchGot(it){
   tc.score += it.pts; it.el.remove(); renderCatchTop(); plink(it.pts > 1 ? "R" : "U");
   const b = $("catchBasket"); b.classList.remove("got"); void b.offsetWidth; b.classList.add("got");
-  if (it.pts > 1){ burst(10); if (Math.random() < 0.5) say(rnd(["A gem!", "Sparkly gem!", "Three treasures!"])); }
+  if (it.pts > 1){ burst(10); tc.gems++; if (Math.random() < 0.5) say(rnd(["A gem!", "Sparkly gem!", "Three treasures!"])); }
 }
 function catchAdvance(dt){
   const f = $("catchField"), W = f.clientWidth, H = f.clientHeight, reach = $("catchBasket").offsetWidth * 0.6 / (W || 1);
@@ -2468,6 +2492,7 @@ function catchStop(){ tc.on = false; cancelAnimationFrame(tc.raf); tc.items.forE
 function catchEnd(){
   const prevBest = stats.catchBest || 0; catchStop();
   const earned = Math.max(1, Math.floor(tc.score / 5)); addStar(earned); chal("treasure", tc.score);
+  if (tc.gems >= 3) setTimeout(() => findEgg("gems", true), 50);
   if (tc.score > prevBest) setStat("catchBest", tc.score);
   renderCatchTop(); $("catchGo").classList.remove("hidden"); $("catchGo").textContent = "Play again ▶";
   const rec = tc.score > prevBest && tc.score > 0;
@@ -2475,7 +2500,7 @@ function catchEnd(){
                   spoken: `Time's up! You caught ${tc.score} treasure${tc.score === 1 ? "" : "s"}! ${rec ? "That's a new record!" : ""}` });
 }
 $("catchGo").onclick = () => {
-  catchStop(); tc.on = true; tc.score = 0; tc.last = 0; tc.spawnIn = 0.6; tc.end = Date.now() + tc.dur; renderCatchTop(); $("catchGo").classList.add("hidden");
+  catchStop(); tc.on = true; tc.score = 0; tc.gems = 0; tc.last = 0; tc.spawnIn = 0.6; tc.end = Date.now() + tc.dur; renderCatchTop(); $("catchGo").classList.add("hidden");
   say("Ready, set, catch!"); tc.raf = requestAnimationFrame(catchStep);
 };
 
@@ -2561,7 +2586,7 @@ const TREASURES = [
   { id: "bubble", emo: "🫧", name: "Bubble Star", hint: "Cast 10 spells in Mana Bubbles.", prog: () => [Math.min(10, stats.bubbleCasts || 0), 10] },
   { id: "keeper", emo: "🦄", name: "Keeper Star", hint: "Make 10 creatures.", prog: () => [Math.min(10, stats.petsMade || 0), 10] },
   { id: "painter", emo: "🎨", name: "Painter Star", hint: "Make 8 paintings in Art Studio.", prog: () => [Math.min(8, stats.paintings || 0), 8] },
-  { id: "secrets", emo: "🔮", name: "Secret Star", hint: "Find all six secrets.", prog: () => [Object.keys(eggs).length, EGGS.length] },
+  { id: "secrets", emo: "🔮", name: "Secret Star", hint: "Find every secret.", prog: () => [Object.keys(eggs).length, EGGS.length] },
   { id: "turn", emo: "🐉", name: "Turn Star", hint: "Play the Practice Turn lesson without a single mistake.", prog: () => [stats.perfectTurn ? 1 : 0, 1] },
 ];
 let treasures = load("luna_treasures", {});
@@ -2852,6 +2877,7 @@ function renderListenPage(){
 }
 function finishListen(){
   const l = lsn.l; go("school", true); addStar(); chal("lessons");
+  setTimeout(() => findEgg("ears", true), 50);
   showCelebrate({ emo: "🎧", title: "Great listening!", sub: `${l.title}. +1 star`, spoken: `Great listening! You did ${l.title} with your ears! One star for you!` });
 }
 function renderLessonPage(){
