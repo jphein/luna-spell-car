@@ -6,6 +6,9 @@
   will live; Spell Echo no longer shows its name twice.
 - 📏 Bigger games on the tablet: Spell Echo pads, Faerie Pop pools, Rootha's face, and Mana Bubbles (field and bubbles)
   grow to fill the screen, and in landscape everything (Start included) still fits without scrolling. Phones unchanged.
+- ❤️ Game Night turn helper, easier without reading: the six turn steps are big picture buttons (🔄 🃏 ⛰️ ✨ ⚔️ ✅);
+  tap one to hear it again. The "whose turn" banner wears that player's colour, "Next turn" glows on Done, and with
+  "Face each other" the banner turns around to face whoever is playing.
 - 💬 Questions are now a big, spoken pop-up with picture buttons (Remove a creature or painting, Start over, New game)
   instead of browser dialogs Luna couldn't read. Back or tapping outside just closes the question.
 - 🎨 Art is never lost by accident: ✖ or the tablet's Back button while painting asks "Keep your painting?" (empty pages

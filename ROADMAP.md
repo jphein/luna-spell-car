@@ -6,13 +6,13 @@ Reorder freely; each item should be small enough for one PR, with a clear "done 
 ## Next
 - [ ] **Practice Turn 2**: a harder guided turn with Goldspan Dragon, Treasure, and blocking decisions.
 - [ ] **Lesson replays as voice-only car mode**: listen to a lesson with eyes closed, answering by tapping big colored halves.
-- [ ] **Second-deck edition, slice 1: deck switcher.** Add First Flight card data (white/blue, with art) and a "Whose deck?"
+- [ ] **Second-deck edition, slice 1: deck switcher.** ⏸ On hold: it needs new card art, and CLAUDE.md forbids adding new
+      copyrighted art. Unblock with a grown-up decision on where the second deck's card images come from. Add First Flight card data (white/blue, with art) and a "Whose deck?"
       picker so every game can use the second deck's cards. Done when: switching decks changes Window Magic, Count, Who Wins, and Memory; tested.
 - [ ] **Second-deck edition, slice 2: flying & reach in Who Wins.** Flyers can only be blocked by flying/reach; harder questions for older kids.
 - [ ] **Sticker book page**: drag earned stickers onto a scene (castle, sky, meadow) and save it. Done when: placements persist and back up.
 - [ ] **Cloud voice cache**: keep recent neural-voice clips on the device so repeated phrases work offline in the car.
 - [ ] **Coloring pages**: outline versions of her deck's art to color in Art Studio.
-- [ ] **Turn helper for real games**: in Game Night, a big "whose turn" banner with the 6 turn steps read aloud.
 
 ## Later
 - [ ] Treasure Catch: catch Goldspan Dragon's falling coins in a basket (drag game).

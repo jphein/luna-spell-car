@@ -212,6 +212,37 @@ async def game_night_turns(pg, mode):
     await home(pg)
 
 @test
+async def game_night_steps(pg, mode):
+    # The turn helper works without reading: big picture step buttons, tap one to hear it, the banner wears the
+    # player's colour, "Next turn" glows on Done, and with "Face each other" the banner turns toward whoever is playing.
+    await pg.evaluate("night.players = null; night.count = 2; night.flip = false; saveNight(); window.__said = []; window.__say = say; say = (t, f) => { __said.push(t); __say(t, f); }; true")
+    await pg.click("[data-go=night]"); await pg.click("#ntStart"); await pg.click("#ntNextTurn")
+    steps = pg.locator("#ntSteps button")
+    assert await steps.count() == 6, "turn steps aren't buttons"
+    for i in range(6):
+        bb = await steps.nth(i).bounding_box()
+        assert bb["height"] >= 52 and bb["width"] >= 52, f"step {i} is too small to tap ({bb})"
+        assert (await steps.nth(i).inner_text()).strip()[0] not in "ABCDEFGHIJKLMNOPQRSTUVWXYZ", f"step {i} has no picture"
+    await pg.wait_for_timeout(400)  # the banner colour fades in
+    who = await pg.evaluate("(() => { const c = document.createElement('i'); c.style.color = NT_COLORS[night.turn]; document.body.appendChild(c); const want = getComputedStyle(c).color; c.remove(); return [getComputedStyle(document.getElementById('ntWho')).backgroundColor, want]; })()")
+    assert who[0] == who[1], f"banner isn't in the player's colour ({who})"
+    await steps.nth(4).click()
+    assert await pg.evaluate("night.step") == 4, "tapping a step didn't jump to it"
+    assert "Attack" in (await pg.evaluate("__said"))[-1], "tapped step wasn't read aloud"
+    assert await pg.locator("#ntSteps button.now").count() == 1 and "now" in (await steps.nth(4).get_attribute("class")), "tapped step not lit"
+    assert not await pg.evaluate("ntNextTurn.classList.contains('go')"), "Next turn glows too early"
+    await pg.click("#ntNextStep")
+    assert await pg.evaluate("ntNextTurn.classList.contains('go')"), "Next turn doesn't glow on Done"
+    await pg.click("#ntFlip")
+    for _ in range(2):
+        t = await pg.evaluate("night.turn")
+        assert await pg.evaluate("ntBanner.classList.contains('flip')") == (t == 0), f"banner doesn't face player {t}"
+        await pg.click("#ntNextTurn", force=True)  # it pulses while glowing, so it never "settles"
+    assert not await pg.evaluate("ntNextTurn.classList.contains('go')"), "glow stuck after the turn passed"
+    await pg.click("#ntFlip"); await pg.evaluate("say = __say; true")
+    await home(pg)
+
+@test
 async def level_up(pg, mode):
     await pg.evaluate("window.__quietCelebrations = false; xp = 14; stars = 0; addStar()")
     await pg.wait_for_function("!document.getElementById('celebrate').classList.contains('hidden')", timeout=3000)

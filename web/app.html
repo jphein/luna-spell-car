@@ -299,12 +299,16 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .speedrow button{padding:10px 16px;border-radius:99px;background:var(--surface);box-shadow:0 3px 0 var(--line);font-size:17px;font-weight:600}
 .speedrow button.on{background:var(--violet);color:#fff}
 .nt-p.turn{box-shadow:0 0 0 5px var(--gold),0 0 26px rgba(255,201,74,.7)}
-.nt-banner{background:var(--surface);border-radius:22px;padding:12px 14px;margin:0 0 10px;box-shadow:0 4px 0 var(--line);text-align:center}
-.nt-banner .ntwho{font-size:24px;font-weight:700}
-.nt-steps{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:8px 0}
-.nt-steps span{padding:6px 10px;border-radius:99px;background:var(--chip);font-size:15px;font-weight:600;color:var(--muted)}
-.nt-steps span.now{background:var(--gold);color:#2B1650}
-.nt-steps span.past{opacity:.45;text-decoration:line-through}
+.nt-banner{background:var(--surface);border-radius:22px;padding:12px 14px;margin:0 0 10px;box-shadow:0 4px 0 var(--line);text-align:center;transition:transform .5s ease}
+.nt-banner.flip{transform:rotate(180deg)}
+.nt-banner .ntwho{font-size:26px;font-weight:700;border-radius:16px;padding:10px 12px;transition:background .3s}
+.nt-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}
+@media (min-width:600px){.nt-steps{grid-template-columns:repeat(6,1fr)}}
+.nt-steps button{min-height:60px;padding:6px 2px;border-radius:16px;background:var(--chip);font-size:14px;font-weight:600;color:var(--muted);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;line-height:1.1}
+.nt-steps button i{font-style:normal;font-size:26px}
+.nt-steps button.now{background:var(--gold);color:#2B1650;transform:scale(1.08);box-shadow:0 3px 0 rgba(0,0,0,.15)}
+.nt-steps button.past{opacity:.45}
+#ntNextTurn.go{animation:pulse 1s ease-in-out infinite;box-shadow:0 0 0 4px var(--gold),0 0 22px rgba(255,201,74,.8)}
 .nt-turnbtns{display:flex;gap:10px;justify-content:center}
 .nt-turnbtns button{padding:12px 18px;border-radius:99px;font-size:18px;font-weight:700;background:var(--violet);color:#fff}
 .nt-turnbtns button.alt{background:var(--chip);color:var(--ink)}
@@ -2737,14 +2741,30 @@ function renderNightSetup(){
   }
 }
 const NT_STEPS = [
-  ["Untap", "Untap! Turn all your cards straight."], ["Draw", "Draw a card."], ["Land", "Play a land, if you have one."],
-  ["Cast spells", "Cast spells! Count your mana."], ["Attack!", "Attack! Pick who to attack, then block and count damage."], ["Done", "Say done! Next player's turn."]
+  ["Untap", "Untap! Turn all your cards straight.", "🔄"], ["Draw", "Draw a card.", "🃏"], ["Land", "Play a land, if you have one.", "⛰️"],
+  ["Cast", "Cast spells! Count your mana.", "✨"], ["Attack!", "Attack! Pick who to attack, then block and count damage.", "⚔️"], ["Done", "Say done! Next player's turn.", "✅"]
 ];
+// With "Face each other", the top panels (and the banner, on their turn) turn around to face the far side of the table.
+function ntFlipped(i){ return night.flip && (night.players.length === 2 ? i === 0 : i < 2); }
 function renderTurn(){
-  const has = night.players && night.turn != null && night.players[night.turn];
-  $("ntWho").textContent = has ? `🌟 ${night.players[night.turn].name}'s turn` : "Tap \"Next turn\" to start!";
-  $("ntSteps").innerHTML = NT_STEPS.map((st, i) => `<span class="${has && i === night.step ? "now" : has && i < night.step ? "past" : ""}">${st[0]}</span>`).join("");
-  $("ntNextStep").classList.toggle("hidden", !has);
+  const has = night.players && night.turn != null && night.players[night.turn], last = NT_STEPS.length - 1;
+  const w = $("ntWho"); w.textContent = has ? `🌟 ${night.players[night.turn].name}'s turn` : "Tap \"Next turn\" to start!";
+  w.style.background = has ? NT_COLORS[night.turn] : ""; w.style.color = has ? "#fff" : "";
+  const s = $("ntSteps"); s.innerHTML = "";
+  NT_STEPS.forEach((st, i) => {
+    const b = document.createElement("button"); b.className = has && i === night.step ? "now" : has && i < night.step ? "past" : "";
+    b.innerHTML = `<i>${st[2]}</i>${st[0]}`; b.setAttribute("aria-label", st[0]); b.onclick = () => ntStep(i); s.appendChild(b);
+  });
+  $("ntNextStep").classList.toggle("hidden", !has || night.step === last);
+  $("ntNextTurn").classList.toggle("go", !!has && night.step === last);
+  $("ntBanner").classList.toggle("flip", !!has && ntFlipped(night.turn));
+}
+// Tapping a step (or "Next step") lights it up and reads it aloud; before the first turn it just reads it.
+function ntStep(i){
+  if (night.turn == null){ tick(i + 2); say(NT_STEPS[i][1]); return; }
+  night.step = i; saveNight(); renderTurn(); tick(i + 2);
+  if (i === NT_STEPS.length - 1) tone([659, 784], 0.08);
+  say(NT_STEPS[i][1]);
 }
 $("ntNextTurn").onclick = () => {
   const n = night.players.length; let t = night.turn == null ? -1 : night.turn;
@@ -2752,11 +2772,7 @@ $("ntNextTurn").onclick = () => {
   night.turn = t; night.step = 0; saveNight(); renderBoard(); renderTurn(); tone([523, 784], 0.1);
   say(`${night.players[t].name}'s turn! ${NT_STEPS[0][1]}`);
 };
-$("ntNextStep").onclick = () => {
-  if (night.turn == null) return;
-  night.step = Math.min(NT_STEPS.length - 1, (night.step || 0) + 1); saveNight(); renderTurn(); tick(night.step + 2);
-  say(NT_STEPS[night.step][1]);
-};
+$("ntNextStep").onclick = () => { if (night.turn != null) ntStep(Math.min(NT_STEPS.length - 1, (night.step || 0) + 1)); };
 $("ntStart").onclick = () => {
   night.players = Array.from({ length: night.count }, (_, i) => ({ name: (night.names[i] || `Player ${i + 1}`).trim() || `Player ${i + 1}`, life: night.life, out: false }));
   night.turn = null; night.step = 0;
@@ -2767,8 +2783,7 @@ function renderBoard(){
   const b = $("ntBoard"); b.innerHTML = ""; b.className = "nt-board" + (night.players.length === 2 ? " p2" : "");
   night.players.forEach((pl, i) => {
     const d = document.createElement("div");
-    const flip = night.flip && (night.players.length === 2 ? i === 0 : i < 2);
-    d.className = "nt-p" + (flip ? " flip" : "") + (pl.life <= 0 ? " out" : "") + (night.turn === i ? " turn" : ""); d.style.background = NT_COLORS[i];
+    d.className = "nt-p" + (ntFlipped(i) ? " flip" : "") + (pl.life <= 0 ? " out" : "") + (night.turn === i ? " turn" : ""); d.style.background = NT_COLORS[i];
     d.innerHTML = `<div class="nm"></div><button class="tap" aria-label="Lose 1 life">−</button><div class="life">${pl.life <= 0 ? "💤" : pl.life}</div><button class="tap" aria-label="Gain 1 life">+</button>
       <div class="delta"></div><div class="five"><button>−5</button><button>+5</button></div>`;
     d.querySelector(".nm").textContent = pl.name;
@@ -2800,7 +2815,7 @@ $("ntFirst").onclick = () => {
   const spin = setInterval(() => { r.textContent = "👑 " + names[k++ % names.length]; tick(k % 8); }, 110);
   setTimeout(() => { clearInterval(spin); const w = rnd(names); night.turn = names.indexOf(w); night.step = 0; saveNight(); renderBoard(); renderTurn(); r.classList.remove("spin"); void r.offsetWidth; r.classList.add("spin"); r.textContent = `👑 ${w} goes first!`; fanfare(); say(`${w} goes first!`); }, 1500);
 };
-$("ntFlip").onclick = () => { night.flip = !night.flip; saveNight(); renderBoard(); tick(3); };
+$("ntFlip").onclick = () => { night.flip = !night.flip; saveNight(); renderBoard(); renderTurn(); tick(3); };
 $("ntNew").onclick = () => ask({ emo: "🔄", q: "Start a new game?", spoken: "Start a new game? Everyone's life goes back to the start.", yes: ["🔄", "New game"], no: ["❤️", "Keep playing"] },
   () => { night.players = null; saveNight(); openNight(); });
 
