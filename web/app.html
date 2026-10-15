@@ -221,6 +221,17 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .pmodal .rowbtns .danger{color:var(--red)}
 .printbtn{display:flex;align-items:center;gap:8px;margin:12px 0 0;padding:12px 18px;border-radius:99px;background:var(--chip);font-size:17px;font-weight:600}
 .pnote{color:var(--muted);font-size:14px;margin:6px 4px 0}
+/* kid-friendly question (instead of browser dialogs a young child can't read) */
+.pmodal.ask{z-index:27}
+.ask .box{max-width:460px}
+.ask .askemo{font-size:84px;line-height:1.1}
+.ask h2{margin:0 0 6px;font-size:26px;text-align:center;cursor:pointer}
+.askbtns{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%}
+.askbtns button{min-height:104px;border-radius:24px;font-size:19px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px 6px;box-shadow:0 5px 0 rgba(0,0,0,.18)}
+.askbtns button:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.18)}
+.askbtns button i{font-style:normal;font-size:42px;line-height:1}
+.askbtns #askYes{background:var(--violet);color:#fff}
+.askbtns #askNo{background:var(--chip);color:var(--ink)}
 @media (prefers-reduced-motion:reduce){.mcard .in{transition:none}.thinking i{animation:none}}
 /* paint */
 .paint{position:fixed;inset:0;z-index:25;background:var(--bg);display:flex;flex-direction:column;padding:calc(10px + env(safe-area-inset-top,0px)) 12px calc(10px + env(safe-area-inset-bottom,0px));gap:10px;overflow:auto}
@@ -757,6 +768,11 @@ body.theme-forest{--bg:#ECF8EE;--bg2:#D5F0DA;--violet:#2E9B5C;--line:#C6E8CE;--c
     <div class="pnote" id="vNote" style="text-align:center"></div>
   </div>
 </div>
+<div class="pmodal ask hidden" id="ask" role="alertdialog" aria-modal="true" aria-labelledby="askQ">
+  <div class="box"><div class="askemo" id="askEmo"></div><h2 id="askQ"></h2>
+    <div class="askbtns"><button id="askYes"></button><button id="askNo"></button></div>
+  </div>
+</div>
 <div class="spark-layer" id="sparks"></div>
 
 <!--SHIM-->
@@ -1045,6 +1061,20 @@ function showCelebrate({ img, emo, title, sub, spoken, clip, treasure }){
   $("celTitle").textContent = title; $("celSub").textContent = sub || "";
   $("celebrate").classList.remove("hidden"); burst(28); emo ? fanfare() : chime(); say(spoken || title); $("celOk").focus();
 }
+/* A yes/no question for Luna: big picture buttons, read aloud. Back or tapping outside just closes it (does neither). */
+let askCb = null;
+function ask({ emo, q, spoken, yes, no }, onYes, onNo){
+  askCb = { onYes, onNo }; $("askEmo").textContent = emo; $("askQ").textContent = q; $("askQ").dataset.say = spoken || q;
+  [["askYes", yes], ["askNo", no]].forEach(([id, [e, label]]) => { const b = $(id); b.innerHTML = "<i></i><span></span>"; b.firstChild.textContent = e; b.lastChild.textContent = label; });
+  $("ask").classList.remove("hidden"); tick(4); say(spoken || q); $("askNo").focus();
+}
+function askDone(yes){
+  const cb = askCb; askCb = null; $("ask").classList.add("hidden");
+  const f = cb && (yes === true ? cb.onYes : yes === false ? cb.onNo : null); if (f) f();
+}
+$("askYes").onclick = () => askDone(true); $("askNo").onclick = () => askDone(false);
+$("askQ").onclick = () => say($("askQ").dataset.say);
+$("ask").onclick = e => { if (e.target === $("ask")){ askDone(null); say("Okay!"); } };
 $("celOk").onclick = () => {
   $("celebrate").classList.add("hidden"); $("celMedia").innerHTML = ""; const pb = $("celPrint"); if (pb) pb.remove();
   setTimeout(flushCelebrate, 250);
@@ -1370,6 +1400,7 @@ if (window.AndroidBridge){
   }) };
 }
 window.__back = () => {
+  if (!$("ask").classList.contains("hidden")){ askDone(null); return "stay"; }
   if (current === "lesson"){ go("school"); return "stay"; }
   if (!$("viewer").classList.contains("hidden")){ $("vClose").click(); return "stay"; }
   if (!$("paint").classList.contains("hidden")){ $("pCancel").click(); return "stay"; }
@@ -1396,7 +1427,12 @@ function openPet(p){
 $("pmClose").onclick = () => $("petModal").classList.add("hidden");
 $("pmSay").onclick = () => { const pw = POWERS.find(x => x.id === modalPet.power); say(`${modalPet.name}. ${pw.text}. Power ${modalPet.p}, toughness ${modalPet.t}.`); };
 $("pmEdit").onclick = () => { editId = modalPet.id; draft = { ...modalPet, acc: modalPet.acc || "none", custom: true }; $("petModal").classList.add("hidden"); go("maker"); };
-$("pmDel").onclick = () => { if (confirm(`Remove ${modalPet.name}?`)){ pets = pets.filter(x => x.id !== modalPet.id); store("luna_pets", pets); $("petModal").classList.add("hidden"); renderBook(); } };
+$("pmDel").onclick = () => {
+  const p = modalPet, k = KINDS.find(x => x.id === p.kind);
+  ask({ emo: k ? k.emo : "🦄", q: `Remove ${p.name}?`, spoken: `Do you want to take ${p.name} out of your Spellbook?`, yes: ["🗑️", "Remove"], no: ["💖", "Keep"] },
+      () => { pets = pets.filter(x => x.id !== p.id); store("luna_pets", pets); $("petModal").classList.add("hidden"); renderBook(); say("Okay. All done."); },
+      () => say(`Yay! ${p.name} stays!`));
+};
 $("pmStory").onclick = () => { storyWho = ["pet:" + modalPet.id]; $("petModal").classList.add("hidden"); go("story"); };
 
 /* ---------- STORY TIME ---------- */
@@ -1718,7 +1754,8 @@ pc.addEventListener("pointerdown", e => {
 pc.addEventListener("pointermove", e => { if (!pDown) return; e.preventDefault(); const q = pPos(e); pStroke(pLast, q); pLast = q; });
 ["pointerup", "pointercancel", "pointerleave"].forEach(ev => pc.addEventListener(ev, () => { pDown = false; }));
 $("pUndo").onclick = () => { const im = pUndoStack.pop(); if (im){ px.putImageData(im, 0, 0); tick(1); } else boop(); };
-$("pClear").onclick = () => { if (!confirm("Start your drawing over?")) return; pUndoStack.push(px.getImageData(0, 0, pc.width, pc.height)); px.clearRect(0, 0, pc.width, pc.height); say("Fresh page!"); };
+$("pClear").onclick = () => ask({ emo: "🎨", q: "Start over?", spoken: "Do you want to wipe your picture and start over?", yes: ["🧽", "Start over"], no: ["🖍️", "Keep drawing"] },
+  () => { pUndoStack.push(px.getImageData(0, 0, pc.width, pc.height)); px.clearRect(0, 0, pc.width, pc.height); say("Fresh page!"); });
 $("pGuideBtn").onclick = () => { const g = $("pGuide"); const on = g.style.display !== "none"; g.style.display = on ? "none" : ""; $("pGuideBtn").classList.toggle("on", !on); };
 let paintMode = "creature", paintEditId = null;
 function openPaint(){
@@ -1732,7 +1769,13 @@ function openPaint(){
   $("paint").classList.remove("hidden");
   say(`Draw your ${k.name.toLowerCase()}! Tap the ghost if you want a guide to trace.`);
 }
-$("pCancel").onclick = () => { $("paint").classList.add("hidden"); say("Okay!"); };
+function closePaint(){ $("paint").classList.add("hidden"); say("Okay!"); }
+$("pCancel").onclick = () => {
+  if (!pUndoStack.length) return closePaint();
+  const what = paintMode === "studio" ? "painting" : "drawing";
+  ask({ emo: "🎨", q: `Keep your ${what}?`, spoken: `Do you want to keep your ${what}?`, yes: ["💾", "Keep it!"], no: ["🧽", "Throw it away"] },
+      () => $("pDone").click(), closePaint);
+};
 $("pDone").onclick = () => {
   if (paintMode === "studio") return finishStudio();
   const out = document.createElement("canvas"); out.width = 480; out.height = 360; const ox = out.getContext("2d");
@@ -1962,7 +2005,7 @@ $("pmCard").onclick = () => { const c = petToCard(modalPet); if (clipKeys.has(cl
 $("clipAll").onclick = async () => {
   const todo = CARDS.filter(c => !clipKeys.has(clipKeyFor(c)) && !clipJobs[clipKeyFor(c)]);
   if (!todo.length){ refreshCloudUI("🎬 All deck cards can already move."); return; }
-  if (!confirm(`Make ${todo.length} magic movies with Google Veo? Each one uses about 8 seconds of Veo credits.`)) return;
+  if (!confirm(`Make ${todo.length} magic movies with Google Veo? Each one uses about 8 seconds of Veo credits.`)) return;  // grown-ups only: it spends Veo credits, so a real dialog is the right speed bump
   let n = 0;
   for (const c of todo){
     try { const r = await makeClip(c, true); if (r !== "skip") n++; refreshCloudUI(`🎬 Started ${n} of ${todo.length}…`); }
@@ -2575,7 +2618,9 @@ function renderStudio(){
     const el = document.createElement("div"); el.className = "bk";
     el.innerHTML = `<img src="${d.img}" alt="Painting"><div class="nm">${new Date(d.at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</div><button class="del" aria-label="Remove painting">✕</button>`;
     el.querySelector("img").onclick = () => openStudioPaint(d);
-    el.querySelector(".del").onclick = ev => { ev.stopPropagation(); if (confirm("Remove this painting?")){ drawings = drawings.filter(x => x.id !== d.id); store("luna_drawings", drawings); renderStudio(); } };
+    el.querySelector(".del").onclick = ev => { ev.stopPropagation();
+      ask({ emo: "🖼️", q: "Remove this painting?", yes: ["🗑️", "Remove"], no: ["💖", "Keep"] },
+          () => { drawings = drawings.filter(x => x.id !== d.id); store("luna_drawings", drawings); renderStudio(); say("Okay. All done."); }); };
     g.appendChild(el);
   });
 }
@@ -2749,7 +2794,8 @@ $("ntFirst").onclick = () => {
   setTimeout(() => { clearInterval(spin); const w = rnd(names); night.turn = names.indexOf(w); night.step = 0; saveNight(); renderBoard(); renderTurn(); r.classList.remove("spin"); void r.offsetWidth; r.classList.add("spin"); r.textContent = `👑 ${w} goes first!`; fanfare(); say(`${w} goes first!`); }, 1500);
 };
 $("ntFlip").onclick = () => { night.flip = !night.flip; saveNight(); renderBoard(); tick(3); };
-$("ntNew").onclick = () => { if (!confirm("Start a new game?")) return; night.players = null; saveNight(); openNight(); };
+$("ntNew").onclick = () => ask({ emo: "🔄", q: "Start a new game?", spoken: "Start a new game? Everyone's life goes back to the start.", yes: ["🔄", "New game"], no: ["❤️", "Keep playing"] },
+  () => { night.players = null; saveNight(); openNight(); });
 
 /* ---------- BACKUP & RESTORE ---------- */
 $("bkSave").onclick = async () => {

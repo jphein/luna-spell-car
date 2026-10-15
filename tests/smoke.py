@@ -32,6 +32,7 @@ SEED_PETS = """localStorage.setItem('luna_pets', JSON.stringify([
  {id:'p2',kind:'kitty',color:'U',p:2,t:3,power:'fly',name:'Captain Whiskers'}]));"""
 
 results = []
+ONLY = set(filter(None, os.environ.get("SMOKE_ONLY", "").split(",")))  # e.g. SMOKE_ONLY=home_renders,art_studio
 def test(fn):
     results.append(fn); return fn
 
@@ -372,6 +373,49 @@ async def backup_has_progress(pg, mode):
 
 STACK = None
 
+async def stroke(pg):
+    box = await pg.locator("#pCanvas").bounding_box()
+    await pg.mouse.move(box["x"] + 60, box["y"] + 60); await pg.mouse.down(); await pg.mouse.move(box["x"] + 160, box["y"] + 140, steps=6); await pg.mouse.up()
+
+@test
+async def kid_friendly_asks(pg, mode):
+    # Questions are a big spoken pop-up with picture buttons (never a browser dialog), and art is never lost by accident.
+    await pg.click("[data-go=book]"); keep = await pg.evaluate("pets[pets.length - 1]"); n0 = await pg.evaluate("pets.length")
+    await pg.click("#petBook .bk >> nth=0"); await pg.click("#pmDel")
+    assert await pg.is_visible("#ask"), "removing a creature didn't ask"
+    if mode == "android":
+        spoken = [c["t"] for c in await pg.evaluate("window.__calls") if isinstance(c, dict) and "t" in c]
+        assert spoken and keep["name"] in spoken[-1], f"question not read aloud: {spoken[-1:]}"
+    await pg.wait_for_timeout(450)  # let the pop-in animation finish before measuring
+    assert (await pg.locator("#askYes").bounding_box())["height"] >= 72, "answer buttons too small"
+    await pg.click("#askNo"); assert await pg.evaluate("pets.length") == n0 and not await pg.is_visible("#ask"), "No removed it"
+    await pg.click("#pmDel"); await pg.click("#askYes")
+    assert await pg.evaluate("pets.length") == n0 - 1, "Yes didn't remove it"
+    await pg.evaluate("p => { pets = pets.concat([p]); store('luna_pets', pets); }", keep); await home(pg)
+
+    await pg.click("[data-go=studio]"); d0 = await pg.evaluate("drawings.length")
+    await pg.click("#stNew"); await pg.click("#pCancel")
+    assert not await pg.is_visible("#paint") and not await pg.is_visible("#ask"), "an empty page shouldn't ask"
+    await pg.click("#stNew"); await stroke(pg)
+    assert await pg.evaluate("window.__back()") == "stay" and await pg.is_visible("#paint"), "Back threw the painting away"
+    assert await pg.is_visible("#ask"), "Back didn't ask about the painting"
+    assert await pg.evaluate("window.__back()") == "stay" and await pg.is_visible("#paint") and not await pg.is_visible("#ask"), "Back on the question should just close it"
+    await pg.click("#pClear"); assert await pg.is_visible("#ask"); await pg.click("#askNo")
+    assert await pg.evaluate("px.getImageData(0, 0, pc.width, pc.height).data.some(v => v)"), "Keep drawing wiped the page"
+    await pg.click("#pCancel"); await pg.click("#askYes"); await pg.click("#celOk")
+    assert await pg.evaluate("drawings.length") == d0 + 1, "Keep it didn't save the painting"
+    await pg.click("#stNew"); await stroke(pg); await pg.click("#pCancel"); await pg.click("#askNo")
+    assert not await pg.is_visible("#paint") and await pg.evaluate("drawings.length") == d0 + 1, "Throw away saved it anyway"
+    await pg.click("#stGallery .bk >> nth=0 >> .del"); await pg.click("#askYes")
+    assert await pg.evaluate("drawings.length") == d0, "painting not removed"
+    await home(pg)
+
+    await pg.click("[data-go=night]")
+    if await pg.is_visible("#ntStart"): await pg.click("#ntStart")
+    await pg.click("#ntNew"); await pg.click("#askNo"); assert await pg.is_visible("#ntGame"), "Keep playing ended the game"
+    await pg.click("#ntNew"); await pg.click("#askYes"); assert await pg.is_visible("#ntSetup"), "New game didn't reset"
+    await home(pg)
+
 @test
 async def cloud_connect(pg, mode):
     if mode != "android": return
@@ -438,10 +482,13 @@ async def run_mode(browser, mode):
     await ctx.add_init_script("window.__quietCelebrations = true;" + (FAKE_CLAUDE if mode == "web" else FAKE_ANDROID) + "if(!localStorage.getItem('luna_pets')){" + SEED_PETS + "}")
     pg = await ctx.new_page(); errors = []
     pg.on("pageerror", lambda e: errors.append(str(e)))
+    # A young child can't read a browser dialog: any confirm()/alert() a test reaches is a failure.
+    pg.on("dialog", lambda d: (errors.append(f"native {d.type} dialog: {d.message}"), asyncio.ensure_future(d.dismiss())))
     pg.on("console", lambda m: errors.append(m.text) if m.type == "error" and "fonts.g" not in m.text and "ERR_" not in m.text and not m.text.startswith("Failed to load resource") else None)
     await pg.goto(WEB if mode == "web" else AND); await pg.wait_for_timeout(700)
     fails = 0
     for fn in results:
+        if ONLY and fn.__name__ not in ONLY: continue
         name = f"{mode}:{fn.__name__}"
         try:
             await fn(pg, mode)

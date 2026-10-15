@@ -6,3 +6,4 @@ __pycache__/
 local.properties
 server/.env
 server/videos/
+scratch/

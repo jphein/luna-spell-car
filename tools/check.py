@@ -47,6 +47,8 @@ COMPOUND_OK = {("mana-btn", "blue"), ("mana-btn", "red"), ("mana-btn", "purple")
 cclash = sorted({f".{a_}.{b_}" for a_, b_ in compound if b_ in standalone and (a_, b_) not in COMPOUND_OK})
 check(not cclash, "no state class reuses a standalone component name (e.g. .tile.next)" + (f": {cclash}" if cclash else ""))
 check(not clash, "no CSS class is styled both on its own and as a nested class (style clashes)" + (f": {clash}" if clash else ""))
+native = [l.strip()[:60] for l in script.splitlines() if re.search(r"\b(confirm|alert|prompt)\(", l) and "grown-ups only" not in l]
+check(not native, "no browser dialogs in Luna's games (use ask())" + (f": {native}" if native else ""))
 check(src.count("__CARDS__") == 1 and "__VERSION__" in src, "build placeholders present")
 check(len(src) < 400_000, f"app.html source size {len(src)//1024} KB")
 print("\n" + ("All checks passed." if not fails else f"{len(fails)} check(s) failed.")); sys.exit(1 if fails else 0)

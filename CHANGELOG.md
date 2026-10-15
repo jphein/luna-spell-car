@@ -1,6 +1,12 @@
 # Changelog
 
 ## Unreleased
+- 💬 Questions are now a big, spoken pop-up with picture buttons (Remove a creature or painting, Start over, New game)
+  instead of browser dialogs Luna couldn't read. Back or tapping outside just closes the question.
+- 🎨 Art is never lost by accident: ✖ or the tablet's Back button while painting asks "Keep your painting?" (empty pages
+  still close straight away).
+- New static check: no browser dialogs in the games (the grown-up "make all movies" button keeps its one on purpose).
+  Smoke tests fail on any browser dialog; `SMOKE_ONLY=name,name` runs a few tests while developing.
 - `tools/live_check.py`: checks a deployed server end to end (story, picture, voice, optional one Veo clip), never prints secrets.
 - `SPELLCAR_URL` + `SPELLCAR_APP_TOKEN` at build time preconnect the tablet APK to the server (no Azure/Google keys in the app).
 - `AGENT_HANDOFF.md`: step-by-step deploy instructions for a home agent.
