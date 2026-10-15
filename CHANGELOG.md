@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- 🍿 Movie night: My Spellbook → "🎬 Movie night" plays every magic movie she has (cards she's cast and her creatures)
+  back to back, says each name, and ends with "The end!". Big Next and Stop buttons; a clip that can't play is skipped.
 - 🏰 Make a Creature: "Where does it live?" puts the magic picture in a castle, on a beach, in space, or in a meadow
   (or the original sparkles). Older creatures look exactly the same, and their movie clips still match.
 - 🧜‍♀️ The Mermaid joins the Star Shop creatures (15 stars). The Spell Car server can draw and animate her.

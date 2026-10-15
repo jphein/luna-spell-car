@@ -246,6 +246,8 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .askbtns button i{font-style:normal;font-size:42px;line-height:1}
 .askbtns #askYes{background:var(--violet);color:#fff}
 .askbtns #askNo{background:var(--chip);color:var(--ink)}
+.askbtns #thNext{background:var(--violet);color:#fff}
+.askbtns #thStop{background:var(--chip);color:var(--ink)}
 @media (prefers-reduced-motion:reduce){.mcard .in{transition:none}.thinking i{animation:none}}
 /* paint */
 .paint{position:fixed;inset:0;z-index:25;background:var(--bg);display:flex;flex-direction:column;padding:calc(10px + env(safe-area-inset-top,0px)) 12px calc(10px + env(safe-area-inset-bottom,0px));gap:10px;overflow:auto}
@@ -820,6 +822,7 @@ body.theme-forest{--bg:#ECF8EE;--bg2:#D5F0DA;--violet:#2E9B5C;--line:#C6E8CE;--c
     <div class="rowbtns"><button id="bkSave">💾 Save a backup</button><button id="bkLoad">📂 Restore a backup</button></div>
     <input type="file" id="bkFile" accept=".json,application/json,text/plain" class="hidden">
     <div class="pnote">Moves creatures, stars, stickers, and stories between devices. Includes Art Studio paintings. Restoring adds to what's here; nothing gets erased.</div>
+    <button class="printbtn hidden" id="theaterBtn">🎬 Movie night</button>
     <h3 class="sec-h">Cards I've cast <span id="castCount" style="color:var(--muted);font-size:16px"></span></h3>
     <div class="book" id="cardBook"></div>
   </section>
@@ -857,6 +860,11 @@ body.theme-forest{--bg:#ECF8EE;--bg2:#D5F0DA;--violet:#2E9B5C;--line:#C6E8CE;--c
 <div class="pmodal ask hidden" id="ask" role="alertdialog" aria-modal="true" aria-labelledby="askQ">
   <div class="box"><div class="askemo" id="askEmo"></div><h2 id="askQ"></h2>
     <div class="askbtns"><button id="askYes"></button><button id="askNo"></button></div>
+  </div>
+</div>
+<div class="pmodal hidden" id="theater" role="dialog" aria-modal="true" aria-label="Movie night">
+  <div class="box"><div class="vmedia" id="thMedia"></div><h2 id="thName" style="margin:6px 0 0;text-align:center"></h2>
+    <div class="askbtns"><button id="thNext"><i>⏭</i><span>Next</span></button><button id="thStop"><i>■</i><span>Stop</span></button></div>
   </div>
 </div>
 <div class="spark-layer" id="sparks"></div>
@@ -1523,6 +1531,7 @@ function renderBook(){
     cb.appendChild(d);
   });
   $("castCount").textContent = `${n} of ${CARDS.length}`;
+  $("theaterBtn").classList.toggle("hidden", !theaterList().length);
 }
 
 
@@ -1539,6 +1548,7 @@ window.__back = () => {
   if (!$("ask").classList.contains("hidden")){ askDone(null); return "stay"; }
   if (current === "lesson"){ go("school"); return "stay"; }
   if (current === "scene"){ go("book"); return "stay"; }
+  if (!$("theater").classList.contains("hidden")){ closeTheater(); return "stay"; }
   if (!$("viewer").classList.contains("hidden")){ $("vClose").click(); return "stay"; }
   if (!$("paint").classList.contains("hidden")){ $("pCancel").click(); return "stay"; }
   if (!$("celebrate").classList.contains("hidden")){ $("celOk").click(); return "stay"; }
@@ -2184,6 +2194,27 @@ function openViewer(c){
   else if (cloudCaps && cloudCaps.video) say(`Want to see ${c.say} move? Tap make it move!`);
   else say(`${c.say}!`);
 }
+/* ---------- MOVIE NIGHT: every magic movie she has, back to back ---------- */
+const theater = { list: [], i: 0, gen: 0 };
+function theaterList(){ return CARDS.filter(c => cast[c.name]).concat(pets.map(petToCard)).filter(c => clipKeys.has(clipKeyFor(c))); }
+function theaterAt(i){
+  const gen = ++theater.gen, box = $("thMedia"); theater.i = i;
+  if (i >= theater.list.length){
+    box.innerHTML = `<div class="brew">🍿</div>`; $("thName").textContent = "The end! 🍿"; $("thNext").classList.add("hidden");
+    burst(20); chime(); say("The end! What a great movie night!"); return;
+  }
+  const c = theater.list[i]; $("thName").textContent = c.name; $("thNext").classList.remove("hidden"); say(`${c.say}!`);
+  const next = () => { if (gen === theater.gen) setTimeout(() => { if (gen === theater.gen) theaterAt(i + 1); }, 700); };
+  playClipIn(box, clipKeyFor(c), c.img).then(ok => {
+    if (gen !== theater.gen) return;
+    const v = box.querySelector("video"); if (!ok || !v) return next();
+    v.addEventListener("ended", next, { once: true }); v.addEventListener("error", next, { once: true });  // a broken clip never gets stuck
+  });
+}
+function closeTheater(){ theater.gen++; $("theater").classList.add("hidden"); $("thMedia").innerHTML = ""; stopSpeech(); }
+$("theaterBtn").onclick = () => { theater.list = theaterList(); if (!theater.list.length) return; $("theater").classList.remove("hidden"); tick(4); theaterAt(0); };
+$("thNext").onclick = () => theaterAt(theater.i + 1);
+$("thStop").onclick = () => { closeTheater(); say("Okay!"); };
 $("vPlay").onclick = () => { const key = clipKeyFor(viewerCard); playClipIn($("vMedia"), key, viewerCard.img); };
 $("vClose").onclick = () => { $("viewer").classList.add("hidden"); $("vMedia").innerHTML = ""; viewerCard = null; };
 $("vMake").onclick = async () => {

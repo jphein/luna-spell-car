@@ -787,6 +787,30 @@ async def parent_stats(pg, mode):
     assert "Magic Fog" in txt and "%" in txt and "first try" in txt, f"grown-up stats missing: {txt[:200]}"
     await pg.evaluate("document.querySelector('.grownup').open = false")
 
+@test
+async def movie_night(pg, mode):
+    # My Spellbook → Movie night: every magic movie she has, back to back, then "The end".
+    keep = await pg.evaluate("[...clipKeys]")
+    try:
+        await pg.evaluate("clipKeys.clear(); go('book', true)")
+        assert not await pg.is_visible("#theaterBtn"), "Movie night shown with no movies"
+        await pg.evaluate("""(async () => { for (const n of ['Stormcatch Mentor', 'Faerie Mastermind']){ cast[n] = cast[n] || 1;
+            const c = CARDS.find(x => x.name === n), k = clipKeyFor(c); await clipDB.put(k, new Blob(['not a real clip'], { type: 'video/mp4' })); clipKeys.add(k); }
+            store('luna_cast', cast); go('book', true); })()""")
+        assert await pg.is_visible("#theaterBtn"), "no Movie night button"
+        names = await pg.evaluate("theaterList().map(c => c.name)")
+        assert names[:2] == ["Stormcatch Mentor", "Faerie Mastermind"] or set(names) >= {"Stormcatch Mentor", "Faerie Mastermind"}, f"playlist wrong: {names}"
+        await pg.click("#theaterBtn"); assert await pg.is_visible("#theater"), "theater didn't open"
+        assert await pg.inner_text("#thName") == names[0], "first movie not showing"
+        await pg.click("#thNext"); assert await pg.inner_text("#thName") == names[1], "Next didn't move on"
+        # a clip that can't play moves on by itself instead of getting stuck
+        await pg.evaluate("theaterAt(theater.list.length - 1)"); await pg.wait_for_function("document.getElementById('thName').textContent.includes('The end')", timeout=6000)
+        assert await pg.evaluate("window.__back()") == "stay" and not await pg.is_visible("#theater"), "Back didn't close Movie night"
+    finally:
+        await pg.evaluate("""async ks => { for (const k of [...clipKeys]) if (!ks.includes(k)) await clipDB.del(k);
+            clipKeys.clear(); ks.forEach(k => clipKeys.add(k)); }""", keep)
+    await home(pg)
+
 STACK = None
 
 async def stroke(pg):
@@ -950,6 +974,20 @@ async def magic_movies(pg, mode):
     assert got >= 1 and await pg.evaluate("clipKeys.has('card:Goldspan Dragon')"), "sync didn't restore the clip"
     assert len([x for x in FakeAzure.seen if "predictLongRunning" in x[0]]) == starts0 + 1, "sync started a new paid job"
     await home(pg)
+
+
+@test
+async def movie_night_plays(pg, mode):
+    # With a real clip (made by the fake Veo in magic_movies), Movie night plays it to the end and then moves on.
+    if mode != "android": return
+    await pg.evaluate("CARDS.forEach(c => { if (clipKeys.has(clipKeyFor(c))) cast[c.name] = cast[c.name] || 1; }); go('book', true)")
+    lst = await pg.evaluate("theaterList().map(c => c.name)")
+    assert lst, "no real clip to play"
+    await pg.evaluate("""theater.list = theaterList().slice(0, 1); $('theater').classList.remove('hidden'); window.__ended = false; theaterAt(0);
+        const iv = setInterval(() => { const v = document.querySelector('#thMedia video'); if (v){ v.addEventListener('ended', () => { window.__ended = true; }); clearInterval(iv); } }, 20);""")
+    await pg.wait_for_function("document.getElementById('thName').textContent.includes('The end')", timeout=12000)
+    assert await pg.evaluate("window.__ended"), "Movie night moved on without the clip playing to the end"
+    await pg.click("#thStop"); await home(pg)
 
 async def run_mode(browser, mode):
     ctx = await browser.new_context(viewport={"width": 400, "height": 860}, has_touch=True)
