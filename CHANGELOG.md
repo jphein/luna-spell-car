@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- 🏰 Make a Creature: "Where does it live?" puts the magic picture in a castle, on a beach, in space, or in a meadow
+  (or the original sparkles). Older creatures look exactly the same, and their movie clips still match.
+- 🧜‍♀️ The Mermaid joins the Star Shop creatures (15 stars). The Spell Car server can draw and animate her.
 - Going public as free fan content: the Wizards Fan Content Policy notice is in For grown-ups and the README, the
   README is rewritten for the public (install from Releases, screenshots, offline by default, credits and licenses),
   Fredoka's OFL license now ships with the font, and public files no longer mention the kids' ages or names.

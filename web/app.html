@@ -610,7 +610,8 @@ body.theme-forest{--bg:#ECF8EE;--bg2:#D5F0DA;--violet:#2E9B5C;--line:#C6E8CE;--c
         </div>
         <div class="ctrl"><h3>5. Special power</h3><div class="pickrow" id="powRow"></div></div>
         <div class="ctrl"><h3>6. Add something special</h3><div class="pickrow" id="accRow"></div></div>
-        <div class="ctrl"><h3>7. Name</h3><div class="namerow"><input id="petName" maxlength="28" aria-label="Creature name"><button class="dice" id="reroll" aria-label="New name">🎲</button></div></div>
+        <div class="ctrl" id="bgCtrl"><h3>7. Where does it live?</h3><div class="pickrow" id="bgRow"></div></div>
+        <div class="ctrl"><h3>8. Name</h3><div class="namerow"><input id="petName" maxlength="28" aria-label="Creature name"><button class="dice" id="reroll" aria-label="New name">🎲</button></div></div>
         <button class="save" id="savePet">Save to my Spellbook ✨</button>
         <button class="reset hidden" id="cancelEdit">Cancel changes</button>
       </div>
@@ -1051,7 +1052,12 @@ const KINDS = [
   { id: "penguin", emo: "🐧", name: "Penguin", end: ["waddle", "flipper", "snow"], shop: 15 },
   { id: "turtle", emo: "🐢", name: "Turtle", end: ["shell", "toes", "pebble"], shop: 15 },
   { id: "flamingo", emo: "🦩", name: "Flamingo", end: ["feathers", "legs", "pink"], shop: 15 },
+  { id: "mermaid", emo: "🧜‍♀️", name: "Mermaid", end: ["tail", "shell", "splash"], shop: 15 },
 ];
+/* Where the creature lives: the magic picture's background. "sparkle" is the original look (and the default). */
+const BGS = [{ id: "sparkle", emo: "✨", label: "Sparkles" }, { id: "castle", emo: "🏰", label: "Castle" }, { id: "beach", emo: "🏖️", label: "Beach" },
+             { id: "space", emo: "🚀", label: "Space" }, { id: "meadow", emo: "🌼", label: "Meadow" }];
+const bgOf = p => (p.bg && p.bg !== "sparkle" && BGS.some(b => b.id === p.bg)) ? p.bg : "";  // "" keeps old creatures' keys unchanged
 const COLORS = { U: { name: "Blue", grad: ["#9ED2FF", "#2E8FE0"], frame: "#2E8FE0" }, R: { name: "Red", grad: ["#FFC08A", "#EF5A31"], frame: "#EF5A31" },
                  P: { name: "Purple", grad: ["#E7B8FF", "#7B4BE0"], frame: "#7B4BE0" } };
 const POWERS = [
@@ -1080,20 +1086,33 @@ function petCost(p){
 const imgCache = {}, artCache = {};
 function petImg(p){
   if (p.art) return p.art;
-  const key = p.kind + p.color + (p.acc || "none");
+  const key = p.kind + p.color + (p.acc || "none") + bgOf(p);
   if (imgCache[key]) return imgCache[key];
   return (imgCache[key] = petArt(p).toDataURL("image/jpeg", 0.85));
 }
 function petArt(p){
-  const key = p.kind + p.color + (p.acc || "none");
+  const key = p.kind + p.color + (p.acc || "none") + bgOf(p);
   if (artCache[key]) return artCache[key];
   const cv = document.createElement("canvas"); cv.width = 480; cv.height = 360; const x = cv.getContext("2d");
-  const [c1, c2] = COLORS[p.color].grad;
-  const g = x.createRadialGradient(240, 150, 30, 240, 180, 330); g.addColorStop(0, c1); g.addColorStop(1, c2);
-  x.fillStyle = g; x.fillRect(0, 0, 480, 360);
+  const [c1, c2] = COLORS[p.color].grad, bg = bgOf(p);
   let seed = key.split("").reduce((a, ch) => a + ch.charCodeAt(0), 7);
   const r = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
-  for (let i = 0; i < 26; i++){
+  const EMOJI = "'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif";
+  const emo = (e, px, ex, ey) => { x.save(); x.font = `${px}px ${EMOJI}`; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(e, ex, ey); x.restore(); };
+  if (bg){
+    const sky = { castle: ["#BFE3FF", "#EADCFF"], beach: ["#8FD3FF", "#E6F6FF"], space: ["#090726", "#2A1F66"], meadow: ["#B7E4FF", "#F2FAFF"] }[bg];
+    const g = x.createLinearGradient(0, 0, 0, 360); g.addColorStop(0, sky[0]); g.addColorStop(1, sky[1]); x.fillStyle = g; x.fillRect(0, 0, 480, 360);
+    if (bg === "space"){ for (let i = 0; i < 70; i++){ x.fillStyle = `rgba(255,255,255,${0.4 + r() * 0.6})`; x.beginPath(); x.arc(r() * 480, r() * 360, 0.6 + r() * 1.8, 0, Math.PI * 2); x.fill(); } emo("🪐", 74, 78, 70); emo("🌙", 44, 432, 300); }
+    if (bg === "castle"){ x.fillStyle = "#93D69A"; x.beginPath(); x.ellipse(120, 380, 260, 120, 0, 0, Math.PI * 2); x.ellipse(400, 395, 240, 120, 0, 0, Math.PI * 2); x.fill(); emo("🏰", 128, 400, 205); }
+    if (bg === "beach"){ x.fillStyle = "#4FB3E8"; x.fillRect(0, 222, 480, 70); x.fillStyle = "#F6DFA4"; x.fillRect(0, 282, 480, 78); emo("☀️", 58, 62, 58); emo("🐚", 38, 420, 322); }
+    if (bg === "meadow"){ x.fillStyle = "#9BD77A"; x.fillRect(0, 276, 480, 84); for (let i = 0; i < 9; i++) emo(i % 2 ? "🌼" : "🌸", 26, 20 + i * 55 + r() * 12, 300 + r() * 46); emo("☀️", 54, 70, 56); }
+    const glow = x.createRadialGradient(240, 190, 20, 240, 190, 170); glow.addColorStop(0, c1 + "CC"); glow.addColorStop(1, c1 + "00");
+    x.fillStyle = glow; x.fillRect(0, 0, 480, 360);  // a soft glow in the card's color
+  } else {
+  const g = x.createRadialGradient(240, 150, 30, 240, 180, 330); g.addColorStop(0, c1); g.addColorStop(1, c2);
+  x.fillStyle = g; x.fillRect(0, 0, 480, 360);
+  }
+  for (let i = 0; i < (bg ? 0 : 26); i++){
     const sx = r() * 480, sy = r() * 360, s = 3 + r() * 9;
     x.fillStyle = `rgba(255,255,255,${0.35 + r() * 0.5})`; x.beginPath();
     x.moveTo(sx, sy - s); x.quadraticCurveTo(sx, sy, sx + s, sy); x.quadraticCurveTo(sx, sy, sx, sy + s);
@@ -1276,6 +1295,8 @@ function renderMaker(){
   document.querySelectorAll("#colorRow .swatch").forEach(b => b.classList.toggle("on", b.dataset.c === draft.color));
   document.querySelectorAll("#powRow .pick").forEach(b => b.classList.toggle("on", b.dataset.p === draft.power));
   document.querySelectorAll("#accRow .pick").forEach(b => b.classList.toggle("on", b.dataset.a === (draft.acc || "none")));
+  document.querySelectorAll("#bgRow .pick").forEach(b => b.classList.toggle("on", b.dataset.bg === (bgOf(draft) || "sparkle")));
+  $("bgCtrl").classList.toggle("hidden", !!draft.art);  // a drawn or AI picture has its own background
   $("artMagic").classList.toggle("on", !draft.art); $("artDraw").classList.toggle("on", !!draft.art && draft.artBy !== "ai"); $("artAI").classList.toggle("on", !!draft.art && draft.artBy === "ai");
   $("savePet").textContent = editId ? "Save changes ✨" : "Save to my Spellbook ✨";
   $("cancelEdit").classList.toggle("hidden", !editId);
@@ -1315,6 +1336,11 @@ function renderAccRow(){
   });
 }
 renderAccRow();
+BGS.forEach(bg => {
+  const b = document.createElement("button"); b.className = "pick txt"; b.dataset.bg = bg.id; b.innerHTML = `<span style="font-size:24px">${bg.emo}</span>${bg.label}`;
+  b.onclick = () => { draft.bg = bg.id; renderMaker(); tick(5); say(bg.id === "sparkle" ? "Sparkles!" : `It lives in the ${bg.label.toLowerCase()}!`); };
+  $("bgRow").appendChild(b);
+});
 document.querySelectorAll("[data-st]").forEach(b => b.onclick = () => {
   const k = b.dataset.st, lo = k === "p" ? 0 : 1, v = Math.max(lo, Math.min(9, draft[k] + +b.dataset.d));
   if (v === draft[k]){ boop(); return; }
@@ -1331,6 +1357,7 @@ $("savePet").onclick = () => {
   const p = { id: editId || Date.now().toString(36), kind: draft.kind, color: draft.color, p: draft.p, t: draft.t, power: draft.power, acc: draft.acc || "none", name: draft.name.trim() };
   const wasEdit = !!editId;
   if (draft.art) p.art = draft.art;
+  if (bgOf(draft)) p.bg = bgOf(draft);
   const before = pets;
   if (wasEdit){ pets = pets.map(x => x.id === editId ? p : x); } else { pets = pets.concat([p]); if (pets.length > 60) pets = pets.slice(-60); }
   if (!store("luna_pets", pets)){ pets = before; boop(); say("Your Spellbook is too full! Ask a grown-up to remove a creature first."); return; }
@@ -2043,7 +2070,7 @@ let clipJobs = load("luna_clipjobs", {}), clipPollMs = 15000, clipTimer = null, 
 clipDB.keys().then(ks => { (ks || []).forEach(k => clipKeys.add(k)); if (current === "book") renderBook(); }).catch(() => {});
 function hashStr(str){ let h = 2166136261; for (let i = 0; i < str.length; i += 7) h = Math.imul(h ^ str.charCodeAt(i), 16777619); return (h >>> 0).toString(36); }
 function clipKeyFor(c){
-  if (c.pet){ const p = pets.find(x => x.id === c.id); return p ? `pet:${p.id}:${p.art ? hashStr(p.art) : p.kind + p.color + (p.acc || "none")}` : null; }
+  if (c.pet){ const p = pets.find(x => x.id === c.id); return p ? `pet:${p.id}:${p.art ? hashStr(p.art) : p.kind + p.color + (p.acc || "none") + bgOf(p)}` : null; }
   return "card:" + c.full;
 }
 function clipRequestFor(c){
@@ -3324,7 +3351,7 @@ $("bkFile").onchange = () => {
     const have = new Set(pets.map(p => p.id)); let added = 0;
     const merged = pets.slice();
     d.pets.filter(ok).forEach(p => { const clean = { id: String(p.id || Date.now().toString(36) + added), kind: p.kind, color: p.color, p: Math.max(0, Math.min(9, p.p | 0)), t: Math.max(1, Math.min(9, p.t | 0)), power: p.power, acc: ACCS.some(a => a.id === p.acc) ? p.acc : "none", name: p.name.slice(0, 28) };
-      if (p.art) clean.art = p.art; if (!have.has(clean.id)){ merged.push(clean); have.add(clean.id); added++; } });
+      if (p.art) clean.art = p.art; if (bgOf(p)) clean.bg = bgOf(p); if (!have.has(clean.id)){ merged.push(clean); have.add(clean.id); added++; } });
     if (!store("luna_pets", merged)){ say("There isn't enough room for all of those creatures."); return; }
     pets = merged;
     if (Number.isFinite(d.stars) && d.stars > stars){ stars = Math.floor(d.stars); store("luna_stars", stars); $("starCount").textContent = stars; }

@@ -56,7 +56,7 @@ PLACES = {
     "sky": "the night sky, floating among friendly stars", "sea": "a shimmering kingdom under the sea",
     "school": "Strixhaven, a school for young wizards", "car": "a family car trip where magic happens outside the window",
 }
-KINDS = {k: k for k in ["unicorn", "horse", "dragon", "owl", "otter", "butterfly", "fox", "panda", "dolphin", "penguin", "turtle", "flamingo"]}
+KINDS = {k: k for k in ["unicorn", "horse", "dragon", "owl", "otter", "butterfly", "fox", "panda", "dolphin", "penguin", "turtle", "flamingo", "mermaid"]}
 KINDS.update({"kitty": "fluffy kitten", "puppy": "fluffy puppy", "fairy": "little fairy", "bunny": "bunny rabbit"})
 COLORS = {"U": "sky blue", "R": "warm red and orange", "P": "purple"}
 ACCS = {"none": "", "crown": "wearing a tiny golden crown", "bow": "wearing a pink bow", "flower": "with a flower behind its ear",
@@ -187,7 +187,8 @@ KIND_MOTION = {"unicorn": "the unicorn tosses its mane and its horn glows", "hor
                "bunny": "the bunny wiggles its nose and hops", "butterfly": "the butterfly opens and closes its wings",
                "fox": "the fox swishes its fluffy tail and tilts its head", "panda": "the panda waves and nibbles a bamboo leaf",
                "dolphin": "the dolphin leaps and splashes sparkly water", "penguin": "the penguin waddles and flaps its little wings",
-               "turtle": "the turtle slowly peeks out and smiles", "flamingo": "the flamingo stands on one leg and fluffs its pink feathers"}
+               "turtle": "the turtle slowly peeks out and smiles", "flamingo": "the flamingo stands on one leg and fluffs its pink feathers",
+               "mermaid": "the mermaid flips her shimmering tail and blows a bubble"}
 VIDEO_STYLE = ("Gentle, magical, happy animation for a young child. Slow, soft movement, twinkling sparkles, a slow camera push-in. "
                "Keep the same art style and colors as the picture. Nothing scary, no sudden movements, no text. "
                "Audio: soft magical chimes and sparkles, no speech, no music with words.")

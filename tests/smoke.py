@@ -741,6 +741,33 @@ async def fan_content_notice(pg, mode):
     assert FCP_NOTICE in open(os.path.join(ROOT, "README.md"), encoding="utf-8").read(), "Fan Content notice missing from README"
     await pg.evaluate("document.querySelector('.grownup').open = false")
 
+@test
+async def creature_backgrounds(pg, mode):
+    # Make a Creature: pick where it lives (the magic picture's background), plus the mermaid in the Star Shop.
+    await pg.click("[data-go=maker]")
+    assert await pg.locator("#bgRow .pick").count() >= 5, "no background choices"
+    plain = await pg.evaluate("petImg({ ...draft, bg: 'sparkle' })")
+    await pg.click('#bgRow [data-bg="space"]')
+    assert await pg.evaluate("draft.bg") == "space" and await pg.evaluate("petImg(draft)") != plain, "background didn't change the picture"
+    assert await pg.evaluate("petImg({ kind: draft.kind, color: draft.color, acc: draft.acc }) === petImg({ kind: draft.kind, color: draft.color, acc: draft.acc, bg: 'sparkle' })"), "old creatures' pictures changed"
+    assert await pg.locator('#kindRow [data-k="mermaid"].locked').count() == 1 or await pg.evaluate("isOwned('kind:mermaid')"), "mermaid should be a Star Shop creature"
+    await pg.evaluate("owned['kind:mermaid'] = 1; renderKindRow()"); await pg.click('#kindRow [data-k="mermaid"]')
+    n0 = await pg.evaluate("pets.length"); await pg.click("#savePet"); await dismiss(pg)
+    p = await pg.evaluate("pets[pets.length - 1]")
+    assert pets_ok(p), f"saved creature lost its kind or background: {p}"
+    if mode == "web":
+        await pg.evaluate("go('book', true)"); d = await fresh_backup(pg)
+        d["pets"] = [dict(p, id="bg1"), dict(p, id="bg2", bg="<script>")]
+        await pg.set_input_files("#bkFile", files=[{"name": "b.json", "mimeType": "application/json", "buffer": json.dumps(d).encode()}])
+        await pg.wait_for_function("pets.some(x => x.id === 'bg2')", timeout=5000)
+        got = await pg.evaluate("[pets.find(x => x.id === 'bg1').bg, pets.find(x => x.id === 'bg2').bg]")
+        assert got[0] == "space" and got[1] in (None, "sparkle"), f"restore didn't keep/clean backgrounds: {got}"
+        await pg.evaluate("pets = pets.filter(x => !['bg1', 'bg2'].includes(x.id)); store('luna_pets', pets)")
+    await pg.evaluate("pets = pets.filter(x => x.id !== %s); store('luna_pets', pets)" % json.dumps(p["id"]))
+    await home(pg)
+
+def pets_ok(p): return p and p.get("kind") == "mermaid" and p.get("bg") == "space"
+
 STACK = None
 
 async def stroke(pg):

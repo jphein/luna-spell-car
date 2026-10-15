@@ -32,7 +32,7 @@ try:
     check(st == 200 and json.loads(b)["image"].startswith("data:image/png;base64,"), "image returns a data URL")
     st, _, _ = call(u, "/image", {"kind": "kraken", "color": "P", "power": "fly"}); check(st == 400, "rejects unknown creature kinds")
     st, _, b = call(u, "/image", {"kind": "fox", "color": "R", "acc": "wand", "power": "zoom"}); check(st == 200, "accepts Star Shop creatures and accessories")
-    call(u, "/image", {"kind": "kitty", "color": "U", "power": "heart"})
+    st, _, _ = call(u, "/image", {"kind": "mermaid", "color": "U", "power": "heart"}); check(st == 200, "accepts the mermaid")
     st, _, _ = call(u, "/image", {"kind": "kitty", "color": "U", "power": "heart"}); check(st == 429, "enforces the daily picture cap")
     st, h, b = call(u, "/tts", {"text": "Hi Luna! <b>sparkle</b>", "voice": "en-US-AnaNeural", "rate": 0.9})
     check(st == 200 and h["Content-Type"].startswith("audio/") and len(b) > 100, "tts returns audio")
