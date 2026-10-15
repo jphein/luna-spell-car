@@ -2476,6 +2476,21 @@ stats.lessons = stats.lessons || {};
 function setStat(k, v){ stats[k] = v; store("luna_stats", stats); }
 function bumpStat(k, n = 1){ setStat(k, (stats[k] || 0) + n); }
 
+/* Daily hello: the first open each day, Rootha greets her for the time of day with a small gift. No streaks to lose.
+   The date is a number in stats, so backups carry it and restore keeps the later one. */
+const todayNum = () => { const d = new Date(); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); };
+function helloFor(h){
+  const [emo, part] = h < 5 ? ["🌙", "evening"] : h < 12 ? ["🌞", "morning"] : h < 17 ? ["🌤️", "afternoon"] : ["🌙", "evening"];
+  return { emo, title: `Good ${part}, Luna!` };
+}
+function dailyHello(){
+  if ((stats.lastHello || 0) >= todayNum()) return;
+  setStat("lastHello", todayNum());
+  const g = helloFor(new Date().getHours());
+  queueCelebrate({ emo: g.emo, title: g.title, sub: "A daily gift from Rootha: +2 stars!", spoken: `${g.title} Rootha has a little gift for you. Two stars!` });
+  addStar(2);  // after the hello, so a sticker or level-up it earns is celebrated second
+}
+
 /* ---------- STAR MAP: twelve hidden treasures ---------- */
 const TREASURES = [
   { id: "scholar", emo: "🎓", name: "Scholar Star", hint: "Finish every lesson in Magic School.", prog: () => [CORE.filter(l => stats.lessons[l.id]).length, CORE.length] },
@@ -3265,6 +3280,7 @@ $("bkFile").onchange = () => {
 
 renderStars();
 go("home", true);
+setTimeout(() => { if (!window.__noDailyHello) dailyHello(); }, 1200);  // tests opt out and call dailyHello() themselves
 </script>
 </body>
 </html>

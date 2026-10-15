@@ -646,6 +646,28 @@ async def treasure_catch(pg, mode):
     await pg.click("#catchGo"); await home(pg)
     assert not await pg.evaluate("tc.on") and await pg.locator("#catchField .tcoin").count() == 0, "round kept running after leaving"
 
+@test
+async def daily_hello(pg, mode):
+    # The first open each day: Rootha says hello for the time of day, with a small gift. Never twice a day, no streaks.
+    # one star short of a sticker, so the gift also earns one: the hello must still come first
+    await pg.evaluate("setStat('lastHello', 0); xp = Math.floor(xp / 10) * 10 + 9; window.__quietCelebrations = false; celebQueue.length = 0")
+    try:
+        s0 = await pg.evaluate("stars"); await pg.evaluate("dailyHello()")
+        await pg.wait_for_selector("#celebrate:not(.hidden)", timeout=4000)
+        title = await pg.inner_text("#celTitle")
+        assert "Luna" in title and any(w in title for w in ("morning", "afternoon", "evening", "Hello")), f"odd greeting: {title}"
+        assert await pg.evaluate("stars") == s0 + 2, "no daily gift"
+        assert await pg.evaluate("stats.lastHello") == await pg.evaluate("todayNum()"), "today not remembered"
+        await pg.click("#celOk"); await pg.wait_for_selector("#celebrate:not(.hidden)", timeout=4000)
+        assert "sticker" in (await pg.inner_text("#celTitle")).lower(), "the sticker the gift earned wasn't celebrated after the hello"
+        await dismiss(pg); await pg.evaluate("dailyHello()"); await pg.wait_for_timeout(1200)
+        assert not await pg.is_visible("#celebrate") and await pg.evaluate("stars") == s0 + 2, "daily gift given twice in one day"
+        for h, word in ((8, "morning"), (14, "afternoon"), (19, "evening")):
+            assert word in await pg.evaluate(f"helloFor({h}).title"), f"wrong greeting at {h}:00"
+    finally:
+        await pg.evaluate("window.__quietCelebrations = true")
+    await dismiss(pg); await home(pg)
+
 STACK = None
 
 async def stroke(pg):
@@ -812,7 +834,7 @@ async def magic_movies(pg, mode):
 
 async def run_mode(browser, mode):
     ctx = await browser.new_context(viewport={"width": 400, "height": 860}, has_touch=True)
-    await ctx.add_init_script("window.__quietCelebrations = true;" + (FAKE_CLAUDE if mode == "web" else FAKE_ANDROID) + "if(!localStorage.getItem('luna_pets')){" + SEED_PETS + "}")
+    await ctx.add_init_script("window.__quietCelebrations = true; window.__noDailyHello = true;" + (FAKE_CLAUDE if mode == "web" else FAKE_ANDROID) + "if(!localStorage.getItem('luna_pets')){" + SEED_PETS + "}")
     pg = await ctx.new_page(); errors = []
     pg.on("pageerror", lambda e: errors.append(str(e)))
     # A young child can't read a browser dialog: any confirm()/alert() a test reaches is a failure.
