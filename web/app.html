@@ -257,6 +257,13 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .canvaswrap img.guide{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:.16;pointer-events:none}
 .canvaswrap canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
 .palette{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:720px;margin:0 auto}
+/* coloring pages */
+.canvaswrap img.lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.st-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#stColor{background:var(--blue)}
+.st-pages{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:12px}
+.st-pages button{background:#fff;border-radius:18px;padding:6px;box-shadow:0 4px 0 var(--line)}
+.st-pages img{width:100%;aspect-ratio:4/3;display:block}
 .palette .sw{width:46px;height:46px;border-radius:50%;border:3px solid rgba(0,0,0,.15)}
 .palette .sw.on{box-shadow:0 0 0 4px var(--gold)}
 .palette .tool{min-width:52px;height:50px;border-radius:16px;background:var(--surface);font-size:24px;padding:0 10px;box-shadow:0 3px 0 var(--line);display:flex;align-items:center;gap:4px}
@@ -735,7 +742,8 @@ body.theme-forest{--bg:#ECF8EE;--bg2:#D5F0DA;--violet:#2E9B5C;--line:#C6E8CE;--c
 
   <!-- ART STUDIO -->
   <section id="studio" class="hidden">
-    <button class="save" id="stNew">🎨 New painting</button>
+    <div class="st-btns"><button class="save" id="stNew">🎨 New painting</button><button class="save" id="stColor">🖍️ Coloring page</button></div>
+    <div class="st-pages hidden" id="stPages"></div>
     <h3 class="sec-h" id="stH">My paintings</h3>
     <div class="book" id="stGallery"></div>
   </section>
@@ -812,11 +820,12 @@ body.theme-forest{--bg:#ECF8EE;--bg2:#D5F0DA;--violet:#2E9B5C;--line:#C6E8CE;--c
 </div>
 <div class="paint hidden" id="paint" role="dialog" aria-modal="true" aria-label="Draw your creature">
   <div class="pbar2"><button id="pCancel">✖</button><h2 id="pTitle">Draw your creature!</h2><button class="done" id="pDone">✓ Done</button></div>
-  <div class="canvaswrap"><img class="guide" id="pGuide" alt=""><canvas id="pCanvas" width="960" height="720"></canvas></div>
+  <div class="canvaswrap"><img class="guide" id="pGuide" alt=""><canvas id="pCanvas" width="960" height="720"></canvas><img class="lines hidden" id="pLines" alt=""></div>
   <div class="palette" id="pColors"></div>
   <div class="palette">
     <button class="tool on" data-tool="pen" aria-label="Crayon">🖍️</button><button class="tool" data-tool="rainbow" aria-label="Rainbow">🌈</button>
     <button class="tool" data-tool="sparkle" aria-label="Sparkles">✨</button><button class="tool" data-tool="stamp" aria-label="Stamp hearts">💜</button>
+    <button class="tool" data-tool="fill" aria-label="Fill">🪣</button>
     <button class="tool" data-tool="erase" aria-label="Eraser">🧽</button>
     <button class="tool" data-size="10"><small>S</small></button><button class="tool on" data-size="22"><small>M</small></button><button class="tool" data-size="44"><small>L</small></button>
     <button class="tool" id="pGuideBtn" aria-label="Show a guide">👻<small>Guide</small></button>
@@ -1791,7 +1800,7 @@ function renderBrushes(){
   });
 }
 function setTool(t){ pTool = t; if (t.startsWith("emo:")) pEmo = t.slice(4); document.querySelectorAll("[data-tool]").forEach(x => x.classList.toggle("on", x.dataset.tool === t)); }
-document.querySelectorAll("[data-tool]").forEach(b => b.onclick = () => { setTool(b.dataset.tool); tick(4); say({ pen: "Crayon!", rainbow: "Rainbow!", sparkle: "Sparkles!", stamp: "Hearts!", erase: "Eraser!" }[b.dataset.tool]); });
+document.querySelectorAll("[data-tool]").forEach(b => b.onclick = () => { setTool(b.dataset.tool); tick(4); say({ pen: "Crayon!", rainbow: "Rainbow!", sparkle: "Sparkles!", stamp: "Hearts!", erase: "Eraser!", fill: "Paint bucket! Tap a space to fill it with color." }[b.dataset.tool]); });
 document.querySelectorAll("[data-size]").forEach(b => b.onclick = () => { pSize = +b.dataset.size; document.querySelectorAll("[data-size]").forEach(x => x.classList.toggle("on", x === b)); tick(2); });
 function pPos(e){ const r = pc.getBoundingClientRect(); return { x: (e.clientX - r.left) * pc.width / r.width, y: (e.clientY - r.top) * pc.height / r.height }; }
 function starAt(x, y, r, col){
@@ -1831,8 +1840,48 @@ function pStroke(a, b){
   else px.strokeStyle = pColor;
   px.beginPath(); px.moveTo(a.x, a.y); px.lineTo(b.x, b.y); px.stroke(); px.restore();
 }
+// Paint bucket: fills the tapped space up to her own strokes and the coloring page's lines (pWall).
+let pWall = null;
+function setLines(src){
+  const li = $("pLines"); pWall = null; li.classList.toggle("hidden", !src);
+  if (!src){ li.removeAttribute("src"); return; }
+  li.onload = () => {
+    const c = document.createElement("canvas"); c.width = pc.width; c.height = pc.height; const cx = c.getContext("2d"); cx.drawImage(li, 0, 0, c.width, c.height);
+    const a = cx.getImageData(0, 0, c.width, c.height).data; pWall = new Uint8Array(c.width * c.height);
+    for (let i = 0; i < pWall.length; i++) pWall[i] = a[i * 4 + 3] > 60;
+  };
+  li.src = src;
+}
+function floodFill(sx, sy, hex){
+  const W = pc.width, H = pc.height, x0 = Math.max(0, Math.min(W - 1, sx | 0)), y0 = Math.max(0, Math.min(H - 1, sy | 0));
+  const img = px.getImageData(0, 0, W, H), d = img.data, seed = (y0 * W + x0) * 4;
+  if (pWall && pWall[y0 * W + x0]) return false;
+  const n = parseInt(hex.slice(1), 16), col = [n >> 16, (n >> 8) & 255, n & 255, 255], s = [d[seed], d[seed + 1], d[seed + 2], d[seed + 3]];
+  if (s.every((v, k) => Math.abs(v - col[k]) < 8)) return false;
+  const like = i => !(pWall && pWall[i]) && Math.abs(d[i * 4 + 3] - s[3]) < 48 && (s[3] < 48 || (Math.abs(d[i * 4] - s[0]) < 48 && Math.abs(d[i * 4 + 1] - s[1]) < 48 && Math.abs(d[i * 4 + 2] - s[2]) < 48));
+  const seen = new Uint8Array(W * H), stack = [y0 * W + x0];
+  while (stack.length){
+    const i = stack.pop(); if (seen[i] || !like(i)) continue;
+    let a = i, b = i, row = i - (i % W);
+    while (a > row && !seen[a - 1] && like(a - 1)) a--;
+    while (b < row + W - 1 && !seen[b + 1] && like(b + 1)) b++;
+    for (let j = a; j <= b; j++){
+      seen[j] = 1; d.set(col, j * 4);
+      if (j >= W && !seen[j - W]) stack.push(j - W);
+      if (j < W * (H - 1) && !seen[j + W]) stack.push(j + W);
+    }
+  }
+  px.putImageData(img, 0, 0); return true;
+}
 pc.addEventListener("pointerdown", e => {
-  e.preventDefault(); pc.setPointerCapture(e.pointerId); pDown = true; pDist = 999;
+  e.preventDefault();
+  if (pTool === "fill"){
+    let before = null; try { before = px.getImageData(0, 0, pc.width, pc.height); } catch (err) {}
+    const q = pPos(e);
+    if (floodFill(q.x, q.y, pColor)){ if (before){ pUndoStack.push(before); if (pUndoStack.length > 12) pUndoStack.shift(); } tone([523, 659, 784], 0.05); } else tick(1);
+    return;
+  }
+  pc.setPointerCapture(e.pointerId); pDown = true; pDist = 999;
   try { pUndoStack.push(px.getImageData(0, 0, pc.width, pc.height)); if (pUndoStack.length > 12) pUndoStack.shift(); } catch (err) {}
   pLast = pPos(e); pStroke(pLast, pLast);
 });
@@ -1844,7 +1893,7 @@ $("pClear").onclick = () => ask({ emo: "🎨", q: "Start over?", spoken: "Do you
 $("pGuideBtn").onclick = () => { const g = $("pGuide"); const on = g.style.display !== "none"; g.style.display = on ? "none" : ""; $("pGuideBtn").classList.toggle("on", !on); };
 let paintMode = "creature", paintEditId = null;
 function openPaint(){
-  paintMode = "creature"; $("pTitle").textContent = "Draw your creature!"; $("pGuideBtn").classList.remove("hidden");
+  paintMode = "creature"; $("pTitle").textContent = "Draw your creature!"; $("pGuideBtn").classList.remove("hidden"); setLines(null);
   px.clearRect(0, 0, pc.width, pc.height); pUndoStack = [];
   const k = KINDS.find(z => z.id === draft.kind);
   const g = document.createElement("canvas"); g.width = 480; g.height = 360; const gx = g.getContext("2d");
@@ -2878,17 +2927,39 @@ function renderStudio(){
     g.appendChild(el);
   });
 }
-function openStudioPaint(d){
+// Coloring pages: original line drawings (960×720), shown over the canvas and baked into the saved painting.
+const COLOR_PAGES = (() => {
+  const star = (cx, cy, R, r) => Array.from({ length: 10 }, (_, i) => { const a = -Math.PI / 2 + i * Math.PI / 5, q = i % 2 ? r : R; return Math.round(cx + q * Math.cos(a)) + "," + Math.round(cy + q * Math.sin(a)); }).join(" ");
+  const petals = [0, 60, 120, 180, 240, 300].map(a => `<circle cx="${Math.round(480 + 125 * Math.cos(a * Math.PI / 180))}" cy="${Math.round(290 + 125 * Math.sin(a * Math.PI / 180))}" r="72"/>`).join("");
+  const arcs = [340, 280, 220, 160].map(r => `<path d="M${480 - r} 560A${r} ${r} 0 0 1 ${480 + r} 560"/>`).join("");
+  return [
+    { id: "heart", name: "heart", svg: `<path d="M480 640C200 470 150 260 300 200C400 160 460 220 480 280C500 220 560 160 660 200C810 260 760 470 480 640Z"/><path d="M130 190c-45-28-50-66-22-78c17-7 24 5 22 14c-2-9 5-21 22-14c28 12 23 50-22 78z"/><path d="M830 560c-45-28-50-66-22-78c17-7 24 5 22 14c-2-9 5-21 22-14c28 12 23 50-22 78z"/>` },
+    { id: "star", name: "star", svg: `<polygon points="${star(480, 390, 310, 135)}"/><polygon points="${star(130, 140, 60, 26)}"/><polygon points="${star(840, 600, 60, 26)}"/>` },
+    { id: "flower", name: "flower", svg: `<path d="M480 420V690M480 600C400 560 340 590 320 640C390 660 450 640 480 600ZM480 560C560 520 620 550 640 600C570 620 510 600 480 560Z"/>${petals}<circle cx="480" cy="290" r="70"/><path d="M60 690H900"/>` },
+    { id: "rainbow", name: "rainbow", svg: `${arcs}<path d="M140 560H320M640 560H820"/><path d="M90 600a50 50 0 0 1 60-70a60 60 0 0 1 110 10a45 45 0 0 1 20 90H110a40 40 0 0 1-20-30z"/><path d="M690 600a50 50 0 0 1 60-70a60 60 0 0 1 110 10a45 45 0 0 1 20 90H710a40 40 0 0 1-20-30z"/><circle cx="820" cy="120" r="55"/>` },
+    { id: "castle", name: "castle", svg: `<path d="M300 660V360H660V660ZM300 360V320H345V360M390 360V320H435V360M480 360V320H525V360M570 360V320H615V360"/><path d="M200 660V290H300V660M660 660V290H760V660"/><path d="M190 290L250 170L310 290ZM650 290L710 170L770 290Z"/><path d="M420 660V530A60 60 0 0 1 540 530V660"/><path d="M230 380h40v60h-40zM690 380h40v60h-40zM360 420h50v50h-50zM550 420h50v50h-50z"/><path d="M250 170V100L300 118L250 136M710 170V100L760 118L710 136"/><path d="M40 660H920"/>` },
+    { id: "butterfly", name: "butterfly", svg: `<ellipse cx="480" cy="380" rx="34" ry="190"/><path d="M465 210C430 140 400 110 370 100M495 210C530 140 560 110 590 100"/><path d="M450 330C300 140 120 160 140 290C150 370 300 390 450 370ZM510 330C660 140 840 160 820 290C810 370 660 390 510 370ZM450 400C320 400 200 470 240 560C280 640 400 560 450 450ZM510 400C640 400 760 470 720 560C680 640 560 560 510 450Z"/><circle cx="260" cy="270" r="40"/><circle cx="700" cy="270" r="40"/><circle cx="300" cy="510" r="28"/><circle cx="660" cy="510" r="28"/>` }
+  ].map(p => Object.assign(p, { src: "data:image/svg+xml," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" fill="none" stroke="#1E1033" stroke-width="12" stroke-linecap="round" stroke-linejoin="round">${p.svg}</svg>`) }));
+})();
+function openStudioPaint(d, page){
   paintMode = "studio"; paintEditId = d ? d.id : null;
-  $("pTitle").textContent = d ? "Keep painting!" : "Paint anything!"; $("pGuideBtn").classList.add("hidden"); $("pGuide").style.display = "none";
-  px.clearRect(0, 0, pc.width, pc.height); pUndoStack = [];
+  $("pTitle").textContent = d ? "Keep painting!" : page ? `Color the ${page.name}!` : "Paint anything!"; $("pGuideBtn").classList.add("hidden"); $("pGuide").style.display = "none";
+  px.clearRect(0, 0, pc.width, pc.height); pUndoStack = []; setLines(page ? page.src : null);
   if (d){ const im = new Image(); im.onload = () => px.drawImage(im, 0, 0, pc.width, pc.height); im.src = d.img; }
-  $("paint").classList.remove("hidden"); say(d ? "Let's keep painting!" : "Paint anything you like!");
+  if (page) setTool("fill");
+  $("paint").classList.remove("hidden"); say(d ? "Let's keep painting!" : page ? `Color the ${page.name}! Tap a space with the paint bucket, or use a crayon.` : "Paint anything you like!");
 }
+$("stColor").onclick = () => {
+  const g = $("stPages"), open = g.classList.contains("hidden"); g.classList.toggle("hidden", !open); tick(4);
+  if (!open) return;
+  g.innerHTML = ""; COLOR_PAGES.forEach(p => { const b = document.createElement("button"); b.innerHTML = `<img src="${p.src}" alt="">`; b.setAttribute("aria-label", p.name); b.onclick = () => { g.classList.add("hidden"); openStudioPaint(null, p); }; g.appendChild(b); });
+  say("Pick a coloring page!");
+};
 function finishStudio(){
   if (!paintEditId && !pUndoStack.length){ $("paint").classList.add("hidden"); say("Your page was empty. Paint something first!"); return; }
   const out = document.createElement("canvas"); out.width = 640; out.height = 480; const ox = out.getContext("2d");
   ox.fillStyle = "#fff"; ox.fillRect(0, 0, 640, 480); ox.drawImage(pc, 0, 0, 640, 480);
+  if (!$("pLines").classList.contains("hidden")) ox.drawImage($("pLines"), 0, 0, 640, 480);
   const img = out.toDataURL("image/jpeg", 0.72), before = drawings;
   drawings = paintEditId ? drawings.map(x => x.id === paintEditId ? { ...x, img, at: Date.now() } : x)
                          : drawings.concat([{ id: Date.now().toString(36), img, at: Date.now() }]).slice(-40);

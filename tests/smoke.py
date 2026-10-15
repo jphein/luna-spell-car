@@ -138,6 +138,31 @@ async def art_studio(pg, mode):
     await home(pg)
 
 @test
+async def coloring_pages(pg, mode):
+    # Art Studio coloring pages: pick a line drawing, 🪣 fill stops at the lines, and the saved painting keeps the lines.
+    await pg.click("[data-go=studio]"); n0 = await pg.evaluate("drawings.length")
+    await pg.click("#stColor"); pages = pg.locator("#stPages button")
+    assert await pages.count() >= 6, "not enough coloring pages"
+    bb = await pages.first.bounding_box(); assert bb["height"] >= 52 and bb["width"] >= 52, f"page button too small ({bb})"
+    await pages.nth(0).click()
+    assert await pg.is_visible("#paint") and await pg.is_visible("#pLines"), "coloring page didn't open with its lines"
+    await pg.click("[data-tool=fill]"); await pg.click("#pColors .sw >> nth=4")
+    box = await pg.locator("#pCanvas").bounding_box()
+    await pg.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] * 400 / 720)
+    px_ = "(x, y) => Array.from(pc.getContext('2d').getImageData(x, y, 1, 1).data)"
+    assert await pg.evaluate(f"({px_})(480, 400)") == [239, 90, 49, 255], "fill didn't color the shape"
+    assert (await pg.evaluate(f"({px_})(20, 20)"))[3] == 0, "fill leaked past the lines"
+    await pg.click("#pDone"); await pg.click("#celOk")
+    assert await pg.evaluate("drawings.length") == n0 + 1, "colored page not saved"
+    dark = await pg.evaluate("""new Promise(r => { const im = new Image(); im.onload = () => { const c = document.createElement('canvas'); c.width = 640; c.height = 480;
+        const x = c.getContext('2d'); x.drawImage(im, 0, 0); const d = x.getImageData(320, 267, 1, 200).data; let n = 0;
+        for (let i = 0; i < d.length; i += 4) if (d[i] < 90 && d[i + 1] < 90 && d[i + 2] < 90) n++; r(n); }; im.src = drawings[drawings.length - 1].img; })""")
+    assert dark > 0, "saved painting lost the coloring page lines"
+    await pg.click("#stNew")
+    assert not await pg.is_visible("#pLines"), "lines stayed on a blank painting"
+    await pg.click("#pCancel"); await home(pg)
+
+@test
 async def game_night(pg, mode):
     await pg.click("[data-go=night]")
     if await pg.is_visible("#ntStart"): await pg.click("#ntStart")
@@ -587,14 +612,13 @@ async def sticker_scene(pg, mode):
     assert await pg.evaluate("scene.items.castle.length") == 1, "dragging a sticker off didn't remove it"
     assert await pg.evaluate("window.__back()") == "stay" and await pg.is_visible("#book"), "Back from the scene should go to My Spellbook"
     if mode == "web":
-        await pg.click("#bkSave"); await pg.wait_for_timeout(300)
-        d = json.loads([s for s in await pg.evaluate("window.__saved") if s["filename"].endswith(".json")][-1]["text"])
+        d = await fresh_backup(pg)
         assert len(d["scene"]["items"]["castle"]) == 1, "backup is missing the sticker scene"
         # restoring adds the backup's stickers to the scene without erasing what's there; junk is dropped
         d["scene"]["items"] = {"castle": [{"id": "r1", "s": "🦄", "x": 0.5, "y": 0.5}, {"id": "bad", "s": "<b>", "x": 0.1, "y": 0.1}],
                                "meadow": [{"id": "r2", "s": "🌈", "x": 9, "y": -3}]}
         await pg.set_input_files("#bkFile", files=[{"name": "b.json", "mimeType": "application/json", "buffer": json.dumps(d).encode()}])
-        await pg.wait_for_timeout(300)
+        await pg.wait_for_function("(load('luna_scene').items.meadow || []).length > 0", timeout=10000)  # restore is async (FileReader)
         sc = await pg.evaluate("load('luna_scene')")
         assert len(sc["items"]["castle"]) == 2 and not any(i["s"] == "<b>" for i in sc["items"]["castle"]), f"restore didn't merge the scene ({sc})"
         assert sc["items"]["meadow"][0]["x"] == 1 and sc["items"]["meadow"][0]["y"] == 0, "restored positions not kept on the picture"
