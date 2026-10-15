@@ -20,9 +20,10 @@ names = re.findall(r"^(?:const|let|var|function|class)\s+([A-Za-z_$][\w$]*)", sc
 dupes = [n for n, k in Counter(names).items() if k > 1]
 check(not dupes, "no duplicate top-level names" + (f": {dupes}" if dupes else ""))
 refs = set(re.findall(r'\$\("([\w-]+)"\)', src)) | set(re.findall(r'getElementById\("([\w-]+)"\)', src))
-ids = re.findall(r'\bid="([\w-]+)"', src)
+ids = re.findall(r'\bid="([\w-]+)"', src) + re.findall(r'\.id = "([\w-]+)"', src)
+markup_ids = re.findall(r'\bid="([\w-]+)"', src[:src.index("<script>")])
 check(not (refs - set(ids)), "every $(\"id\") exists in the HTML" + (f": missing {sorted(refs - set(ids))}" if refs - set(ids) else ""))
-dup_ids = [i for i, k in Counter(ids).items() if k > 1]
+dup_ids = [i for i, k in Counter(markup_ids).items() if k > 1]
 check(not dup_ids, "element ids are unique" + (f": {dup_ids}" if dup_ids else ""))
 gos = set(re.findall(r'data-go="(\w+)"', src)); screens = set(re.findall(r"(\w+):\s*\"[^\"]*\"", src[src.index("const screens"):src.index("};", src.index("const screens"))]))
 check(gos <= screens, "every home tile has a screen" + (f": {sorted(gos - screens)}" if gos - screens else ""))
@@ -40,6 +41,11 @@ NESTED_OK = {".celebrate .box", ".pmodal .box", ".mana-btn .count", ".mini .cost
              # deliberate size/spacing tweaks of the same component inside a container:
              ".pmodal .petcard", ".pmodal .rowbtns", ".slot .sym", ".voiceset .rowbtns", ".yesno .ans"}
 clash = [x for x in clash if x not in NESTED_OK]
+# compound selectors like .tile.next pick up every rule of a standalone .next (e.g. white text on a white tile)
+compound = re.findall(r"\.([\w-]+)\.([\w-]+)", css)
+COMPOUND_OK = {("mana-btn", "blue"), ("mana-btn", "red"), ("mana-btn", "purple")}
+cclash = sorted({f".{a_}.{b_}" for a_, b_ in compound if b_ in standalone and (a_, b_) not in COMPOUND_OK})
+check(not cclash, "no state class reuses a standalone component name (e.g. .tile.next)" + (f": {cclash}" if cclash else ""))
 check(not clash, "no CSS class is styled both on its own and as a nested class (style clashes)" + (f": {clash}" if clash else ""))
 check(src.count("__CARDS__") == 1 and "__VERSION__" in src, "build placeholders present")
 check(len(src) < 400_000, f"app.html source size {len(src)//1024} KB")

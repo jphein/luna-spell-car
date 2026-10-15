@@ -356,14 +356,82 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 body.theme-rainbow{--bg:#FFF1F8;--bg2:#E6F3FF;--violet:#D9418F;--line:#F3CDE3;--chip:#FFF0F7}
 body.theme-ocean{--bg:#E6F7FF;--bg2:#C9EEFF;--violet:#1C7FB8;--line:#BDE3F5;--chip:#E9F7FD}
 body.theme-candy{--bg:#FFF0F5;--bg2:#FFE0EE;--violet:#E05A9A;--line:#F8CADF;--chip:#FFF0F5}
+body.theme-starlight{--bg:#E8E4FF;--bg2:#FFF4D6;--violet:#5B3FD6;--line:#D9CFFF;--chip:#F1EDFF;--gold:#D9930F}
 body.theme-forest{--bg:#ECF8EE;--bg2:#D5F0DA;--violet:#2E9B5C;--line:#C6E8CE;--chip:#EEF9F0}
 @media (prefers-color-scheme:dark){
   body.theme-rainbow{--bg:#2A1236;--bg2:#123A52;--surface:#3A1F4E;--violet:#FF7AC3;--line:#5B3470;--chip:#4A2A60}
   body.theme-ocean{--bg:#06263A;--bg2:#0C4A66;--surface:#0F3550;--violet:#4FC3F7;--line:#1F5878;--chip:#164563}
   body.theme-candy{--bg:#33142A;--bg2:#4A1A3C;--surface:#451E3D;--violet:#FF8CC6;--line:#6A2C58;--chip:#5A2550}
+  body.theme-starlight{--bg:#0B0A24;--bg2:#2A1F66;--surface:#1D1747;--violet:#B6A2FF;--line:#3A2F7A;--chip:#2A2263;--gold:#FFD976}
   body.theme-forest{--bg:#0F2A1A;--bg2:#18412A;--surface:#183A26;--violet:#5CD68E;--line:#2A5C3D;--chip:#224D33}
 }
 @media (prefers-reduced-motion:reduce){.season,.starfall{display:none}.rootha.spin{animation:none}}
+/* magic school */
+.lessons{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.ltile{position:relative;background:var(--surface);border-radius:22px;padding:14px 10px;box-shadow:0 4px 0 var(--line);display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;min-height:120px;justify-content:center}
+.ltile .emo{font-size:40px;line-height:1}
+.ltile b{font-size:16px;line-height:1.15}
+.ltile .num{position:absolute;top:8px;left:10px;font-size:13px;color:var(--muted);font-weight:700}
+.ltile.done::after{content:"✓";position:absolute;top:6px;right:8px;width:26px;height:26px;border-radius:50%;background:var(--good);color:#fff;font-weight:700;display:grid;place-items:center}
+.ltile.upnext{box-shadow:0 0 0 4px var(--gold),0 4px 0 var(--line);animation:pulse 1.8s ease-in-out infinite}
+.diploma-btn{width:100%;margin-top:14px;padding:18px;border-radius:999px;font-size:21px;font-weight:700;color:#2B1650;background:linear-gradient(90deg,#FFD976,#FFC94A,#FFE9A8);box-shadow:0 5px 0 rgba(0,0,0,.18)}
+.lprog{display:flex;gap:5px;justify-content:center;margin:0 0 10px}
+.lprog i{width:12px;height:12px;border-radius:50%;background:var(--line)}
+.lprog i.on{background:var(--violet)}.lprog i.now{background:var(--gold);transform:scale(1.3)}
+.lpage{background:var(--surface);border-radius:26px;padding:16px;box-shadow:0 5px 0 var(--line),0 10px 24px var(--shadow);text-align:center}
+.lpage .visual{min-height:120px;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.lpage .visual img.art{width:100%;max-height:34vh;object-fit:cover;border-radius:18px}
+.lpage .big{font-size:72px;line-height:1.1}
+.lpage .ltext{font-size:21px;line-height:1.45;font-weight:500;margin:6px 4px;cursor:pointer}
+.lpage .ltext b{color:var(--violet)}
+.lpage .why{font-size:18px;color:var(--good);font-weight:600;min-height:1.4em;margin-top:8px}
+.lopts{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-top:12px}
+.lopt{background:var(--chip);border-radius:20px;padding:12px 8px;font-size:18px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:6px;border:3px solid transparent;min-height:72px;justify-content:center}
+.lopt img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:12px}
+.lopt .oe{font-size:38px;line-height:1}
+.lopt.right{border-color:var(--good);background:var(--surface);box-shadow:0 0 0 3px var(--good)}
+.lopt.wrong{animation:shake .4s}
+.lnav{display:flex;gap:10px;justify-content:center;margin-top:14px}
+.lnav button{padding:16px 28px;border-radius:999px;font-size:21px;font-weight:700;background:var(--violet);color:#fff;box-shadow:0 5px 0 rgba(0,0,0,.2)}
+.lnav button.alt{background:var(--chip);color:var(--ink)}
+.cardhot{position:relative;width:min(300px,78vw);margin:0 auto}
+.cardhot img{width:100%;display:block;border-radius:14px}
+.cardhot button{position:absolute;border-radius:8px;background:transparent;padding:0}
+.cardhot button.found{box-shadow:0 0 0 3px var(--gold);background:rgba(255,201,74,.18)}
+.paylands{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:10px}
+.land{width:76px;height:100px;border-radius:12px;font-size:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;transition:transform .3s;box-shadow:0 4px 0 rgba(0,0,0,.2)}
+.land span{font-size:38px}
+.land.U{background:linear-gradient(160deg,#4BA6F5,#1F6FC4)}.land.R{background:linear-gradient(160deg,#FF8556,#C9391A)}.land.T{background:linear-gradient(160deg,#FFD976,#C9911A);color:#2B1650}
+.land.tapped{transform:rotate(90deg);opacity:.75}
+.paypool{display:flex;gap:6px;justify-content:center;min-height:30px;margin-top:10px}
+.orderbox{display:grid;gap:10px;margin-top:10px}
+.orderdone{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;min-height:44px}
+.orderdone span{background:var(--good);color:#fff;border-radius:99px;padding:8px 12px;font-weight:700;font-size:16px}
+.orderopts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.orderopts button{padding:14px 10px;border-radius:18px;background:var(--chip);font-size:18px;font-weight:600}
+.orderopts button.used{visibility:hidden}
+.orderopts button.wrong{animation:shake .4s}
+.mini-board{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.mini-board figure{margin:0;width:96px;text-align:center;font-size:13px;font-weight:600}
+.mini-board figure img{width:96px;height:72px;object-fit:cover;border-radius:10px;display:block}
+.mini-board .pt{display:inline-block;background:var(--surface);border:2px solid var(--line);border-radius:8px;padding:0 6px;margin-top:3px;font-weight:700}
+/* star map */
+.skybox{background:radial-gradient(120% 90% at 50% 0%,#2E1A66,#0E0A2A 70%);border-radius:26px;padding:10px;box-shadow:0 6px 24px var(--shadow);position:relative;overflow:hidden}
+.skybox::before{content:"";position:absolute;inset:0;background-image:radial-gradient(1px 1px at 20% 30%,#fff8,transparent),radial-gradient(1px 1px at 70% 20%,#fff9,transparent),radial-gradient(1.5px 1.5px at 40% 80%,#fff7,transparent),radial-gradient(1px 1px at 85% 65%,#fff8,transparent),radial-gradient(1px 1px at 10% 85%,#fff6,transparent),radial-gradient(1.5px 1.5px at 55% 50%,#fff5,transparent);animation:twinkle 4s ease-in-out infinite alternate}
+@keyframes twinkle{to{opacity:.4}}
+.skybox svg{width:100%;height:auto;display:block;position:relative}
+.skybox .cap{position:relative;color:#E9E2FF;text-align:center;font-size:17px;font-weight:600;margin:4px 0 2px}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:12px}
+.tcard{background:var(--surface);border-radius:20px;padding:12px;box-shadow:0 4px 0 var(--line);display:flex;gap:10px;align-items:center;text-align:left}
+.tcard .ge{font-size:34px;filter:grayscale(1) opacity(.35)}
+.tcard.got .ge{filter:none;text-shadow:0 0 14px rgba(255,201,74,.9)}
+.tcard b{display:block;font-size:15px}
+.tcard small{color:var(--muted);font-size:13px}
+.celebrate .box.treasure{background:radial-gradient(120% 100% at 50% 0%,#3B2386,#120C33 75%);color:#fff;border:3px solid #FFD976;box-shadow:0 0 60px rgba(255,217,118,.55)}
+.celebrate .box.treasure p{color:#E9E2FF}
+.celebrate .box.treasure .bigemo{animation:gemglow 1.6s ease-in-out infinite alternate}
+@keyframes gemglow{from{filter:drop-shadow(0 0 6px #FFD976)}to{filter:drop-shadow(0 0 26px #FFD976) brightness(1.15)}}
+.celebrate .box .tmap{margin:8px 0 2px}
 /* celebration */
 .celebrate{position:fixed;inset:0;background:rgba(20,8,48,.82);display:grid;place-items:center;z-index:20;padding:24px}
 .celebrate .box{background:var(--surface);border-radius:30px;padding:18px;max-width:420px;width:100%;text-align:center;animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
@@ -401,15 +469,17 @@ body.theme-forest{--bg:#ECF8EE;--bg2:#D5F0DA;--violet:#2E9B5C;--line:#C6E8CE;--c
       <button class="game-btn hidden" data-go="story" id="storyTile"><div class="ico" style="background:#3E7BD6">📖</div><b>Story Time</b><span>Stories with your creatures</span></button>
       <button class="game-btn" data-go="studio"><div class="ico" style="background:#FF7EB6">🎨</div><b>Art Studio</b><span>Paint anything!</span></button>
       <button class="game-btn" data-go="maker"><div class="ico" style="background:#E86BB8">🦄</div><b>Make a Creature</b><span>Unicorns, kitties, and more</span></button>
-      <button class="game-btn" data-go="echo"><div class="ico" style="background:linear-gradient(135deg,#4BA6F5,#B07CFF,#FFD976)">🎵</div><b>Spell Echo <span class="newtag">NEW</span></b><span>Copy the magic colors</span></button>
-      <button class="game-btn" data-go="pop"><div class="ico" style="background:#6A35D0">🧚</div><b>Faerie Pop <span class="newtag">NEW</span></b><span>Catch the faeries!</span></button>
-      <button class="game-btn" data-go="fog"><div class="ico" style="background:#7E8BA8">🌫️</div><b>Magic Fog <span class="newtag">NEW</span></b><span>Who's hiding?</span></button>
+      <button class="game-btn" data-go="echo"><div class="ico" style="background:linear-gradient(135deg,#4BA6F5,#B07CFF,#FFD976)">🎵</div><b>Spell Echo</b><span>Copy the magic colors</span></button>
+      <button class="game-btn" data-go="pop"><div class="ico" style="background:#6A35D0">🧚</div><b>Faerie Pop</b><span>Catch the faeries!</span></button>
+      <button class="game-btn" data-go="fog"><div class="ico" style="background:#7E8BA8">🌫️</div><b>Magic Fog</b><span>Who's hiding?</span></button>
       <button class="game-btn" data-go="memory"><div class="ico" style="background:#8A4FE6">🃏</div><b>Memory Match</b><span>Find the pairs</span></button>
       <button class="game-btn" data-go="count"><div class="ico" style="background:var(--violet)">3</div><b>Count the Mana</b><span>Add up the cost</span></button>
       <button class="game-btn" data-go="battle"><div class="ico" style="background:var(--red)">⚔</div><b>Who Wins?</b><span>Power vs. toughness</span></button>
       <button class="game-btn" data-go="bubbles"><div class="ico" style="background:radial-gradient(circle at 30% 30%,#9ED2FF,#2E8FE0)">🫧</div><b>Mana Bubbles</b><span>Pop the right colors!</span></button>
       <button class="game-btn" data-go="says"><div class="ico" style="background:#1F9D63">🗣️</div><b>Rootha Says</b><span>Listen and move!</span></button>
-      <button class="game-btn wide" data-go="shop"><div class="ico" style="background:var(--gold)">🛍️</div><div><b>Star Shop <span class="newtag">NEW</span></b><span>Spend your stars on creatures, colors, and brushes</span></div></button>
+      <button class="game-btn wide" data-go="school"><div class="ico" style="background:linear-gradient(135deg,#2E8FE0,#8A4FE6,#EF5A31)">🎓</div><div><b>Magic School <span class="newtag">NEW</span></b><span>Learn to play: cards, mana, turns, battles, and Rootha's big trick</span></div></button>
+      <button class="game-btn wide" data-go="stars"><div class="ico" style="background:#1B1250">🌌</div><div><b>Star Map <span class="newtag">NEW</span></b><span>Twelve hidden treasures to find in the sky</span></div></button>
+      <button class="game-btn wide" data-go="shop"><div class="ico" style="background:var(--gold)">🛍️</div><div><b>Star Shop</b><span>Spend your stars on creatures, colors, and brushes</span></div></button>
       <button class="game-btn wide" data-go="night"><div class="ico" style="background:#D9411E">❤️</div><div><b>Game Night</b><span>Life counter and dice for real games at the table</span></div></button>
       <button class="game-btn wide" data-go="book"><div class="ico" style="background:var(--gold)">⭐</div><div><b>My Spellbook</b><span>Stickers, creatures, and cards you've cast</span></div></button>
     </div>
@@ -419,7 +489,7 @@ body.theme-forest{--bg:#ECF8EE;--bg2:#D5F0DA;--violet:#2E9B5C;--line:#C6E8CE;--c
       <p><b>Make a Creature:</b> she designs her own creature card. Stronger creatures cost more. Saved creatures appear in Window Magic, Count the Mana, and Who Wins.</p>
       <p><b>Story Time</b> asks Claude to write a short, gentle story starring the creatures she picks, then reads it aloud (it uses your Claude account, so it asks permission the first time). <b>Memory Match</b> is a flip-and-find pairs game. In <b>My Spellbook</b>, tap one of her creatures to edit it, and use <b>Print my creatures</b> to get a real-card-size PDF to cut out and sleeve.</p>
       <p><b>Rootha Says:</b> Simon Says, read aloud, no screen needed. You're the judge: if she moves when Rootha didn't say it, gotcha! Every correct answer earns a star, and every 10 stars earns a sticker in My Spellbook. Tap any question to hear it again. Everything is saved on this device only.</p>
-      <p><b>Mana Bubbles:</b> pop bubbles to pay a card's cost; colored slots need that color, gray slots take any. <b>Game Night</b> is a life counter (20 or 40 life, 2–4 players) with dice, a coin, and "who goes first." In Make a Creature she can <b>draw her own picture</b>, and <b>Art Studio</b> is free painting with a saved gallery. With a <b>Spell Car server</b> (below), the tablet app also gets Story Time, AI creature pictures, and natural neural voices from your Azure account. <b>Magic movies</b> (Google Veo, via the same server) let her cards and creatures move: tap a card in My Spellbook, or use "Make all deck cards move" below; each clip is made once, shared by all your devices, and plays offline. <b>Levels</b> come from every star she has ever earned, so spending stars in the <b>Star Shop</b> never lowers her level or stickers. There are six hidden <b>secrets</b>; the ❓ tiles in My Spellbook give hints. <b>Backup</b> in My Spellbook moves her creatures and stars between the tablet and the web version.</p>
+      <p><b>Mana Bubbles:</b> pop bubbles to pay a card's cost; colored slots need that color, gray slots take any. <b>Game Night</b> is a life counter (20 or 40 life, 2–4 players) with dice, a coin, and "who goes first." In Make a Creature she can <b>draw her own picture</b>, and <b>Art Studio</b> is free painting with a saved gallery. With a <b>Spell Car server</b> (below), the tablet app also gets Story Time, AI creature pictures, and natural neural voices from your Azure account. <b>Magic movies</b> (Google Veo, via the same server) let her cards and creatures move: tap a card in My Spellbook, or use "Make all deck cards move" below; each clip is made once, shared by all your devices, and plays offline. <b>Magic School</b> turns the printed Spellbook into twelve spoken, tappable lessons (zones, card parts, mana, the turn, combat, prowess and magecraft, Treasure, Rootha's Elemental trick, and a full practice turn), ending in a printable diploma. The <b>Star Map</b> holds twelve harder treasures (long streaks, high scores, collecting every card) that light up a dragon constellation. <b>Levels</b> come from every star she has ever earned, so spending stars in the <b>Star Shop</b> never lowers her level or stickers. There are six hidden <b>secrets</b>; the ❓ tiles in My Spellbook give hints. <b>Backup</b> in My Spellbook moves her creatures and stars between the tablet and the web version.</p>
       <div class="voiceset hidden" id="cloudSet"><b>Spell Car server (Azure)</b>
         <div class="pnote" style="margin:2px 0 6px">Adds Story Time, AI creature pictures, and natural voices. Uses your self-hosted Spell Car server; the Azure keys stay on the server.</div>
         <input id="cloudUrl" placeholder="Server address, e.g. https://spellcar.example.com" autocomplete="off" inputmode="url">
@@ -577,6 +647,23 @@ body.theme-forest{--bg:#ECF8EE;--bg2:#D5F0DA;--violet:#2E9B5C;--line:#C6E8CE;--c
     </div>
   </section>
 
+  <!-- MAGIC SCHOOL -->
+  <section id="school" class="hidden">
+    <div class="pnote" style="text-align:center;margin:0 0 10px;font-size:16px">Twelve lessons from your Spellbook. Tap the glowing one to start!</div>
+    <div class="lessons" id="lessonList"></div>
+    <button class="diploma-btn hidden" id="diplomaBtn">🎓 Get my diploma!</button>
+  </section>
+  <section id="lesson" class="hidden">
+    <div class="lprog" id="lProg"></div>
+    <div class="lpage" id="lPage"></div>
+  </section>
+
+  <!-- STAR MAP -->
+  <section id="stars" class="hidden">
+    <div class="skybox"><div class="cap" id="skyCap"></div><div id="skySvg"></div></div>
+    <div class="tgrid" id="tGrid"></div>
+  </section>
+
   <!-- STAR SHOP -->
   <section id="shop" class="hidden">
     <div class="shop-head"><div class="big">⭐ <span id="shopStars">0</span></div><div class="pnote">Earn stars by playing. Shopping never lowers your level or your stickers!</div></div>
@@ -721,6 +808,7 @@ function addStar(n = 1){
                      spoken: `Level up! You're a ${LEVELS[lv][1]} now! Here are five bonus stars!` });
   }
   store("luna_stars", stars); store("luna_xp", xp); renderStars();
+  setTimeout(checkTreasures, 60);
 }
 function spendStars(n){ if (stars < n) return false; stars -= n; store("luna_stars", stars); renderStars(); return true; }
 
@@ -946,7 +1034,10 @@ function burst(n = 18){
     L.appendChild(s); setTimeout(() => s.remove(), 1300);
   }
 }
-function showCelebrate({ img, emo, title, sub, spoken, clip }){
+function showCelebrate({ img, emo, title, sub, spoken, clip, treasure }){
+  const bx = document.querySelector("#celebrate .box"); bx.classList.toggle("treasure", treasure !== undefined);
+  const old = bx.querySelector(".tmap"); if (old) old.remove();
+  if (treasure !== undefined){ const m = document.createElement("div"); m.className = "tmap"; m.innerHTML = skySVG(treasure, true); $("celTitle").before(m); }
   $("celImg").classList.toggle("hidden", !img); if (img) $("celImg").src = img;
   $("celMedia").classList.add("hidden"); $("celMedia").innerHTML = "";
   if (clip && clipKeys.has(clip)) playClipIn($("celMedia"), clip, img).then(ok => { if (ok){ $("celMedia").classList.remove("hidden"); $("celImg").classList.add("hidden"); } });
@@ -955,12 +1046,12 @@ function showCelebrate({ img, emo, title, sub, spoken, clip }){
   $("celebrate").classList.remove("hidden"); burst(28); emo ? fanfare() : chime(); say(spoken || title); $("celOk").focus();
 }
 $("celOk").onclick = () => {
-  $("celebrate").classList.add("hidden"); $("celMedia").innerHTML = "";
+  $("celebrate").classList.add("hidden"); $("celMedia").innerHTML = ""; const pb = $("celPrint"); if (pb) pb.remove();
   setTimeout(flushCelebrate, 250);
 };
 
 /* ---------- navigation ---------- */
-const screens = { home: "", echo: "Spell Echo", pop: "Faerie Pop", fog: "Magic Fog", shop: "Star Shop", studio: "Art Studio", bubbles: "Mana Bubbles", night: "Game Night", window: "Window Magic", story: "Story Time", memory: "Memory Match", maker: "Make a Creature", count: "Count the Mana", battle: "Who Wins?", says: "Rootha Says", book: "My Spellbook" };
+const screens = { home: "", school: "Magic School", lesson: "", stars: "Star Map", echo: "Spell Echo", pop: "Faerie Pop", fog: "Magic Fog", shop: "Star Shop", studio: "Art Studio", bubbles: "Mana Bubbles", night: "Game Night", window: "Window Magic", story: "Story Time", memory: "Memory Match", maker: "Make a Creature", count: "Count the Mana", battle: "Who Wins?", says: "Rootha Says", book: "My Spellbook" };
 let current = "home";
 function go(id, quiet){
   if (current === "says" && id !== "says") stopSays();
@@ -986,6 +1077,8 @@ function go(id, quiet){
   if (id === "echo"){ echo.seq = []; renderEchoTop(); $("echoGo").textContent = "Start ▶"; $("echoGo").classList.remove("hidden"); say("Spell Echo! Watch the colors light up, then tap them in the same order. Tap start!"); }
   if (id === "pop"){ renderPopTop(); $("popTime").style.width = "100%"; say("Faerie Pop! Catch the faeries when they peek out. Tap start!"); }
   if (id === "fog") newFog();
+  if (id === "school"){ renderSchool(); if (!quiet) say(Object.keys(stats.lessons).length === LESSONS.length ? "You finished Magic School! Tap Get my diploma!" : "Magic School! Tap the glowing lesson to start."); }
+  if (id === "stars"){ renderStarMap(); if (!quiet) say("The Star Map! Find treasures to light up the stars. Tap a star for a clue."); }
   if (id === "shop"){ renderShop(); say(`Star Shop! You have ${stars} stars to spend.`); }
   if (id === "studio"){ renderStudio(); say("Art studio! Tap new painting, or tap a painting to keep working on it."); }
   if (id === "night") openNight();
@@ -1107,7 +1200,7 @@ $("savePet").onclick = () => {
   if (!store("luna_pets", pets)){ pets = before; boop(); say("Your Spellbook is too full! Ask a grown-up to remove a creature first."); return; }
   if (/luna/i.test(p.name)) setTimeout(() => findEgg("luna"), 1200);
   if (p.p === 9 && p.t === 9) setTimeout(() => findEgg("mega"), 1200);
-  if (!wasEdit) addStar();
+  if (!wasEdit){ bumpStat("petsMade"); addStar(); }
   editId = null;
   const pw = POWERS.find(x => x.id === p.power);
   showCelebrate({ img: petImg(p), title: wasEdit ? `${p.name} is all new!` : `${p.name} joined your Spellbook!`, sub: `Power ${p.p}, toughness ${p.t}`,
@@ -1118,7 +1211,9 @@ $("savePet").onclick = () => {
 /* ---------- COUNT THE MANA ---------- */
 let cCur = null, cLast = null, cRun = 0;
 const numWords = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
+let cMissed = false;
 function newCount(){
+  cMissed = false;
   const pool_ = allCards(); do { cCur = rnd(pool_); } while (cCur === cLast && pool_.length > 1); cLast = cCur; cRun = 0;
   $("cArt").src = cCur.img; $("cName").textContent = cCur.name;
   const row = $("cCost"); row.innerHTML = "";
@@ -1140,11 +1235,12 @@ function newCount(){
     b.onclick = () => {
       if (!$("cNext").classList.contains("hidden")) return;
       if (n === t){
+        if (!cMissed) bumpStat("countStreak"); cMissed = true;
         b.classList.add("right"); addStar(); burst(); chime();
         const parts = []; if (cCur.g) parts.push(`${cCur.g} of any color`); if (cCur.u) parts.push(`${cCur.u} blue`); if (cCur.r) parts.push(`${cCur.r} red`);
         $("cExplain").textContent = parts.join(" + ") + ` = ${t}`; $("cNext").classList.remove("hidden");
         say(`Yes! ${parts.join(", plus ")}. That makes ${t}!`);
-      } else { b.classList.remove("wrong"); void b.offsetWidth; b.classList.add("wrong"); boop(); say("Hmm, tap the circles to count them."); }
+      } else { cMissed = true; setStat("countStreak", 0); b.classList.remove("wrong"); void b.offsetWidth; b.classList.add("wrong"); boop(); say("Hmm, tap the circles to count them."); }
     };
     box.appendChild(b);
   });
@@ -1156,7 +1252,9 @@ $("cQ").onclick = () => say(`How many mana does ${cCur.say} cost?`);
 /* ---------- WHO WINS ---------- */
 let bAtk, bDef, bLastKey = "";
 const dots = (n, col) => Array.from({ length: n }, () => `<span class="dot" style="background:${col}"></span>`).join("");
+let bMissed = false;
 function newBattle(){
+  bMissed = false;
   const cr = allCards().filter(c => c.p !== null);
   const petsIn = cr.filter(c => c.pet);
   let key, tries = 0;
@@ -1179,11 +1277,12 @@ document.querySelectorAll("#battle .yesno .ans").forEach(b => b.onclick = () => 
   if (!$("bNext").classList.contains("hidden")) return;
   const truth = bAtk.p >= bDef.t, pick = b.dataset.yes === "1";
   if (pick === truth){
+    if (!bMissed) bumpStat("battleStreak"); bMissed = true;
     b.classList.add("right"); addStar(); burst(); chime();
     $("bExplain").textContent = truth ? `${bAtk.p} is as big as ${bDef.t} or bigger, so ${bDef.name} is defeated!` : `${bAtk.p} is less than ${bDef.t}, so ${bDef.name} is safe!`;
     $("bNext").classList.remove("hidden");
     say(truth ? `Yes! ${bAtk.p} damage is enough. ${bDef.say} is defeated!` : `Right! ${bAtk.p} damage is not enough. ${bDef.say} is safe!`);
-  } else { b.classList.remove("wrong"); void b.offsetWidth; b.classList.add("wrong"); boop(); say("Try again! Compare the red dots and the purple dots."); }
+  } else { bMissed = true; setStat("battleStreak", 0); b.classList.remove("wrong"); void b.offsetWidth; b.classList.add("wrong"); boop(); say("Try again! Compare the red dots and the purple dots."); }
 });
 $("bNext").onclick = newBattle;
 
@@ -1271,6 +1370,7 @@ if (window.AndroidBridge){
   }) };
 }
 window.__back = () => {
+  if (current === "lesson"){ go("school"); return "stay"; }
   if (!$("viewer").classList.contains("hidden")){ $("vClose").click(); return "stay"; }
   if (!$("paint").classList.contains("hidden")){ $("pCancel").click(); return "stay"; }
   if (!$("celebrate").classList.contains("hidden")){ $("celOk").click(); return "stay"; }
@@ -1932,7 +2032,7 @@ $("titleSpark").onclick = () => {
 })();
 
 /* ---------- STAR SHOP ---------- */
-const THEMES = { night: "Night sky", rainbow: "Rainbow", ocean: "Ocean", candy: "Candy", forest: "Forest" };
+const THEMES = { night: "Night sky", rainbow: "Rainbow", ocean: "Ocean", candy: "Candy", forest: "Forest", starlight: "Starlight" };
 let theme = load("luna_theme", "night");
 function applyTheme(){ Object.keys(THEMES).forEach(t => document.body.classList.toggle("theme-" + t, t === theme && t !== "night")); }
 applyTheme();
@@ -1940,19 +2040,20 @@ const SHOP = [].concat(
   KINDS.filter(k => k.shop).map(k => ({ id: "kind:" + k.id, cat: "New creatures", emo: k.emo, name: k.name, price: k.shop })),
   ACCS.filter(a => a.shop).map(a => ({ id: "acc:" + a.id, cat: "Accessories", emo: a.emo, name: a.label, price: a.shop })),
   [{ id: "theme:night", emo: "🌙", price: 0 }, { id: "theme:rainbow", emo: "🌈", price: 25 }, { id: "theme:ocean", emo: "🌊", price: 25 },
-   { id: "theme:candy", emo: "🍬", price: 25 }, { id: "theme:forest", emo: "🌳", price: 25 }].map(t => ({ ...t, cat: "App colors", name: THEMES[t.id.slice(6)] })),
+   { id: "theme:candy", emo: "🍬", price: 25 }, { id: "theme:forest", emo: "🌳", price: 25 }, { id: "theme:starlight", emo: "🌌", price: 999 }].map(t => ({ ...t, cat: "App colors", name: THEMES[t.id.slice(6)] })),
   [{ id: "brush:gold", emo: "🌟", name: "Gold glitter crayon", price: 12 }, { id: "brush:unicorn", emo: "🦄", name: "Unicorn stamp", price: 12 },
    { id: "brush:star", emo: "⭐", name: "Star stamp", price: 12 }].map(b => ({ ...b, cat: "Art Studio" }))
 );
 let shopArmed = null;
 function itemOwned(it){ return it.price === 0 || isOwned(it.id); }
+function shopHidden(it){ return it.id === "theme:starlight" && !isOwned(it.id); }
 function renderShop(){
   renderStars();
   const L = $("shopList"); L.innerHTML = "";
   [...new Set(SHOP.map(i => i.cat))].forEach(cat => {
     const h = document.createElement("h3"); h.className = "sec-h"; h.textContent = cat; L.appendChild(h);
     const g = document.createElement("div"); g.className = "shopgrid"; L.appendChild(g);
-    SHOP.filter(i => i.cat === cat).forEach(it => {
+    SHOP.filter(i => i.cat === cat && !shopHidden(i)).forEach(it => {
       const own = itemOwned(it), isTheme = it.id.startsWith("theme:"), using = isTheme && theme === it.id.slice(6);
       const d = document.createElement("div"); d.className = "shopitem" + (!own && stars < it.price ? " poor" : ""); d.dataset.item = it.id;
       const label = own ? (isTheme ? (using ? "Using ✓" : "Use") : "Yours ✓") : shopArmed === it.id ? "Tap again!" : `⭐ ${it.price}`;
@@ -2093,7 +2194,7 @@ const FOG_STEPS = [26, 18, 12, 7, 3, 0];
 const fog = { card: null, level: 0, timer: null, done: false, last: null };
 function setFog(){ $("fogImg").style.filter = FOG_STEPS[fog.level] ? `blur(${FOG_STEPS[fog.level]}px) saturate(.75) brightness(1.08)` : "none"; }
 function newFog(){
-  clearInterval(fog.timer); fog.done = false; fog.level = 0;
+  clearInterval(fog.timer); fog.done = false; fog.level = 0; fog.missed = false;
   const pool_ = allCards(); do { fog.card = rnd(pool_); } while (fog.card === fog.last && pool_.length > 1); fog.last = fog.card;
   const others = pool_.filter(c => c !== fog.card).sort(() => Math.random() - 0.5).slice(0, 2);
   const opts = [fog.card, ...others].sort(() => Math.random() - 0.5);
@@ -2111,12 +2212,359 @@ function fogPick(b, c){
   if (fog.done) return;
   if (c === fog.card){
     fog.done = true; clearInterval(fog.timer); fog.level = FOG_STEPS.length - 1; setFog(); b.classList.add("right");
-    const earned = fog.level < 3 ? 2 : 1; addStar(earned); chime(); burst(16);
+    const earned = fog.level < 3 ? 2 : 1;
+    if (earned > 1 && !fog.missed) bumpStat("fogStreak"); else setStat("fogStreak", 0);
+    addStar(earned); chime(); burst(16);
     $("fogExplain").textContent = `It's ${c.name}!${earned > 1 ? " Super fast! +2 stars" : ""}`; $("fogNext").classList.remove("hidden");
     say(`It's ${c.say}! ${earned > 1 ? "Super fast! Two stars!" : "You found it!"}`);
-  } else { b.classList.remove("wrong"); void b.offsetWidth; b.classList.add("wrong"); boop(); say("Not that one! Look closer."); }
+  } else { fog.missed = true; setStat("fogStreak", 0); b.classList.remove("wrong"); void b.offsetWidth; b.classList.add("wrong"); boop(); say("Not that one! Look closer."); }
 }
 $("fogNext").onclick = newFog;
+
+/* ---------- PROGRESS STATS ---------- */
+let stats = load("luna_stats", {});
+stats.petsMade = Math.max(stats.petsMade || 0, pets.length);
+stats.paintings = Math.max(stats.paintings || 0, (load("luna_drawings", []) || []).length);
+stats.lessons = stats.lessons || {};
+function setStat(k, v){ stats[k] = v; store("luna_stats", stats); }
+function bumpStat(k, n = 1){ setStat(k, (stats[k] || 0) + n); }
+
+/* ---------- STAR MAP: twelve hidden treasures ---------- */
+const TREASURES = [
+  { id: "scholar", emo: "🎓", name: "Scholar Star", hint: "Finish every lesson in Magic School.", prog: () => [Object.keys(stats.lessons).length, LESSONS.length] },
+  { id: "echo", emo: "🎵", name: "Echo Star", hint: "Remember 8 colors in a row in Spell Echo.", prog: () => [Math.min(8, load("luna_echo_best", 0)), 8] },
+  { id: "faerie", emo: "🧚", name: "Faerie Star", hint: "Catch 25 faeries in one game of Faerie Pop.", prog: () => [Math.min(25, load("luna_pop_best", 0)), 25] },
+  { id: "collector", emo: "📚", name: "Collector Star", hint: "Cast every card in your deck at least once.", prog: () => [CARDS.filter(c => cast[c.name]).length, CARDS.length] },
+  { id: "fog", emo: "🌫️", name: "Fog Star", hint: "In Magic Fog, guess 5 in a row while the fog is still thick.", prog: () => [Math.min(5, stats.fogStreakBest || 0), 5] },
+  { id: "battle", emo: "⚔️", name: "Battle Star", hint: "Get 10 Who Wins answers right in a row, first try.", prog: () => [Math.min(10, stats.battleStreakBest || 0), 10] },
+  { id: "count", emo: "🔢", name: "Counting Star", hint: "Get 10 Count the Mana answers right in a row, first try.", prog: () => [Math.min(10, stats.countStreakBest || 0), 10] },
+  { id: "bubble", emo: "🫧", name: "Bubble Star", hint: "Cast 10 spells in Mana Bubbles.", prog: () => [Math.min(10, stats.bubbleCasts || 0), 10] },
+  { id: "keeper", emo: "🦄", name: "Keeper Star", hint: "Make 10 creatures.", prog: () => [Math.min(10, stats.petsMade || 0), 10] },
+  { id: "painter", emo: "🎨", name: "Painter Star", hint: "Make 8 paintings in Art Studio.", prog: () => [Math.min(8, stats.paintings || 0), 8] },
+  { id: "secrets", emo: "🔮", name: "Secret Star", hint: "Find all six secrets.", prog: () => [Object.keys(eggs).length, EGGS.length] },
+  { id: "turn", emo: "🐉", name: "Turn Star", hint: "Play the Practice Turn lesson without a single mistake.", prog: () => [stats.perfectTurn ? 1 : 0, 1] },
+];
+let treasures = load("luna_treasures", {});
+const SKY = [[340, 70], [298, 96], [255, 120], [205, 136], [155, 152], [106, 178], [62, 218], [244, 64], [198, 40], [150, 58], [232, 190], [178, 200]];
+const SKY_EDGES = [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [2, 7], [7, 8], [8, 9], [9, 3], [2, 10], [3, 11]];
+function skySVG(highlight, small){
+  const got = i => !!treasures[TREASURES[i].id];
+  let out = `<svg viewBox="20 10 360 230" role="img" aria-label="Galazeth's constellation">`;
+  SKY_EDGES.forEach(([a, b]) => {
+    const on = got(a) && got(b);
+    out += `<line x1="${SKY[a][0]}" y1="${SKY[a][1]}" x2="${SKY[b][0]}" y2="${SKY[b][1]}" stroke="${on ? "#FFD976" : "rgba(233,226,255,.18)"}" stroke-width="${on ? 2.4 : 1.4}" stroke-linecap="round" ${on ? "" : 'stroke-dasharray="3 5"'}/>`;
+  });
+  SKY.forEach(([x, y], i) => {
+    const g = got(i), hi = i === highlight;
+    out += `<g data-star="${i}" style="cursor:pointer">`;
+    if (g) out += `<circle cx="${x}" cy="${y}" r="${hi ? 16 : 11}" fill="rgba(255,217,118,${hi ? .45 : .25})"><animate attributeName="r" values="${hi ? "12;19;12" : "9;13;9"}" dur="${hi ? 1.2 : 3}s" repeatCount="indefinite"/></circle>`;
+    out += `<path transform="translate(${x} ${y}) scale(${g ? (hi ? 1.25 : 1) : 0.7})" d="M0-9C1-2 2-1 9 0 2 1 1 2 0 9-1 2-2 1-9 0-2-1-1-2 0-9Z" fill="${g ? "#FFE9A8" : "rgba(233,226,255,.35)"}"/>`;
+    if (!small) out += `<circle cx="${x}" cy="${y}" r="20" fill="transparent"/>`;
+    out += `</g>`;
+  });
+  return out + "</svg>";
+}
+function checkTreasures(){
+  ["fog", "battle", "count"].forEach(k => { if ((stats[k + "Streak"] || 0) > (stats[k + "StreakBest"] || 0)) stats[k + "StreakBest"] = stats[k + "Streak"]; });
+  store("luna_stats", stats);
+  TREASURES.forEach((t, i) => {
+    if (treasures[t.id]) return;
+    const [a, b] = t.prog(); if (a < b) return;
+    treasures[t.id] = Date.now(); store("luna_treasures", treasures);
+    const all = TREASURES.every(x => treasures[x.id]);
+    queueCelebrate({ emo: t.emo, title: `Treasure! The ${t.name}`, sub: all ? "Galazeth's whole constellation is shining!" : `${Object.keys(treasures).length} of ${TREASURES.length} stars in the sky`,
+      spoken: all ? `You found the ${t.name}! And that's every star! Galazeth's constellation is complete! You unlocked the Starlight colors!` : `A treasure! You found the ${t.name}! Look, a new star is shining in the sky!`,
+      treasure: i });
+    if (all){ owned["theme:starlight"] = Date.now(); store("luna_owned", owned); }
+  });
+}
+function renderStarMap(){
+  const n = Object.keys(treasures).length;
+  $("skyCap").textContent = n === TREASURES.length ? "✨ Galazeth's constellation is complete! ✨" : `${n} of ${TREASURES.length} stars found`;
+  $("skySvg").innerHTML = skySVG(-1);
+  $("skySvg").querySelectorAll("[data-star]").forEach(g => g.onclick = () => {
+    const t = TREASURES[+g.dataset.star];
+    say(treasures[t.id] ? `The ${t.name}! You found it!` : `This star is still hiding. ${t.hint}`);
+  });
+  const G = $("tGrid"); G.innerHTML = "";
+  TREASURES.forEach(t => {
+    const [a, b] = t.prog(), got = !!treasures[t.id];
+    const d = document.createElement("button"); d.className = "tcard" + (got ? " got" : "");
+    d.innerHTML = `<span class="ge">${t.emo}</span><span><b>${got ? t.name : "???"}</b><small>${got ? "Found!" : b > 1 ? `${a} of ${b}` : "Not yet"}</small></span>`;
+    d.onclick = () => say(got ? `The ${t.name}! You found it!` : `Here's a clue. ${t.hint}`);
+    G.appendChild(d);
+  });
+}
+
+/* ---------- MAGIC SCHOOL ---------- */
+const CB = n => CARDS.find(c => c.name === n || c.full === n);
+const ART = n => `<img class="art" src="${CB(n).img}" alt="${n}">`;
+const DOT = { W: ["#F8F1D6", "☀️"], G: ["#2BB673", "🌲"], B: ["#3A3340", "🌑"] };
+const dot = c => DOT[c] ? `<span style="display:inline-grid;place-items:center;width:46px;height:46px;border-radius:50%;background:${DOT[c][0]};font-size:24px">${DOT[c][1]}</span>` : sym(c, 0, true);
+const fig = (n, extra) => { const c = CB(n); return `<figure><img src="${c.img}" alt=""><div>${c.name}</div>${c.p !== null ? `<span class="pt">${c.p}/${c.t}</span>` : ""}${extra || ""}</figure>`; };
+const LESSONS = [
+ { id: "colors", emo: "🌈", title: "Magic Colors", pages: [
+   { t: "info", v: `${sym("U", 0, true)}<span class="big">+</span>${sym("R", 0, true)}<span class="big">=</span><span class="big">🔮</span>`, text: "Magic has five colors. Your deck uses two of them: <b>blue</b> and <b>red</b>." },
+   { t: "info", v: ART("Faerie Mastermind"), text: "<b>Blue</b> magic is water and clever thinking. Blue cards help you draw more cards." },
+   { t: "info", v: ART("Goldspan Dragon"), text: "<b>Red</b> magic is fire and dragons. Red cards are fast and strong!" },
+   { t: "info", v: ART("Rootha, Mastering the Moment"), text: "Blue and red together make <b>purple</b>. That's the Prismari school, where wizards make art out of magic!" },
+   { t: "quiz", q: "Which two colors are in your deck?", opts: [{ v: `<span>${sym("U", 0, true)}${sym("R", 0, true)}</span>`, l: "Blue and red", ok: 1 }, { v: `<span>${dot("G")}${dot("W")}</span>`, l: "Green and white" }, { v: `<span>${dot("B")}${dot("G")}</span>`, l: "Black and green" }], why: "Blue and red, mixed into purple!" },
+ ]},
+ { id: "zones", emo: "🗺️", title: "Where Cards Live", pages: [
+   { t: "info", v: `<span class="big">📚</span>`, text: "Your deck is called your <b>library</b>. You draw cards from the top." },
+   { t: "info", v: `<span class="big">🤚🃏</span>`, text: "Your <b>hand</b> is the cards you're holding. Keep them secret!" },
+   { t: "info", v: `<span class="big">🏰</span>`, text: "The <b>battlefield</b> is the table in front of you. Lands and creatures go there." },
+   { t: "info", v: `<span class="big">🍂</span>`, text: "The <b>graveyard</b> is the pile where used spells and defeated creatures go." },
+   { t: "info", v: ART("Rootha, Mastering the Moment"), text: "Rootha waits in the <b>command zone</b>. You can cast her from there whenever you have enough mana." },
+   { t: "quiz", q: "Where do you draw cards from?", opts: [{ e: "📚", l: "Library", ok: 1 }, { e: "🍂", l: "Graveyard" }, { e: "🤚", l: "Hand" }] },
+   { t: "quiz", q: "A creature is defeated. Where does it go?", opts: [{ e: "🍂", l: "Graveyard", ok: 1 }, { e: "📚", l: "Library" }, { e: "👑", l: "Command zone" }] },
+   { t: "quiz", q: "Where does Rootha wait when the game starts?", opts: [{ e: "👑", l: "Command zone", ok: 1 }, { e: "🤚", l: "Hand" }, { e: "🍂", l: "Graveyard" }] },
+ ]},
+ { id: "parts", emo: "🃏", title: "Parts of a Card", pages: [
+   { t: "info", v: `<span class="big">🃏🔍</span>`, text: "Every card has the same parts. Let's find them on <b>Stormcatch Mentor</b>!" },
+   { t: "hot", spots: [
+       { k: "name", r: [5, 3.5, 70, 7.5], l: "the name" }, { k: "cost", r: [77, 3.5, 20, 7.5], l: "the mana cost" }, { k: "art", r: [8, 11.5, 84, 43], l: "the picture" },
+       { k: "type", r: [6, 55.5, 86, 6], l: "the type line" }, { k: "text", r: [8, 62.5, 84, 25.5], l: "the rules text" }, { k: "pt", r: [76, 88, 20, 7], l: "the power and toughness" }] },
+   { t: "info", v: `<span class="big">1 / 1</span>`, text: "The first number is <b>power</b>: how hard it hits. The second is <b>toughness</b>: how much damage it can take." },
+   { t: "quiz", q: "Which number is power?", opts: [{ e: "1️⃣", l: "The first number", ok: 1 }, { e: "2️⃣", l: "The second number" }], why: "Power comes first. Then toughness." },
+ ]},
+ { id: "kinds", emo: "🧩", title: "Kinds of Cards", pages: [
+   { t: "info", v: `<span class="big">🏝️ ⛰️</span>`, text: "<b>Lands</b> make mana. You can play just <b>one land</b> each turn." },
+   { t: "info", v: ART("Goldspan Dragon"), text: "<b>Creatures</b> fight for you. They stay on the battlefield." },
+   { t: "info", v: ART("Prismari Command"), text: "<b>Instants</b> are quick spells. You can cast them any time, even on someone else's turn!" },
+   { t: "info", v: `<span class="big">📜</span>`, text: "<b>Sorceries</b> are spells too, but you can only cast them on your own turn." },
+   { t: "quiz", v: ART("Goldspan Dragon"), q: "What kind of card is Goldspan Dragon?", opts: [{ e: "🐉", l: "Creature", ok: 1 }, { e: "⛰️", l: "Land" }, { e: "⚡", l: "Instant" }] },
+   { t: "quiz", v: ART("Prismari Command"), q: "What kind of card is Prismari Command?", opts: [{ e: "⚡", l: "Instant", ok: 1 }, { e: "🐉", l: "Creature" }, { e: "⛰️", l: "Land" }] },
+   { t: "quiz", q: "Which kind can you play only one of each turn?", opts: [{ e: "🏝️", l: "Land", ok: 1 }, { e: "🐉", l: "Creature" }, { e: "⚡", l: "Instant" }] },
+ ]},
+ { id: "mana", emo: "💧", title: "Making Mana", pages: [
+   { t: "info", v: `<span class="big">🏝️ ➜ ${sym("U", 0, true)}</span>`, text: "To make mana, you <b>tap</b> a land. Tapping means turning it sideways." },
+   { t: "info", v: `<span class="big">🏝️</span>${sym("U", 0, true)} <span class="big">⛰️</span>${sym("R", 0, true)}`, text: "<b>Islands</b> make blue mana. <b>Mountains</b> make red mana." },
+   { t: "pay", card: "Stormcatch Mentor", lands: ["U", "U", "R"], text: "Tap lands to pay for <b>Stormcatch Mentor</b>. It needs one blue and one red." },
+   { t: "info", v: sym("N", 3, true), text: "A gray number means <b>any color</b> works. Three means any three mana." },
+   { t: "pay", card: "Goldspan Dragon", lands: ["R", "U", "R", "U", "U"], text: "<b>Goldspan Dragon</b> needs two red, plus three of any color. Tap to pay!" },
+   { t: "info", v: `<span class="big">🔄</span>`, text: "At the start of your turn, all your lands <b>untap</b>. Fresh mana every turn!" },
+ ]},
+ { id: "turn", emo: "🔁", title: "Your Turn", pages: [
+   { t: "order", q: "Put your turn in order! What comes first?", items: [["🔄", "Untap"], ["🃏", "Draw a card"], ["🏝️", "Play a land"], ["✨", "Cast spells"], ["⚔️", "Attack"], ["👋", "Say done"]] },
+   { t: "quiz", q: "How many lands can you play each turn?", opts: [{ e: "1️⃣", l: "One", ok: 1 }, { e: "2️⃣", l: "Two" }, { e: "♾️", l: "As many as I want" }] },
+   { t: "quiz", q: "A creature just arrived. Can it attack this turn?", opts: [{ e: "⏳", l: "Not yet", ok: 1 }, { e: "⚔️", l: "Yes" }], why: "New creatures need a turn to get ready. Unless they have haste!" },
+ ]},
+ { id: "combat", emo: "⚔️", title: "Battle Time", pages: [
+   { t: "info", v: `<span class="big">⚔️ 🛡️</span>`, text: "When you <b>attack</b>, the other player can <b>block</b> with one of their creatures." },
+   { t: "info", v: `<div class="mini-board">${fig("Muddle, the Ever-Changing")}<span class="big">vs</span>${fig("Stormcatch Mentor")}</div>`, text: "Each creature deals damage equal to its <b>power</b>. If the damage is as big as the other creature's <b>toughness</b>, it's defeated." },
+   { t: "quiz", v: `<div class="mini-board">${fig("Muddle, the Ever-Changing")}<span class="big">vs</span>${fig("Stormcatch Mentor")}</div>`, q: "Muddle attacks. Stormcatch Mentor blocks. Who is defeated?",
+     opts: [{ i: "Stormcatch Mentor", l: "Stormcatch Mentor", ok: 1 }, { i: "Muddle, the Ever-Changing", l: "Muddle" }, { e: "🤝", l: "Both" }], why: "Muddle hits for 3, and Mentor can only take 1. Mentor hits for 1, and Muddle can take 3." },
+   { t: "info", v: ART("Goldspan Dragon"), text: "<b>Flying</b> creatures can only be blocked by other flyers." },
+   { t: "quiz", v: `<div class="mini-board">${fig("Goldspan Dragon")}<span class="big">vs</span>${fig("Renegade Bull")}</div>`, q: "Goldspan Dragon flies in to attack. Can Renegade Bull block it?",
+     opts: [{ e: "🚫", l: "No", ok: 1 }, { e: "✅", l: "Yes" }], why: "The Bull can't fly, so the Dragon soars right over it!" },
+   { t: "info", v: ART("Goldspan Dragon"), text: "<b>Haste</b> means a creature can attack the very turn it arrives. Goldspan Dragon has haste!" },
+ ]},
+ { id: "spells", emo: "✨", title: "Spells Power Up", pages: [
+   { t: "info", v: ART("Prismari Command"), text: "Your deck <b>loves</b> instants and sorceries. Many of your creatures do something extra when you cast one!" },
+   { t: "info", v: ART("Stormcatch Mentor"), text: "<b>Prowess</b>: when you cast a spell, Stormcatch Mentor gets <b>+1/+1</b> until the end of the turn." },
+   { t: "quiz", v: `<div class="mini-board">${fig("Stormcatch Mentor")}</div>`, q: "Stormcatch Mentor is 1/1. You cast Prismari Command. How big is it now?",
+     opts: [{ e: "2️⃣", l: "2/2", ok: 1 }, { e: "1️⃣", l: "1/1" }, { e: "3️⃣", l: "3/3" }], why: "Plus one and plus one makes 2/2!" },
+   { t: "info", v: ART("Archmage Emeritus"), text: "<b>Magecraft</b>: when you cast a spell, Archmage Emeritus lets you draw a card." },
+   { t: "info", v: ART("Prismari Pianist"), text: "When you cast a spell, Prismari Pianist makes a little 1/1 <b>Elemental</b> friend." },
+   { t: "quiz", v: `<div class="mini-board">${fig("Prismari Pianist")}</div>`, q: "Prismari Pianist is out, and you cast one spell. What do you get?",
+     opts: [{ e: "🌀", l: "A 1/1 Elemental", ok: 1 }, { e: "🃏", l: "A card" }, { e: "🫥", l: "Nothing" }] },
+   { t: "info", v: ART("Thunderclap Drake"), text: "Stormcatch Mentor and Thunderclap Drake make your spells cost <b>one less</b> mana!" },
+ ]},
+ { id: "treasure", emo: "💰", title: "Treasure!", pages: [
+   { t: "info", v: `<span class="big">💰</span>`, text: "A <b>Treasure</b> is a magic coin. Tap it and use it up to make one mana of <b>any color</b>." },
+   { t: "info", v: ART("Storm-Kiln Artist"), text: "<b>Magecraft</b>: when you cast a spell, Storm-Kiln Artist makes a Treasure!" },
+   { t: "info", v: ART("Goldspan Dragon"), text: "When Goldspan Dragon attacks, you get a Treasure. And while Goldspan is out, each Treasure makes <b>two</b> mana!" },
+   { t: "pay", card: "Prismari Command", lands: ["U", "R", "T"], text: "Pay for Prismari Command with two lands and a Treasure!" },
+   { t: "quiz", q: "You have 3 lands and 1 Treasure. Goldspan Dragon costs 5. Is that enough?", opts: [{ e: "🙅", l: "No, that's 4", ok: 1 }, { e: "👍", l: "Yes" }], why: "3 lands plus 1 Treasure is 4 mana. One short!" },
+   { t: "quiz", v: `<div class="mini-board">${fig("Goldspan Dragon")}</div>`, q: "Goldspan Dragon is on the battlefield. How much mana does one Treasure make now?",
+     opts: [{ e: "2️⃣", l: "Two", ok: 1 }, { e: "1️⃣", l: "One" }, { e: "0️⃣", l: "Zero" }] },
+ ]},
+ { id: "rootha", emo: "🐉", title: "Rootha's Big Trick", pages: [
+   { t: "info", v: ART("Rootha, Mastering the Moment"), text: "Rootha is your <b>commander</b>. She's a sorceress who mixes water and fire." },
+   { t: "info", v: `<img class="art" src="${CB("Rootha").token_img}" alt="Elemental">`, text: "Her trick: cast an instant or sorcery <b>before combat</b>. When combat starts, Rootha makes an <b>Elemental</b>!" },
+   { t: "info", v: `<img class="art" src="${CB("Rootha").token_img}" alt="Elemental">`, text: "The Elemental has <b>flying</b> and <b>haste</b>, and it's as big as the biggest spell you cast that turn." },
+   { t: "quiz", v: ART("Prismari Command"), q: "You cast Prismari Command. It costs 3 mana. How big is Rootha's Elemental?", opts: [{ e: "3️⃣", l: "3/3", ok: 1 }, { e: "1️⃣", l: "1/1" }, { e: "5️⃣", l: "5/5" }] },
+   { t: "quiz", q: "You didn't cast any spells this turn. Does Rootha make an Elemental?", opts: [{ e: "🚫", l: "No", ok: 1 }, { e: "✅", l: "Yes" }], why: "No spell, no Elemental. Cast a spell first!" },
+   { t: "quiz", q: "Can the Elemental attack right away?", opts: [{ e: "⚡", l: "Yes, it has haste", ok: 1 }, { e: "⏳", l: "No" }] },
+ ]},
+ { id: "win", emo: "🏆", title: "How to Win", pages: [
+   { t: "info", v: `<span class="big">❤️ 40</span>`, text: "Everyone starts with <b>40 life</b>. For a quicker game, start with 20." },
+   { t: "info", v: `<span class="big">🏁</span>`, text: "When a player's life gets to <b>zero</b>, they're out. The last wizard still playing <b>wins</b>!" },
+   { t: "info", v: ART("Rootha, Mastering the Moment"), text: "Commander bonus: if one commander deals a player <b>21 damage</b> in all, that player is out too." },
+   { t: "quiz", q: "Dad has 3 life. Goldspan Dragon hits him for 4. What happens?", opts: [{ e: "🏁", l: "Dad is out", ok: 1 }, { e: "❤️", l: "Dad is fine" }], why: "3 minus 4 is less than zero. You win!" },
+ ]},
+ { id: "practice", emo: "🎮", title: "Practice Turn", pages: [
+   { t: "info", v: `<div class="mini-board">${fig("Rootha, Mastering the Moment")}<figure><span class="big">🏝️🏝️⛰️</span><div>3 lands</div></figure></div>`,
+     text: "Your turn! Rootha and 3 lands are on the battlefield. In your hand: <b>Prismari Command</b>, a <b>Mountain</b>, and <b>Stormcatch Mentor</b>. Dad has <b>20 life</b>." },
+   { t: "quiz", q: "What do you do first?", opts: [{ e: "🔄", l: "Untap", ok: 1 }, { e: "⚔️", l: "Attack" }, { e: "👋", l: "Say done" }] },
+   { t: "quiz", q: "What's next?", opts: [{ e: "🃏", l: "Draw a card", ok: 1 }, { e: "👋", l: "Say done" }, { e: "⚔️", l: "Attack" }] },
+   { t: "quiz", q: "Now you can play one land. Which card is the land?", opts: [{ e: "⛰️", l: "Mountain", ok: 1 }, { i: "Prismari Command", l: "Prismari Command" }, { i: "Stormcatch Mentor", l: "Stormcatch Mentor" }] },
+   { t: "quiz", q: "Rootha's trick needs a spell before combat. Which do you cast first?", opts: [{ i: "Prismari Command", l: "Prismari Command", ok: 1 }, { e: "🫥", l: "Nothing" }], why: "Prismari Command is an instant, so it wakes up Rootha's trick!" },
+   { t: "quiz", v: ART("Prismari Command"), q: "Prismari Command deals 2 damage to Dad and makes you a Treasure. Dad had 20. How much now?", opts: [{ e: "1️⃣8️⃣", l: "18", ok: 1 }, { e: "2️⃣0️⃣", l: "20" }, { e: "1️⃣6️⃣", l: "16" }] },
+   { t: "quiz", q: "You have a Mountain and your new Treasure left. Can you cast Stormcatch Mentor? It needs one blue and one red.", opts: [{ e: "👍", l: "Yes", ok: 1 }, { e: "👎", l: "No" }], why: "The Mountain makes red, and the Treasure can make blue!" },
+   { t: "quiz", v: `<img class="art" src="${CB("Rootha").token_img}" alt="Elemental">`, q: "Combat starts! Rootha makes an Elemental. Prismari Command cost 3. How big is it?", opts: [{ e: "3️⃣", l: "3/3", ok: 1 }, { e: "2️⃣", l: "2/2" }, { e: "1️⃣", l: "1/1" }] },
+   { t: "quiz", q: "The Elemental flies in to attack. Dad has no flyers. Who can block it?", opts: [{ e: "🙅", l: "Nobody", ok: 1 }, { e: "🛡️", l: "Dad's creatures" }] },
+   { t: "quiz", q: "The 3/3 Elemental hits Dad. He had 18 life. How much now?", opts: [{ e: "1️⃣5️⃣", l: "15", ok: 1 }, { e: "1️⃣7️⃣", l: "17" }, { e: "1️⃣8️⃣", l: "18" }] },
+   { t: "info", v: `<span class="big">👋✨</span>`, text: "Now say <b>done</b>! That was a real Prismari turn. Great job, wizard!" },
+ ]},
+];
+let lsn = null;
+function renderSchool(){
+  const L = $("lessonList"); L.innerHTML = "";
+  const nextIdx = LESSONS.findIndex(l => !stats.lessons[l.id]);
+  LESSONS.forEach((l, i) => {
+    const b = document.createElement("button"); b.className = "ltile" + (stats.lessons[l.id] ? " done" : "") + (i === nextIdx ? " upnext" : "");
+    b.dataset.lesson = l.id; b.innerHTML = `<span class="num">${i + 1}</span><span class="emo">${l.emo}</span><b>${l.title}</b>`;
+    b.onclick = () => startLesson(l.id); L.appendChild(b);
+  });
+  $("diplomaBtn").classList.toggle("hidden", nextIdx !== -1);
+}
+function startLesson(id){
+  const l = LESSONS.find(x => x.id === id); lsn = { l, i: 0, mistakes: 0 };
+  current = "lesson"; Object.keys(screens).forEach(k => $(k).classList.toggle("hidden", k !== "lesson")); $("lesson").classList.remove("hidden");
+  $("homeBtn").classList.remove("hidden"); $("screenTitle").textContent = l.title; scrollTo(0, 0);
+  renderLessonPage();
+}
+const plain = h => h.replace(/<[^>]+>/g, "");
+function lessonNav(showNext){
+  return `<div class="lnav"><button class="alt" id="lBack">◀</button>${showNext ? `<button id="lNext">${lsn.i === lsn.l.pages.length - 1 ? "Finish 🎓" : "Next ▶"}</button>` : ""}</div>`;
+}
+function wireNav(){
+  $("lBack").onclick = () => { if (lsn.i > 0){ lsn.i--; renderLessonPage(); } else go("school"); };
+  const n = $("lNext"); if (n) n.onclick = nextLessonPage;
+}
+function nextLessonPage(){ if (lsn.i < lsn.l.pages.length - 1){ lsn.i++; renderLessonPage(); } else finishLesson(); }
+function renderLessonPage(){
+  const pg = lsn.l.pages[lsn.i], box = $("lPage");
+  $("lProg").innerHTML = lsn.l.pages.map((_, k) => `<i class="${k < lsn.i ? "on" : k === lsn.i ? "now" : ""}"></i>`).join("");
+  if (pg.t === "info"){
+    box.innerHTML = `<div class="visual">${pg.v || ""}</div><div class="ltext" id="lText">${pg.text}</div>${lessonNav(true)}`;
+    wireNav(); say(plain(pg.text)); $("lText").onclick = () => say(plain(pg.text));
+  } else if (pg.t === "quiz"){
+    box.innerHTML = `<div class="visual">${pg.v || ""}</div><div class="ltext" id="lText">${pg.q}</div><div class="lopts" id="lOpts"></div><div class="why" id="lWhy"></div>${lessonNav(false)}`;
+    const opts = pg.opts.slice().sort(() => Math.random() - 0.5), O = $("lOpts"); let solved = false;
+    opts.forEach(o => {
+      const b = document.createElement("button"); b.className = "lopt"; if (o.ok) b.dataset.ok = "1";
+      b.innerHTML = (o.i ? `<img src="${CB(o.i).img}" alt="">` : o.v ? o.v : `<span class="oe">${o.e}</span>`) + `<span>${o.l}</span>`;
+      b.onclick = () => {
+        if (solved) return;
+        if (o.ok){
+          solved = true; b.classList.add("right"); chime(); burst(10);
+          $("lWhy").textContent = pg.why || rnd(["That's right!", "Yes! Great job!", "You got it!", "Perfect!"]);
+          say(pg.why || "That's right!");
+          box.querySelector(".lnav").innerHTML = `<button class="alt" id="lBack">◀</button><button id="lNext">${lsn.i === lsn.l.pages.length - 1 ? "Finish 🎓" : "Next ▶"}</button>`; wireNav();
+        } else { lsn.mistakes++; b.classList.remove("wrong"); void b.offsetWidth; b.classList.add("wrong"); boop(); say(`Not ${o.l}. Try again!`); }
+      };
+      O.appendChild(b);
+    });
+    wireNav(); const ask = () => say(`${pg.q} ${opts.map(o => o.l).join(", or ")}?`); ask(); $("lText").onclick = ask;
+  } else if (pg.t === "hot"){
+    const c = CB("Stormcatch Mentor"); let k = 0;
+    box.innerHTML = `<div class="ltext" id="lText"></div><div class="cardhot" id="lHot"><img src="${c.full_img}" alt="Stormcatch Mentor"></div><div class="why" id="lWhy"></div>${lessonNav(false)}`;
+    const H = $("lHot");
+    pg.spots.forEach(sp => {
+      const b = document.createElement("button"); b.dataset.spot = sp.k; b.setAttribute("aria-label", sp.l);
+      Object.assign(b.style, { left: sp.r[0] + "%", top: sp.r[1] + "%", width: sp.r[2] + "%", height: sp.r[3] + "%" });
+      b.onclick = () => {
+        if (k >= pg.spots.length) return;
+        if (sp.k === pg.spots[k].k){
+          b.classList.add("found"); chime(); k++;
+          if (k === pg.spots.length){ $("lText").textContent = "You found every part!"; say("You found every part!"); box.querySelector(".lnav").innerHTML = `<button class="alt" id="lBack">◀</button><button id="lNext">Next ▶</button>`; wireNav(); }
+          else { $("lText").textContent = `Now tap ${pg.spots[k].l}!`; say(`Yes! Now tap ${pg.spots[k].l}.`); }
+        } else { lsn.mistakes++; boop(); say(`That's ${sp.l}. Find ${pg.spots[k].l}!`); }
+      };
+      H.appendChild(b);
+    });
+    H.dataset.order = pg.spots.map(x => x.k).join(",");
+    $("lText").textContent = `Tap ${pg.spots[0].l}!`; wireNav(); say(`Tap ${pg.spots[0].l}!`);
+    $("lText").onclick = () => say($("lText").textContent);
+  } else if (pg.t === "pay"){
+    const c = CB(pg.card), pool = { U: 0, R: 0 }; let paid = false;
+    box.innerHTML = `<div class="visual">${ART(pg.card)}</div><div class="costrow">${costHTML(c, true)}</div><div class="ltext" id="lText">${pg.text}</div>
+      <div class="paylands" id="lLands"></div><div class="paypool" id="lPool"></div><div class="why" id="lWhy"></div>${lessonNav(false)}`;
+    const Lb = $("lLands");
+    pg.lands.forEach(k => {
+      const b = document.createElement("button"); b.className = "land " + k; b.dataset.land = k;
+      b.innerHTML = k === "T" ? `<span>💰</span>Treasure` : k === "U" ? `<span>🏝️</span>Island` : `<span>⛰️</span>Mountain`;
+      b.onclick = () => {
+        if (paid || b.classList.contains("tapped")) return;
+        b.classList.add("tapped");
+        if (k === "T"){ const needU = c.u - pool.U, needR = c.r - pool.R; pool[needU > 0 ? "U" : needR > 0 ? "R" : "U"]++; tick(5); }
+        else { pool[k]++; plink(k); }
+        $("lPool").innerHTML = costHTML({ g: 0, u: pool.U, r: pool.R });
+        if (pool.U >= c.u && pool.R >= c.r && pool.U + pool.R >= total(c)){
+          paid = true; burst(18); chime(); $("lWhy").textContent = `You cast ${c.name}!`; say(`You paid the mana and cast ${c.say}!`);
+          box.querySelector(".lnav").innerHTML = `<button class="alt" id="lBack">◀</button><button id="lNext">Next ▶</button>`; wireNav();
+        } else say(k === "T" ? "The Treasure makes any color you need!" : `${pool[k]} ${k === "U" ? "blue" : "red"}!`);
+      };
+      Lb.appendChild(b);
+    });
+    wireNav(); say(plain(pg.text)); $("lText").onclick = () => say(plain(pg.text));
+  } else if (pg.t === "order"){
+    let k = 0;
+    box.innerHTML = `<div class="ltext" id="lText">${pg.q}</div><div class="orderbox"><div class="orderdone" id="lDone"></div><div class="orderopts" id="lOrd"></div></div><div class="why" id="lWhy"></div>${lessonNav(false)}`;
+    const O = $("lOrd");
+    pg.items.map((it, rank) => ({ it, rank })).sort(() => Math.random() - 0.5).forEach(({ it, rank }) => {
+      const b = document.createElement("button"); b.dataset.rank = rank; b.innerHTML = `${it[0]} ${it[1]}`;
+      b.onclick = () => {
+        if (rank === k){
+          b.classList.add("used"); $("lDone").insertAdjacentHTML("beforeend", `<span>${k + 1}. ${it[0]} ${it[1]}</span>`); tick(k + 2); k++;
+          if (k === pg.items.length){ chime(); burst(18); $("lWhy").textContent = "That's a whole turn!"; say("Yes! Untap, draw, play a land, cast spells, attack, and say done. That's a whole turn!");
+            box.querySelector(".lnav").innerHTML = `<button class="alt" id="lBack">◀</button><button id="lNext">Next ▶</button>`; wireNav(); }
+          else say(`${it[1]}! What's next?`);
+        } else { lsn.mistakes++; b.classList.remove("wrong"); void b.offsetWidth; b.classList.add("wrong"); boop(); say("Hmm, not yet. What comes next?"); }
+      };
+      O.appendChild(b);
+    });
+    wireNav(); say(pg.q);
+  }
+}
+function finishLesson(){
+  const l = lsn.l, first = !stats.lessons[l.id];
+  stats.lessons[l.id] = Date.now();
+  if (l.id === "practice" && lsn.mistakes === 0) stats.perfectTurn = 1;
+  store("luna_stats", stats);
+  go("school", true);
+  if (first) addStar(3);
+  showCelebrate({ emo: l.emo, title: `Lesson done: ${l.title}!`, sub: first ? "+3 stars" : "Great practice!",
+    spoken: `You finished ${l.title}! ${first ? "Three stars for you!" : "Great practice!"}` });
+}
+async function diplomaCanvas(){
+  try { await document.fonts.load("700 60px Fredoka"); } catch (e) {}
+  const W_ = 2200, H_ = 1700, cv = document.createElement("canvas"); cv.width = W_; cv.height = H_; const x = cv.getContext("2d");
+  const g = x.createLinearGradient(0, 0, W_, H_); g.addColorStop(0, "#FBF7FF"); g.addColorStop(1, "#EFE4FF"); x.fillStyle = g; x.fillRect(0, 0, W_, H_);
+  x.strokeStyle = "#E9A91B"; x.lineWidth = 26; x.strokeRect(50, 50, W_ - 100, H_ - 100);
+  x.strokeStyle = "#7B4BE0"; x.lineWidth = 6; x.strokeRect(100, 100, W_ - 200, H_ - 200);
+  const im = await new Promise(r => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = CB("Rootha").img; });
+  if (im){ x.save(); x.beginPath(); x.arc(W_ / 2, 400, 190, 0, Math.PI * 2); x.clip(); const sc = 380 / Math.min(im.width, im.height); x.drawImage(im, W_ / 2 - im.width * sc / 2, 400 - im.height * sc / 2 - 40, im.width * sc, im.height * sc); x.restore();
+    x.strokeStyle = "#7B4BE0"; x.lineWidth = 14; x.beginPath(); x.arc(W_ / 2, 400, 196, 0, Math.PI * 2); x.stroke(); }
+  x.textAlign = "center"; x.fillStyle = "#6E5F8F"; x.font = "600 54px Fredoka, Arial, sans-serif"; x.fillText("MAGIC SCHOOL DIPLOMA", W_ / 2, 690);
+  x.fillStyle = "#2B1650"; x.font = "700 210px Fredoka, Arial, sans-serif"; x.fillText("Luna", W_ / 2, 920);
+  x.fillStyle = "#6E5F8F"; x.font = "500 60px Fredoka, Arial, sans-serif"; x.fillText("has finished all twelve lessons and is now a", W_ / 2, 1040);
+  x.fillStyle = "#7B4BE0"; x.font = "700 110px Fredoka, Arial, sans-serif"; x.fillText("Prismari Apprentice", W_ / 2, 1180);
+  x.font = "64px 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif"; x.fillText(LESSONS.map(l => l.emo).join(" "), W_ / 2, 1300);
+  x.strokeStyle = "#6E5F8F"; x.lineWidth = 3; x.beginPath(); x.moveTo(400, 1480); x.lineTo(950, 1480); x.moveTo(1250, 1480); x.lineTo(1800, 1480); x.stroke();
+  x.fillStyle = "#6E5F8F"; x.font = "500 44px Fredoka, Arial, sans-serif";
+  x.fillText(new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" }), 675, 1460); x.fillText("Date", 675, 1540); x.fillText("Teacher", 1525, 1540);
+  return cv;
+}
+$("diplomaBtn").onclick = async () => {
+  const cv = await diplomaCanvas();
+  showCelebrate({ img: cv.toDataURL("image/jpeg", 0.85), title: "You're a Prismari Apprentice!", sub: downloadsCap ? "Tap Print to get a paper diploma." : "Congratulations, wizard!", spoken: "Congratulations! You finished Magic School! You're a Prismari Apprentice!" });
+  if (downloadsCap && !$("celPrint")){
+    const b = document.createElement("button"); b.id = "celPrint"; b.className = "next"; b.style.marginLeft = "8px"; b.textContent = "🖨️ Print";
+    b.onclick = async () => {
+      try {
+        await loadScript(window.AndroidBridge ? "vendor/jspdf.umd.min.js" : "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+        const pdf = new window.jspdf.jsPDF({ unit: "in", format: "letter", orientation: "landscape" });
+        pdf.addImage((await diplomaCanvas()).toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, 11, 8.5);
+        await downloadsCap.save({ filename: "Lunas_Magic_School_Diploma.pdf", data: pdf.output("blob") }); say("Your diploma is ready to print!");
+      } catch (e) { if (!(e && e.code === "declined")) say("The diploma didn't save. Ask a grown-up to try again."); }
+    };
+    $("celOk").after(b);
+  }
+};
 
 /* ---------- ART STUDIO ---------- */
 let drawings = load("luna_drawings", []);
@@ -2146,7 +2594,7 @@ function finishStudio(){
                          : drawings.concat([{ id: Date.now().toString(36), img, at: Date.now() }]).slice(-40);
   if (!store("luna_drawings", drawings)){ drawings = before; boop(); say("The art studio is full! Ask a grown-up to remove a painting."); return; }
   $("paint").classList.add("hidden"); renderStudio();
-  if (!paintEditId) addStar();
+  if (!paintEditId){ bumpStat("paintings"); addStar(); }
   showCelebrate({ img, title: paintEditId ? "Painting saved!" : "What a masterpiece!", sub: "It's in your Art Studio.", spoken: paintEditId ? "Saved!" : "What a masterpiece! I love it!" });
 }
 $("stNew").onclick = () => openStudioPaint(null);
@@ -2206,7 +2654,7 @@ function popBubble(b, k){
   b.style.transform = `translateY(${ty}px)`; b.style.setProperty("--y", ty + "px"); b.classList.add("popped");
   slot.full = true; slot.got = k; renderSlots(); plink(k);
   if (bb.slots.every(s => s.full)){
-    stopBubbles(); addStar(); if (!bb.card.pet) recordCast(bb.card);
+    bumpStat("bubbleCasts"); stopBubbles(); addStar(); if (!bb.card.pet) recordCast(bb.card);
     showCelebrate({ img: bb.card.img, clip: clipKeyFor(bb.card), title: `You cast ${bb.card.name}!`, sub: "Bubble magic!", spoken: `Pop pop pop! You cast ${bb.card.say}!` });
     $("bbNext").classList.remove("hidden"); $("bbHint").textContent = "";
   }
@@ -2304,7 +2752,7 @@ $("ntNew").onclick = () => { if (!confirm("Start a new game?")) return; night.pl
 
 /* ---------- BACKUP & RESTORE ---------- */
 $("bkSave").onclick = async () => {
-  const data = JSON.stringify({ app: "luna-spell-car", v: 3, at: new Date().toISOString(), stars, xp, owned, eggs, theme, cast, pets, stories, drawings });
+  const data = JSON.stringify({ app: "luna-spell-car", v: 4, at: new Date().toISOString(), stars, xp, owned, eggs, theme, stats, treasures, cast, pets, stories, drawings });
   const name = `luna-spellbook-${new Date().toISOString().slice(0, 10)}.json`;
   try {
     if (downloadsCap) await downloadsCap.save({ filename: name, data: new Blob([data], { type: "application/json" }) });
@@ -2334,6 +2782,13 @@ $("bkFile").onchange = () => {
       d.stories.filter(s => s && typeof s.title === "string" && typeof s.body === "string").forEach(s => { if (!seen.has(s.title + s.at)) stories.push({ title: s.title.slice(0, 120), body: s.body.slice(0, 4000), place: s.place, who: String(s.who || "").slice(0, 80), at: s.at || 0 }); });
       stories.sort((a, b) => (b.at || 0) - (a.at || 0)); stories = stories.slice(0, 30); store("luna_stories", stories); }
     if (Number.isFinite(d.xp) && d.xp > xp){ xp = Math.floor(d.xp); store("luna_xp", xp); }
+    if (d.stats && typeof d.stats === "object"){
+      Object.entries(d.stats).forEach(([k, v]) => { if (Number.isFinite(v) && v > (stats[k] || 0)) stats[k] = v; });
+      if (d.stats.lessons && typeof d.stats.lessons === "object") Object.keys(d.stats.lessons).forEach(k => { if (LESSONS.some(l => l.id === k)) stats.lessons[k] = stats.lessons[k] || Date.now(); });
+      store("luna_stats", stats);
+    }
+    if (d.treasures && typeof d.treasures === "object") Object.keys(d.treasures).forEach(k => { if (TREASURES.some(t => t.id === k)) treasures[k] = treasures[k] || Date.now(); });
+    store("luna_treasures", treasures);
     if (d.owned && typeof d.owned === "object") Object.keys(d.owned).forEach(k => { if (SHOP.some(i => i.id === k)) owned[k] = owned[k] || Date.now(); });
     store("luna_owned", owned);
     if (d.eggs && typeof d.eggs === "object") Object.keys(d.eggs).forEach(k => { if (EGGS.some(e => e.id === k)) eggs[k] = eggs[k] || Date.now(); });

@@ -1,6 +1,15 @@
 # Changelog
 
 ## Unreleased
+- 🎓 Magic School: the printed Spellbook as twelve spoken, tappable lessons: colors, zones, parts of a card
+  (tap the real card), kinds of cards, tapping lands to pay costs, putting a turn in order, combat with flying and
+  haste, prowess and magecraft, Treasure, Rootha's Elemental trick, how to win, and a full guided Practice Turn.
+  Finishing all twelve unlocks a printable Magic School diploma (PDF).
+- 🌌 Star Map: twelve harder hidden treasures (Spell Echo 8 in a row, 25 faeries, cast every card, 10-answer
+  streaks, a mistake-free Practice Turn, and more) light up Galazeth's constellation, with a glowing reveal and
+  progress for each. Finding all twelve unlocks a secret Starlight theme.
+- Progress stats (streaks, casts, creatures, paintings, lessons) are tracked and included in backups (v4).
+- New static check: state classes that reuse a component's name (the cause of the blank lesson tile).
 - Spell Car server for Cloudflare Workers (`worker/`): KV for caps and jobs, R2 for movie clips, a cron trigger that
   finishes clips in the background, and `./deploy.sh` (KV/R2 auto-created, secrets uploaded from `worker/.secrets`).
   The same server tests and app smoke tests pass against it.

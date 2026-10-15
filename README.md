@@ -18,6 +18,8 @@ most games work without reading.
 | **Spell Echo** | Simon-style color-and-sound memory; longer and faster each round. |
 | **Faerie Pop** | 30-second tap-the-faeries; unicorns worth 3; leave the sleeping owl alone. |
 | **Magic Fog** | A card hides in fog that slowly clears; pick the matching picture (faster = more stars). |
+| **Magic School** | Twelve spoken lessons from the Spellbook PDF, from colors to Rootha's Elemental trick, plus a guided practice turn and a printable diploma. |
+| **Star Map** | Twelve harder hidden treasures that light up a dragon constellation; all twelve unlock the Starlight theme. |
 | **Star Shop & levels** | Spend stars on creatures, accessories, themes, and brushes; ten levels from lifetime stars; six hidden secrets. |
 | **Count the Mana** | Tap each mana symbol to count it, then pick the total. |
 | **Who Wins?** | Power vs. toughness, with dots to compare. |

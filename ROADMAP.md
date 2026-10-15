@@ -4,6 +4,8 @@ The nightly routine (see DEVELOPMENT.md) takes the top unchecked item under **Ne
 Reorder freely; each item should be small enough for one PR, with a clear "done when".
 
 ## Next
+- [ ] **Practice Turn 2**: a harder guided turn with Goldspan Dragon, Treasure, and blocking decisions.
+- [ ] **Lesson replays as voice-only car mode**: listen to a lesson with eyes closed, answering by tapping big colored halves.
 - [ ] **Second-deck edition, slice 1: deck switcher.** Add First Flight card data (white/blue, with art) and a "Whose deck?"
       picker so every game can use the second deck's cards. Done when: switching decks changes Window Magic, Count, Who Wins, and Memory; tested.
 - [ ] **Second-deck edition, slice 2: flying & reach in Who Wins.** Flyers can only be blocked by flying/reach; harder questions for older kids.

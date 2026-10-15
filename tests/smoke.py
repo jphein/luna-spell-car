@@ -298,12 +298,73 @@ async def magic_fog(pg, mode):
     assert await pg.is_visible("#fogNext") and await pg.evaluate("stars") > s0, "right answer not rewarded"
     await home(pg)
 
+
+async def solve_page(pg):
+    kind = await pg.evaluate("lsn.l.pages[lsn.i].t")
+    if kind == "quiz": await pg.click("#lOpts .lopt[data-ok='1']")
+    elif kind == "hot":
+        for k in (await pg.get_attribute("#lHot", "data-order")).split(","): await pg.click(f'#lHot [data-spot="{k}"]')
+    elif kind == "pay":
+        n = await pg.locator("#lLands .land").count()
+        for i in range(n):
+            if await pg.locator("#lNext").count(): break
+            await pg.click(f"#lLands .land >> nth={i}")
+    elif kind == "order":
+        n = await pg.locator("#lOrd button").count()
+        for r in range(n): await pg.click(f'#lOrd button[data-rank="{r}"]')
+    await pg.click("#lNext")
+
+@test
+async def magic_school(pg, mode):
+    s0 = await pg.evaluate("stars")
+    await pg.click("[data-go=school]")
+    assert await pg.locator("#lessonList .ltile").count() == 12, "should have 12 lessons"
+    assert await pg.locator("#lessonList .ltile.upnext").count() == 1, "next lesson not highlighted"
+    # a wrong answer shakes and doesn't advance
+    await pg.click('[data-lesson="colors"]', force=True)
+    for _ in range(4): await solve_page(pg)
+    wrong = pg.locator("#lOpts .lopt:not([data-ok])").first
+    await wrong.click(); assert await pg.locator("#lNext").count() == 0, "wrong answer advanced the lesson"
+    await solve_page(pg); await dismiss(pg)
+    assert await pg.evaluate("!!stats.lessons.colors"), "lesson 1 not recorded"
+    for lid in await pg.evaluate("LESSONS.map(l => l.id).filter(id => id !== 'colors')"):
+        await pg.evaluate("go('school', true)"); await pg.click(f'[data-lesson="{lid}"]', force=True)
+        for _ in range(await pg.evaluate("lsn.l.pages.length")): await solve_page(pg)
+        await dismiss(pg)
+    assert await pg.evaluate("Object.keys(stats.lessons).length") == 12, "not all lessons recorded"
+    assert await pg.evaluate("stats.perfectTurn") == 1, "perfect practice turn not recorded"
+    assert await pg.evaluate("stars") >= s0 + 36, "lessons should give 3 stars each"
+    await pg.evaluate("go('school', true)"); assert await pg.is_visible("#diplomaBtn"), "diploma button missing"
+    await pg.wait_for_timeout(200); await pg.evaluate("checkTreasures()")
+    assert await pg.evaluate("!!treasures.scholar && !!treasures.turn"), "school treasures not awarded"
+    await pg.click("#diplomaBtn"); await pg.wait_for_selector("#celImg:not(.hidden)", timeout=5000)
+    await pg.click("#celPrint"); await pg.wait_for_timeout(2500)
+    if mode == "web": names = [s["filename"] for s in await pg.evaluate("window.__saved")]
+    else: names = [c["saved"] for c in await pg.evaluate("window.__calls") if isinstance(c, dict) and "saved" in c]
+    assert any("Diploma" in n for n in names), f"diploma PDF not saved ({names})"
+    await dismiss(pg); await home(pg)
+
+@test
+async def star_map_treasures(pg, mode):
+    await pg.evaluate("setStat('battleStreak', 10); setStat('countStreak', 9); setStat('bubbleCasts', 10); checkTreasures()")
+    assert await pg.evaluate("!!treasures.battle && !!treasures.bubble && !treasures.count"), "treasure thresholds wrong"
+    await pg.evaluate("go('stars', true)")
+    assert await pg.locator("#skySvg svg [data-star]").count() == 12, "sky should have 12 stars"
+    assert "of 12" in await pg.inner_text("#skyCap"), "star count caption missing"
+    assert "9 of 10" in await pg.inner_text("#tGrid"), "progress for unfinished treasure missing"
+    # the full constellation unlocks the Starlight theme
+    await pg.evaluate("TREASURES.forEach(t => { if (t.id !== 'painter') treasures[t.id] = 1; }); setStat('paintings', 8); checkTreasures()")
+    assert await pg.evaluate("!!owned['theme:starlight']"), "Starlight theme not unlocked"
+    await pg.evaluate("go('shop', true)"); assert await pg.locator('[data-item="theme:starlight"]').count() == 1, "Starlight not shown in shop"
+    await dismiss(pg); await home(pg)
+
 @test
 async def backup_has_progress(pg, mode):
     if mode != "web": return
     await pg.evaluate("go('book', true)"); await pg.click("#bkSave"); await pg.wait_for_timeout(300)
     d = json.loads([s for s in await pg.evaluate("window.__saved") if s["filename"].endswith(".json")][-1]["text"])
-    assert d["v"] == 3 and d["xp"] >= 15 and d["owned"].get("kind:fox") and d["eggs"].get("rootha"), "backup is missing levels, purchases, or secrets"
+    assert d["v"] == 4 and d["xp"] >= 15 and d["owned"].get("kind:fox") and d["eggs"].get("rootha"), "backup is missing levels, purchases, or secrets"
+    assert len(d["stats"]["lessons"]) == 12 and d["treasures"].get("scholar"), "backup is missing Magic School or Star Map progress"
     await home(pg)
 
 STACK = None
