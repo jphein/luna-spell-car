@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+
+## 1.10.0 (2026-10-15)
+- 📊 For grown-ups → "How she's doing": her favorite games, Count the Mana and Who Wins first-try accuracy, lessons
+  finished, and stars earned. Counted on the device only (part of progress stats, so it's in backups); never sent anywhere.
 - Easier-to-read buttons: white text on filled buttons now has at least 4.5:1 contrast in every theme, in light and
   dark mode (dark mode and the Ocean, Candy, Forest, and Rainbow themes were too pale). A test and a static check keep it that way.
 - 🍿 Movie night: My Spellbook → "🎬 Movie night" plays every magic movie she has (cards she's cast and her creatures)
