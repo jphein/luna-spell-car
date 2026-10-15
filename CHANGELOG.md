@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- Spell Car server for Cloudflare Workers (`worker/`): KV for caps and jobs, R2 for movie clips, a cron trigger that
+  finishes clips in the background, and `./deploy.sh` (KV/R2 auto-created, secrets uploaded from `worker/.secrets`).
+  The same server tests and app smoke tests pass against it.
 
 ## 1.6.0 (2026-10-15)
 - Three new mini games: 🎵 Spell Echo (copy the color-and-sound pattern; gets longer and faster), 🧚 Faerie Pop

@@ -1,5 +1,8 @@
 # Spell Car server (Azure)
 
+> **Recommended:** deploy the Cloudflare Workers version in `worker/` (see worker/README.md): no home server,
+> automatic HTTPS, works from the car. This Python version is the self-hosted alternative with the same API and tests.
+
 A tiny, dependency-free Python server that gives the tablet app three extras from your Azure account:
 
 | Feature in the app | Endpoint | Azure service |

@@ -12,7 +12,8 @@ def call(url, path, body=None, token=TOKEN, method=None):
     except urllib.error.HTTPError as e: return e.code, e.headers, e.read()
 
 fails = []
-def check(ok, msg): print(("  ok   " if ok else "  FAIL ") + "server: " + msg); ok or fails.append(msg)
+IMPL = os.environ.get("SPELLCAR_IMPL", "python")
+def check(ok, msg): print(("  ok   " if ok else "  FAIL ") + f"{IMPL}: " + msg); ok or fails.append(msg)
 
 s = Stack(IMAGES_PER_DAY=3, STORIES_PER_DAY=5, VIDEOS_PER_DAY=3)
 try:
@@ -65,6 +66,11 @@ try:
     check(json.loads(b)["status"] in ("running", "done") and len([x for x in FakeAzure.seen if "predictLongRunning" in x[0]]) == n0 + 1,
           "a second device's slightly different image reuses the same clip by ref")
     st, _, _ = call(u, "/animate", {"image": "https://example.com/x.png", "kind": "unicorn"}); check(st == 400, "rejects image URLs (data URLs only)")
+    if IMPL == "worker":
+        st, _, b = call(u, "/animate", {"image": img, "kind": "panda", "ref": "pet:cron-test"}); jid = json.loads(b)["id"]
+        for _ in range(3): urllib.request.urlopen(u + "/__scheduled?cron=*+*+*+*+*", timeout=10).read(); time.sleep(0.5)
+        st, _, b = call(u, f"/video/{jid}.mp4")
+        check(st == 200 and len(b) > 1000, "cron trigger finishes clips with no device polling")
 finally:
     s.close()
-print("\n" + ("All server tests passed." if not fails else f"{len(fails)} server test(s) failed.")); sys.exit(1 if fails else 0)
+print("\n" + (f"All {IMPL} server tests passed." if not fails else f"{len(fails)} server test(s) failed.")); sys.exit(1 if fails else 0)
