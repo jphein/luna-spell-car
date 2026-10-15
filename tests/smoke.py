@@ -628,6 +628,38 @@ async def cloud_voice(pg, mode):
     assert await pg.evaluate(f"window.__calls.slice({calls0}).some(c => c && c.t === 'Back to the tablet voice')"), "tablet voice not used when cloud voice is off"
 
 @test
+async def voice_cache(pg, mode):
+    # Cloud-voice phrases she has heard are kept on the tablet, so they still play when the car loses signal.
+    if mode != "android": return
+    tts = lambda: len([x for x in FakeAzure.seen if "cognitive" in x[0]])
+    await pg.evaluate("document.querySelector('.grownup').open = true"); await pg.click("[data-cv=all]")
+    n0 = tts(); await pg.evaluate("ttsCache.clear(); say('Sparkle sparkle, cache me!')")
+    for _ in range(40):  # evaluate() awaits the IndexedDB promise (wait_for_function would not)
+        if await pg.evaluate("voiceDB.get(voiceKey('Sparkle sparkle, cache me!')).then(v => !!(v && v.blob))"): break
+        await pg.wait_for_timeout(200)
+    else: raise AssertionError("phrase never stored on the tablet")
+    assert tts() > n0, "phrase never fetched from the server"
+    await pg.wait_for_timeout(500); n1 = tts()
+    real = await pg.evaluate("cloud.url")
+    try:
+        await pg.evaluate("cloud.url = 'http://127.0.0.1:9'; ttsCache.clear()")  # the car lost signal
+        calls0 = await pg.evaluate("window.__calls.length")
+        await pg.evaluate("say('Sparkle sparkle, cache me!')"); await pg.wait_for_timeout(1200)
+        fell_back = await pg.evaluate(f"window.__calls.slice({calls0}).some(c => c && c.t === 'Sparkle sparkle, cache me!')")
+        assert not fell_back, "cached phrase fell back to the tablet voice while offline"
+        assert tts() == n1, "cached phrase went to the server instead of the tablet's store"
+        await pg.evaluate("say('A brand new phrase')"); await pg.wait_for_timeout(1500)
+        assert await pg.evaluate(f"window.__calls.slice({calls0}).some(c => c && c.t === 'A brand new phrase')"), "uncached phrase didn't fall back to the tablet voice"
+        # the store keeps only the newest clips
+        left = await pg.evaluate("""(async () => { const b = new Blob(['x']);
+          await voiceDB.put('old-1', { blob: b, at: 1 }); await voiceDB.put('old-2', { blob: b, at: 2 });
+          const n = (await voiceDB.keys()).length; await trimVoices(n - 2); return voiceDB.keys(); })()""")
+        assert "old-1" not in left and "old-2" not in left and await pg.evaluate("voiceKey('Sparkle sparkle, cache me!')") in left, f"trim removed the wrong clips: {left}"
+    finally:
+        await pg.evaluate("u => { cloud.url = u; }", real); await pg.click("[data-cv=off]")
+    await home(pg)
+
+@test
 async def magic_movies(pg, mode):
     if mode != "android": return
     await pg.evaluate("clipPollMs = 300")

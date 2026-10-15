@@ -882,10 +882,15 @@ function deviceSpeak(text, rate, pitch, done){
   speechSynthesis.speak(u);
 }
 function useCloudVoice(kind){ return !!(cloudCaps && cloudCaps.tts) && (cloud.voiceMode === "all" || (cloud.voiceMode === "stories" && kind === "long")); }
+const voiceKey = text => cloud.voice + "|" + rateMul + "|" + text;
+/* Cloud voice clips: memory, then the tablet's voice store (works offline in the car), then the server. */
 function cloudAudio(text){
-  const key = cloud.voice + "|" + rateMul + "|" + text;
+  const key = voiceKey(text);
   if (ttsCache.has(key)) return ttsCache.get(key);
-  const pr = cloudFetch("/tts", { text, voice: cloud.voice, rate: 0.95 * rateMul }).then(r => r.blob()).then(b => URL.createObjectURL(b));
+  const fromServer = () => cloudFetch("/tts", { text, voice: cloud.voice, rate: 0.95 * rateMul }).then(r => r.blob()).then(b => { keepVoice(key, b); return b; });
+  const pr = voiceDB.get(key).catch(() => null)
+    .then(v => v && v.blob ? (voiceDB.put(key, { blob: v.blob, at: Date.now() }).catch(() => {}), v.blob) : fromServer())
+    .then(b => URL.createObjectURL(b));
   pr.catch(() => ttsCache.delete(key));
   ttsCache.set(key, pr);
   if (ttsCache.size > 80){ const k0 = ttsCache.keys().next().value; ttsCache.get(k0).then(u => URL.revokeObjectURL(u)).catch(() => {}); ttsCache.delete(k0); }
@@ -1900,19 +1905,33 @@ $("artAI").onclick = async () => {
 
 /* ---------- MAGIC MOVIES (Google Veo via the Spell Car server) ---------- */
 // Clips are made once on the server, then kept on this device in IndexedDB so they play offline in the car.
-const clipDB = (() => {
+function idbStore(dbName, store){
   let dbp = null;
   const open = () => dbp || (dbp = new Promise((res, rej) => {
-    const r = indexedDB.open("spellcar", 1); r.onupgradeneeded = () => r.result.createObjectStore("clips");
+    const r = indexedDB.open(dbName, 1); r.onupgradeneeded = () => r.result.createObjectStore(store);
     r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
   }));
   const run = (mode, fn) => open().then(db => new Promise((res, rej) => {
-    const t = db.transaction("clips", mode), q = fn(t.objectStore("clips"));
+    const t = db.transaction(store, mode), q = fn(t.objectStore(store));
     t.oncomplete = () => res(q && q.result); t.onerror = () => rej(t.error);
   }));
   return { get: k => run("readonly", st => st.get(k)), put: (k, v) => run("readwrite", st => st.put(v, k)),
-           del: k => run("readwrite", st => st.delete(k)), keys: () => run("readonly", st => st.getAllKeys()) };
-})();
+           del: k => run("readwrite", st => st.delete(k)), keys: () => run("readonly", st => st.getAllKeys()),
+           values: () => run("readonly", st => st.getAll()) };
+}
+const clipDB = idbStore("spellcar", "clips");
+/* Voice clips are a cache (re-fetchable from the server), so they stay out of backups; the newest VOICE_KEEP are kept. */
+const voiceDB = idbStore("spellcar-voice", "tts"), VOICE_KEEP = 400;
+let voicePuts = 0;
+function keepVoice(key, blob){ voiceDB.put(key, { blob, at: Date.now() }).then(() => { if (++voicePuts % 25 === 0) trimVoices(); }).catch(() => {}); }
+async function trimVoices(keep = VOICE_KEEP){
+  try {
+    const [ks, vs] = await Promise.all([voiceDB.keys(), voiceDB.values()]);
+    if (ks.length <= keep) return;
+    const old = ks.map((k, i) => [k, (vs[i] && vs[i].at) || 0]).sort((a, b) => a[1] - b[1]).slice(0, ks.length - keep);
+    for (const [k] of old) await voiceDB.del(k);
+  } catch (e) {}
+}
 const clipKeys = new Set(), clipURLs = new Map();
 let clipJobs = load("luna_clipjobs", {}), clipPollMs = 15000, clipTimer = null, clipSound = load("luna_clipsound", false);
 clipDB.keys().then(ks => { (ks || []).forEach(k => clipKeys.add(k)); if (current === "book") renderBook(); }).catch(() => {});

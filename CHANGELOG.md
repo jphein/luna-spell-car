@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- 📶 Cloud voice works offline for phrases she's heard: neural-voice clips are kept on the tablet (newest 400) and
+  played from there first, so lessons and games keep their voice when the car loses signal. New phrases still fall
+  back to the tablet voice. The cache is re-fetchable, so it isn't part of backups.
 - 🏠 Home in landscape shows three games per row; an odd game out spans its whole row instead of sitting alone.
 - 🎧 Eyes-closed car mode in Magic School: "Listen with eyes closed" plays any lesson as voice only. Pages turn by
   themselves, and she answers by tapping the big blue half or red half of the screen ("Tap blue for Library. Tap red
