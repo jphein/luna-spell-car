@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+
+## 1.6.0 (2026-10-15)
 - Three new mini games: 🎵 Spell Echo (copy the color-and-sound pattern; gets longer and faster), 🧚 Faerie Pop
   (30-second catch-the-faeries, unicorns worth 3, don't wake the owl), 🌫️ Magic Fog (guess who's hiding as the fog clears).
 - Levels: ten wizard ranks from Apprentice to Planeswalker, earned from lifetime stars, with a level-up celebration and
