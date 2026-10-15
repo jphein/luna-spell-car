@@ -498,6 +498,28 @@ async def gentle_feedback(pg, mode):
         await pg.evaluate("d => { drawings = d; }", keep)
     await home(pg)
 
+@test
+async def home_layout(pg, mode):
+    # Landscape tablets get three columns of games; an odd tile out never sits alone in half a row.
+    tiles = ".games .game-btn:not(.hidden):not(.wide)"
+    try:
+        await pg.set_viewport_size({"width": 1280, "height": 800}); await home(pg); await pg.wait_for_timeout(100)
+        xs = await pg.evaluate(f"[...new Set([...document.querySelectorAll('{tiles}')].map(b => Math.round(b.getBoundingClientRect().x)))].length")
+        assert xs == 3, f"landscape home should have 3 columns, has {xs}"
+        await pg.set_viewport_size({"width": 800, "height": 1280}); await home(pg); await pg.wait_for_timeout(100)
+        gw = await pg.evaluate("document.querySelector('.games').getBoundingClientRect().width")
+        widths = await pg.evaluate(f"[...document.querySelectorAll('{tiles}')].map(b => b.getBoundingClientRect().width)")
+        if len(widths) % 2: assert widths[-1] > gw * 0.9, f"orphan tile in portrait ({len(widths)} tiles, last {widths[-1]:.0f}px of {gw:.0f}px)"
+        else: assert all(w < gw * 0.6 for w in widths), "a tile spans the row when the count is even"
+        await pg.evaluate("$('storyTile').classList.toggle('hidden'); updateHomeGrid()")  # the other parity
+        widths = await pg.evaluate(f"[...document.querySelectorAll('{tiles}')].map(b => b.getBoundingClientRect().width)")
+        if len(widths) % 2: assert widths[-1] > gw * 0.9, "orphan tile after the story tile changed"
+        else: assert all(w < gw * 0.6 for w in widths), "a tile stayed full-width after the count became even"
+        await pg.evaluate("$('storyTile').classList.toggle('hidden'); updateHomeGrid()")
+    finally:
+        await pg.set_viewport_size({"width": 400, "height": 860}); await home(pg)
+    assert await pg.evaluate("document.documentElement.scrollWidth <= innerWidth + 1"), "home scrolls sideways on a phone"
+
 STACK = None
 
 async def stroke(pg):

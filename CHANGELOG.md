@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- 🏠 Home in landscape shows three games per row; an odd game out spans its whole row instead of sitting alone.
 - 🎧 Eyes-closed car mode in Magic School: "Listen with eyes closed" plays any lesson as voice only. Pages turn by
   themselves, and she answers by tapping the big blue half or red half of the screen ("Tap blue for Library. Tap red
   for Graveyard."). Finishing one earns a star.

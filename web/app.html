@@ -57,6 +57,8 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .game-btn b{display:block;font-size:20px;line-height:1.1}
 .game-btn span{color:var(--muted);font-size:14px;line-height:1.2}
 .game-btn.wide{grid-column:1/-1;flex-direction:row;min-height:84px;justify-content:flex-start;padding:12px 18px;text-align:left}
+.game-btn.solo{grid-column:1/-1}
+@media (min-width:1000px){.app.homeview{max-width:1100px}.games{grid-template-columns:repeat(3,1fr)}}
 .newtag{font-size:11px;background:var(--gold);color:#2B1650;padding:2px 8px;border-radius:99px;font-weight:700;vertical-align:middle;margin-left:4px}
 .grownup{margin-top:auto;padding-top:22px;color:var(--muted);font-size:13px;line-height:1.45}
 .grownup summary{cursor:pointer;font-size:15px;font-weight:600}
@@ -1114,6 +1116,7 @@ function go(id, quiet){
   current = id; markSeen(id);
   Object.keys(screens).forEach(k => $(k).classList.toggle("hidden", k !== id));
   $("homeBtn").classList.toggle("hidden", id === "home"); $("screenTitle").textContent = screens[id];
+  document.querySelector(".app").classList.toggle("homeview", id === "home"); if (id === "home") updateHomeGrid();
   scrollTo(0, 0);
   if (id === "window"){ renderShelf(); say("Window magic! Look outside. Tap blue when you see something blue, red for red, and purple for purple!"); }
   if (id === "maker"){ startMaker(quiet); }
@@ -1135,6 +1138,14 @@ function go(id, quiet){
   if (id === "home" && !quiet) say("Pick a magic game!");
 }
 document.querySelectorAll("[data-go]").forEach(b => b.onclick = () => go(b.dataset.go));
+/* An odd game out spans its whole row instead of sitting alone in half of it (tile count changes with Story Time). */
+function updateHomeGrid(){
+  const g = document.querySelector(".games"), tiles = [...g.querySelectorAll(".game-btn:not(.wide)")];
+  tiles.forEach(t => t.classList.remove("solo"));
+  const shown = tiles.filter(t => !t.classList.contains("hidden")), cols = getComputedStyle(g).gridTemplateColumns.split(" ").length;
+  if (shown.length % cols === 1) shown[shown.length - 1].classList.add("solo");
+}
+addEventListener("resize", () => { if (current === "home") updateHomeGrid(); });
 /* "NEW" on a home tile lasts until she opens that game once */
 let seenGames = load("luna_seen", {});
 function renderNewTags(){ document.querySelectorAll(".game-btn .newtag").forEach(t => t.classList.toggle("hidden", !!seenGames[t.closest("[data-go]").dataset.go])); }
@@ -1829,7 +1840,7 @@ async function cloudFetch(path, body, signal){
 }
 function updateStoryAvail(){
   const ok = !!sampleCap || !!(cloudCaps && cloudCaps.story);
-  $("storyTile").classList.toggle("hidden", !ok); $("pmStory").classList.toggle("hidden", !ok);
+  $("storyTile").classList.toggle("hidden", !ok); $("pmStory").classList.toggle("hidden", !ok); updateHomeGrid();
 }
 function refreshCloudUI(msg){
   if (msg !== undefined) $("cloudStatus").textContent = msg;
