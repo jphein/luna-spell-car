@@ -35,8 +35,10 @@ results = []
 def test(fn):
     results.append(fn); return fn
 
-async def home(pg): await pg.evaluate("go('home', true)")
 async def dismiss(pg): await pg.evaluate("celebQueue.length = 0; ['celebrate','viewer','petModal','paint'].forEach(i => document.getElementById(i).classList.add('hidden'))")
+async def home(pg):
+    # Random events (a natural 20 in Game Night, a surprise sticker) can open a celebration; clear it between tests.
+    await dismiss(pg); await pg.evaluate("go('home', true)")
 
 @test
 async def home_renders(pg, mode):
@@ -142,6 +144,7 @@ async def game_night(pg, mode):
     await pg.click("#ntBoard .nt-p >> nth=0 >> .tap >> nth=0"); await pg.click("#ntBoard .nt-p >> nth=0 >> .five button >> nth=1")
     assert await pg.evaluate("night.players[0].life") == l0 + 4, "life math wrong"
     await pg.click("[data-roll='20']"); assert "🎲" in await pg.inner_text("#ntRoll")
+    await dismiss(pg)  # a natural 20 (1 in 20) finds the "Lucky twenty" secret and opens a celebration
     await home(pg)
 
 @test

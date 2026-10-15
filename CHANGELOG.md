@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- `tools/live_check.py`: checks a deployed server end to end (story, picture, voice, optional one Veo clip), never prints secrets.
+- `SPELLCAR_URL` + `SPELLCAR_APP_TOKEN` at build time preconnect the tablet APK to the server (no Azure/Google keys in the app).
+- `AGENT_HANDOFF.md`: step-by-step deploy instructions for a home agent.
+- Tests: fixed a 1-in-20 flake (a natural 20 in Game Night opened a celebration that blocked the next test).
 
 ## 1.7.0 (2026-10-15)
 - 🎓 Magic School: the printed Spellbook as twelve spoken, tappable lessons: colors, zones, parts of a card

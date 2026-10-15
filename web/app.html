@@ -1745,6 +1745,7 @@ $("artMagic").onclick = () => { delete draft.art; delete draft.artBy; renderMake
 
 /* ---------- SPELL CAR SERVER (Azure) ---------- */
 let cloud = load("luna_cloud", { url: "", token: "", voiceMode: "stories", voice: "en-US-AnaNeural" }), cloudCaps = null;
+if (!cloud.url && window.__SPELLCAR_DEFAULT && window.__SPELLCAR_DEFAULT.url){ cloud.url = window.__SPELLCAR_DEFAULT.url; cloud.token = window.__SPELLCAR_DEFAULT.token; }
 const cloudBase = () => (cloud.url || "").trim().replace(/\/+$/, "");
 async function cloudFetch(path, body, signal){
   const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), path === "/image" ? 150000 : 60000);

@@ -19,6 +19,11 @@ fonts = """<style>@font-face{font-family:"Fredoka";src:url("fonts/Fredoka-Variab
 android = re.sub(r"<!--FONTS-->.*?<!--/FONTS-->", fonts, src, flags=re.S)
 shim = open(os.path.join(W, "tts-shim.js"), encoding="utf-8").read()
 android = android.replace("<!--SHIM-->", "<script>\n" + shim + "\n</script>")
+# Optional: preconnect the tablet build to a Spell Car server (address + narrow app token only; never Azure/Google keys).
+pre_url, pre_tok = os.environ.get("SPELLCAR_URL", "").strip(), os.environ.get("SPELLCAR_APP_TOKEN", "").strip()
+if pre_url and pre_tok:
+    android = android.replace("<script>\nconst CARDS", "<script>window.__SPELLCAR_DEFAULT = " + json.dumps({"url": pre_url, "token": pre_tok}) + ";</script>\n<script>\nconst CARDS", 1)
+    print("android build preconnected to", pre_url)
 A = os.path.join(ROOT, "android", "assets")
 shutil.rmtree(A, ignore_errors=True)
 os.makedirs(os.path.join(A, "fonts")); os.makedirs(os.path.join(A, "vendor"))
