@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- 🎧 Eyes-closed mode now plays every lesson whole: putting a turn in order, paying with lands, and finding the parts of
+  a card become spoken two-choice questions ("Where is the mana cost on a card? Tap blue for in the top corner…").
 - 📶 Cloud voice works offline for phrases she's heard: neural-voice clips are kept on the tablet (newest 400) and
   played from there first, so lessons and games keep their voice when the car loses signal. New phrases still fall
   back to the tablet voice. The cache is re-fetchable, so it isn't part of backups.

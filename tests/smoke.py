@@ -434,6 +434,26 @@ async def listen_mode(pg, mode):
     await pg.evaluate("listenMode = false"); await home(pg)
 
 @test
+async def listen_mode_all_pages(pg, mode):
+    # Eyes-closed mode keeps every lesson whole: tap-only pages become spoken two-choice questions.
+    await pg.evaluate("go('school', true); listenMode = true; renderSchool()")
+    await pg.click('[data-lesson="parts"]', force=True)
+    qs = await pg.evaluate("lsn.lp.filter(p => p.t === 'quiz').map(p => p.q)")
+    assert sum("Where is" in q for q in qs) == 6, f"card-part spots not turned into questions: {qs}"
+    await pg.evaluate("go('school', true)"); await pg.click('[data-lesson="mana"]', force=True)
+    qs = await pg.evaluate("lsn.lp.filter(p => p.t === 'quiz').map(p => p.q)")
+    assert any("Goldspan Dragon cost in all" in q for q in qs), f"paying pages not turned into questions: {qs}"
+    await pg.evaluate("go('school', true)"); s0 = await pg.evaluate("stars")
+    await pg.click('[data-lesson="turn"]', force=True)
+    assert await pg.evaluate("lsn.lp.length") >= 8, "turn order not turned into a question per step"
+    while await pg.evaluate("current === 'lesson'"):
+        await pg.wait_for_function("current !== 'lesson' || (lsn.lp[lsn.i].t === 'quiz' && !lsn.answered)", timeout=15000)
+        if await pg.evaluate("current === 'lesson'"):
+            assert await pg.locator("#lPage .lhalf").count() == 2; await pg.click("#lPage .lhalf[data-ok]")
+    assert await pg.evaluate("stars") >= s0 + 1, "no star after listening to the whole turn lesson"
+    await dismiss(pg); await pg.evaluate("listenMode = false"); await home(pg)
+
+@test
 async def star_map_treasures(pg, mode):
     await pg.evaluate("setStat('battleStreak', 10); setStat('countStreak', 9); setStat('bubbleCasts', 10); checkTreasures()")
     assert await pg.evaluate("!!treasures.battle && !!treasures.bubble && !treasures.count"), "treasure thresholds wrong"

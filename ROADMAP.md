@@ -7,7 +7,7 @@ Reorder freely; each item should be small enough for one PR, with a clear "done 
 - [x] **Practice Turn 2**: a harder guided turn with Goldspan Dragon, Treasure, and blocking decisions (bonus lesson).
 - [ ] **Practice Turn 3**: an opponent's-turn lesson: choosing which creature blocks, double blocks, and saving Rootha.
 - [x] **Lesson replays as voice-only car mode**: listen to a lesson with eyes closed, answering by tapping big colored halves.
-- [ ] **Listen mode, part 2**: spoken versions of the tap-only pages (card parts, paying with lands, putting a turn in order).
+- [x] **Listen mode, part 2**: spoken versions of the tap-only pages (card parts, paying with lands, putting a turn in order).
 - [ ] **Second-deck edition, slice 1: deck switcher.** ⏸ On hold: it needs new card art, and CLAUDE.md forbids adding new
       copyrighted art. Unblock with a grown-up decision on where the second deck's card images come from. Add First Flight card data (white/blue, with art) and a "Whose deck?"
       picker so every game can use the second deck's cards. Done when: switching decks changes Window Magic, Count, Who Wins, and Memory; tested.

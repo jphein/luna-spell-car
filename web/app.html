@@ -2423,8 +2423,9 @@ const LESSONS = [
  { id: "parts", emo: "🃏", title: "Parts of a Card", pages: [
    { t: "info", v: `<span class="big">🃏🔍</span>`, text: "Every card has the same parts. Let's find them on <b>Stormcatch Mentor</b>!" },
    { t: "hot", spots: [
-       { k: "name", r: [5, 3.5, 70, 7.5], l: "the name" }, { k: "cost", r: [77, 3.5, 20, 7.5], l: "the mana cost" }, { k: "art", r: [8, 11.5, 84, 43], l: "the picture" },
-       { k: "type", r: [6, 55.5, 86, 6], l: "the type line" }, { k: "text", r: [8, 62.5, 84, 25.5], l: "the rules text" }, { k: "pt", r: [76, 88, 20, 7], l: "the power and toughness" }] },
+       { k: "name", r: [5, 3.5, 70, 7.5], l: "the name", w: "Across the top" }, { k: "cost", r: [77, 3.5, 20, 7.5], l: "the mana cost", w: "In the top corner" },
+       { k: "art", r: [8, 11.5, 84, 43], l: "the picture", w: "In the big middle" }, { k: "type", r: [6, 55.5, 86, 6], l: "the type line", w: "Just under the picture" },
+       { k: "text", r: [8, 62.5, 84, 25.5], l: "the rules text", w: "In the box near the bottom" }, { k: "pt", r: [76, 88, 20, 7], l: "the power and toughness", w: "In the bottom corner" }] },
    { t: "info", v: `<span class="big">1 / 1</span>`, text: "The first number is <b>power</b>: how hard it hits. The second is <b>toughness</b>: how much damage it can take." },
    { t: "quiz", q: "Which number is power?", opts: [{ e: "1️⃣", l: "The first number", ok: 1 }, { e: "2️⃣", l: "The second number" }], why: "Power comes first. Then toughness." },
  ]},
@@ -2547,7 +2548,7 @@ function renderSchool(){
 }
 function startLesson(id){
   const l = LESSONS.find(x => x.id === id); lsn = { l, i: 0, mistakes: 0, listen: listenMode };
-  if (lsn.listen) lsn.lp = l.pages.filter(p => p.t === "info" || p.t === "quiz");  // tap-only pages (card parts, paying, ordering) need eyes
+  if (lsn.listen) lsn.lp = l.pages.flatMap(listenPages);
   current = "lesson"; Object.keys(screens).forEach(k => $(k).classList.toggle("hidden", k !== "lesson")); $("lesson").classList.remove("hidden");
   $("homeBtn").classList.remove("hidden"); $("screenTitle").textContent = l.title + (lsn.listen ? " 🎧" : ""); scrollTo(0, 0);
   renderLessonPage();
@@ -2568,6 +2569,21 @@ $("listenBtn").onclick = () => {
   listenMode = !listenMode; renderSchool(); tick(4);
   say(listenMode ? "Eyes-closed mode! Tap a lesson, then just listen. To answer, tap the blue side or the red side of the screen." : "Eyes-closed mode is off.");
 };
+/* Tap-only pages become spoken two-choice questions, so a whole lesson works with eyes closed. */
+const numEmo = n => n < 10 ? `${n}\uFE0F\u20E3` : "🔢";
+function listenPages(pg){
+  if (pg.t === "info" || pg.t === "quiz") return [pg];
+  if (pg.t === "order") return pg.items.map((it, k) => {
+    const others = pg.items.slice(k + 1).length ? pg.items.slice(k + 1) : pg.items.slice(0, k);
+    return { t: "quiz", q: k ? `${pg.items[k - 1][1]}. What comes next?` : pg.q, opts: [{ e: it[0], l: it[1], ok: 1 }, ...others.map(o => ({ e: o[0], l: o[1] }))],
+             why: k === pg.items.length - 1 ? "That's a whole turn!" : `${it[1]}!` };
+  });
+  if (pg.t === "pay"){ const c = CB(pg.card), n = total(c), off = n > 1 && Math.random() < 0.5 ? n - 1 : n + 1;
+    return [{ t: "quiz", v: ART(pg.card), q: `How much mana does ${c.name} cost in all?`, opts: [{ e: numEmo(n), l: String(n), ok: 1 }, { e: numEmo(off), l: String(off) }], why: plain(pg.text) }]; }
+  if (pg.t === "hot") return pg.spots.map(sp => ({ t: "quiz", q: `Where is ${sp.l} on a card?`,
+    opts: [{ e: "🃏", l: sp.w, ok: 1 }, ...pg.spots.filter(o => o !== sp).map(o => ({ e: "🃏", l: o.w }))] }));
+  return [];
+}
 function renderListenPage(){
   const me = lsn, pg = me.lp[me.i], box = $("lPage"), t0 = Date.now(); me.answered = false;
   $("lProg").innerHTML = me.lp.map((_, k) => `<i class="${k < me.i ? "on" : k === me.i ? "now" : ""}"></i>`).join("");
