@@ -2532,6 +2532,27 @@ const LESSONS = [
    { t: "quiz", v: `<span class="big">💰</span>`, q: "Your turn again! Goldspan Dragon is still out. How much mana does your Treasure make?", opts: [{ e: "2️⃣", l: "Two", ok: 1 }, { e: "1️⃣", l: "One" }], why: "Goldspan Dragon makes every Treasure worth two mana!" },
    { t: "info", v: `<span class="big">🐲✨</span>`, text: "You planned a <b>dragon turn</b> and kept track of blockers. That's real wizard thinking!" },
  ]},
+ { id: "practice3", emo: "🛡️", title: "Practice Turn 3", bonus: true, pages: [
+   { t: "info", v: `<div class="mini-board">${fig("Rootha, Mastering the Moment")}${fig("Galazeth Prismari")}${fig("Stormcatch Mentor")}</div>`,
+     text: "It's <b>Dad's turn</b>, and he's attacking! Your creatures are untapped and ready to <b>block</b>: Rootha, Galazeth Prismari, and Stormcatch Mentor. You have <b>20 life</b>." },
+   { t: "info", v: `<span class="big">🛡️🤔</span>`, text: "Blocking is <b>your choice</b>. Block with a ready creature, or let the attack through and lose some life." },
+   { t: "quiz", v: `<div class="mini-board">${fig("Muddle, the Ever-Changing")}<span class="big">vs</span>${fig("Stormcatch Mentor")}</div>`, q: "Dad attacks with Muddle. If Stormcatch Mentor blocks, what happens to Mentor?",
+     opts: [{ e: "💫", l: "Mentor is defeated", ok: 1 }, { e: "😊", l: "Mentor is safe" }], why: "Muddle hits for 3, and Mentor can only take 1." },
+   { t: "quiz", v: `<div class="mini-board">${fig("Muddle, the Ever-Changing")}<span class="big">vs</span>${fig("Rootha, Mastering the Moment")}</div>`, q: "What if Rootha blocks Muddle instead? Who is defeated?",
+     opts: [{ i: "Muddle, the Ever-Changing", l: "Muddle", ok: 1 }, { i: "Rootha, Mastering the Moment", l: "Rootha" }, { e: "🤝", l: "Both" }], why: "Rootha hits for 3, enough for Muddle. Muddle hits for 3, but Rootha can take 4!" },
+   { t: "quiz", q: "So who's the best blocker for Muddle?", opts: [{ i: "Rootha, Mastering the Moment", l: "Rootha", ok: 1 }, { i: "Stormcatch Mentor", l: "Stormcatch Mentor" }], why: "Rootha wins the fight and stays safe." },
+   { t: "info", v: ART("Mirrorwing Dragon"), text: "Now Dad's <b>Mirrorwing Dragon</b> attacks. It's a 4/5 with <b>flying</b>!" },
+   { t: "quiz", q: "Which of your creatures can block a flyer?", opts: [{ i: "Galazeth Prismari", l: "Galazeth Prismari", ok: 1 }, { i: "Rootha, Mastering the Moment", l: "Rootha" }], why: "Only flyers can block flyers, and Galazeth has wings!" },
+   { t: "quiz", v: `<div class="mini-board">${fig("Mirrorwing Dragon")}<span class="big">vs</span>${fig("Galazeth Prismari")}</div>`, q: "If Galazeth blocks Mirrorwing Dragon, who is defeated?",
+     opts: [{ i: "Galazeth Prismari", l: "Galazeth", ok: 1 }, { i: "Mirrorwing Dragon", l: "Mirrorwing Dragon" }, { e: "🙅", l: "Nobody" }], why: "The Dragon hits for 4, and Galazeth can take 4. Galazeth hits for 3, but the Dragon can take 5." },
+   { t: "quiz", q: "You have lots of life. Should Galazeth block, or should you let the Dragon through?", opts: [{ e: "❤️", l: "Let it through", ok: 1 }, { e: "🛡️", l: "Galazeth blocks" }],
+     why: "Your life is like a shield. Spend a little to keep Galazeth safe for your next turn!" },
+   { t: "quiz", q: "The Dragon hits you for 4. You had 20 life. How much now?", opts: [{ e: "1️⃣6️⃣", l: "16", ok: 1 }, { e: "2️⃣4️⃣", l: "24" }, { e: "1️⃣8️⃣", l: "18" }] },
+   { t: "info", v: `<div class="mini-board">${fig("Stormcatch Mentor")}${fig("Prismari Pianist")}</div>`, text: "Two creatures can block <b>the same attacker</b> together. That's called a <b>double block</b>!" },
+   { t: "quiz", v: `<div class="mini-board">${fig("Muddle, the Ever-Changing")}<span class="big">vs</span>${fig("Stormcatch Mentor")}${fig("Prismari Pianist")}</div>`,
+     q: "Stormcatch Mentor and Prismari Pianist double block Muddle. Together, do they defeat Muddle?", opts: [{ e: "✅", l: "Yes", ok: 1 }, { e: "🚫", l: "No" }], why: "Mentor hits for 1 and Pianist hits for 2. 1 plus 2 is 3, just enough for Muddle!" },
+   { t: "info", v: `<span class="big">🛡️✨</span>`, text: "You chose blocks like a real wizard. Good blocks keep your creatures safe!" },
+ ]},
 ];
 const CORE = LESSONS.filter(l => !l.bonus);  // the twelve that earn the diploma; bonus lessons never hide it
 let lsn = null;

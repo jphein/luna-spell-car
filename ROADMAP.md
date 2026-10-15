@@ -5,7 +5,7 @@ Reorder freely; each item should be small enough for one PR, with a clear "done 
 
 ## Next
 - [x] **Practice Turn 2**: a harder guided turn with Goldspan Dragon, Treasure, and blocking decisions (bonus lesson).
-- [ ] **Practice Turn 3**: an opponent's-turn lesson: choosing which creature blocks, double blocks, and saving Rootha.
+- [x] **Practice Turn 3**: an opponent's-turn lesson: choosing which creature blocks, double blocks, and saving Rootha.
 - [x] **Lesson replays as voice-only car mode**: listen to a lesson with eyes closed, answering by tapping big colored halves.
 - [x] **Listen mode, part 2**: spoken versions of the tap-only pages (card parts, paying with lands, putting a turn in order).
 - [ ] **Second-deck edition, slice 1: deck switcher.** ⏸ On hold: it needs new card art, and CLAUDE.md forbids adding new

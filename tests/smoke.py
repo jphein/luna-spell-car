@@ -434,6 +434,21 @@ async def listen_mode(pg, mode):
     await pg.evaluate("listenMode = false"); await home(pg)
 
 @test
+async def practice_turn_3(pg, mode):
+    # A second bonus turn: Dad attacks and Luna chooses blockers (best blocker, flyers, taking damage, double block).
+    await pg.evaluate("go('school', true)"); tile = '[data-lesson="practice3"]'
+    assert await pg.locator(tile + ".bonus").count() == 1, "no bonus Practice Turn 3 tile"
+    s0 = await pg.evaluate("stars"); first = await pg.evaluate("!stats.lessons.practice3")
+    await pg.click(tile, force=True)
+    kinds = await pg.evaluate("lsn.l.pages.map(p => p.t)"); text = await pg.evaluate("JSON.stringify(lsn.l.pages)")
+    assert kinds.count("quiz") >= 7, f"Practice Turn 3 too thin: {kinds}"
+    for word in ("block", "flying", "double block", "life"): assert word in text, f"Practice Turn 3 never mentions {word}"
+    for _ in kinds: await solve_page(pg)
+    await dismiss(pg)
+    assert await pg.evaluate("!!stats.lessons.practice3"), "Practice Turn 3 not recorded"
+    if first: assert await pg.evaluate("stars") >= s0 + 3, "no stars for the bonus lesson"
+    await pg.evaluate("go('school', true)"); assert await pg.is_visible("#diplomaBtn"), "a bonus lesson hid the diploma"
+    await home(pg)
 async def listen_mode_all_pages(pg, mode):
     # Eyes-closed mode keeps every lesson whole: tap-only pages become spoken two-choice questions.
     await pg.evaluate("go('school', true); listenMode = true; renderSchool()")

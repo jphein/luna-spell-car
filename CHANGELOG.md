@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- 🛡️ Magic School bonus lesson: **Practice Turn 3**, Dad's turn: pick the best blocker, only flyers block flyers,
+  sometimes it's smarter to take a little damage, and a double block.
 - 🎧 Eyes-closed mode now plays every lesson whole: putting a turn in order, paying with lands, and finding the parts of
   a card become spoken two-choice questions ("Where is the mana cost on a card? Tap blue for in the top corner…").
 - 📶 Cloud voice works offline for phrases she's heard: neural-voice clips are kept on the tablet (newest 400) and
