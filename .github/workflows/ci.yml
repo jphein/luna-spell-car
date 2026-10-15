@@ -5,6 +5,10 @@ on:
     tags: ["v*"]
   pull_request:
 
+# Read-only by default; only the tag-only release job below asks for write.
+permissions:
+  contents: read
+
 jobs:
   test-and-build:
     runs-on: ubuntu-24.04
@@ -33,8 +37,21 @@ jobs:
         with:
           name: test-screenshots
           path: build/test-shots/
+
+  # Only v* tag builds may write: this job creates the GitHub release and attaches the APK the build job uploaded.
+  # (Kept out of test-and-build so PR and main builds never run with a write-capable token.)
+  release:
+    needs: test-and-build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: luna-spell-car-apk
+          path: build
       - name: Attach APK to the GitHub release
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65  # v2.6.2 (pinned: the only third-party action holding a write token)
         with:
           files: build/luna-spell-car.apk
