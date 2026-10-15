@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- ✨ Little polish: "NEW" on a home tile goes away once she's opened that game (saved and in backups); Memory Match
+  gives a soft sound on a miss and says "Try again!" the first two times; an empty Art Studio says where paintings
+  will live; Spell Echo no longer shows its name twice.
 - 📏 Bigger games on the tablet: Spell Echo pads, Faerie Pop pools, Rootha's face, and Mana Bubbles (field and bubbles)
   grow to fill the screen, and in landscape everything (Start included) still fits without scrolling. Phones unchanged.
 - 💬 Questions are now a big, spoken pop-up with picture buttons (Remove a creature or painting, Start over, New game)

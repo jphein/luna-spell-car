@@ -630,7 +630,7 @@ body.theme-forest{--bg:#ECF8EE;--bg2:#D5F0DA;--violet:#2E9B5C;--line:#C6E8CE;--c
 
   <!-- SPELL ECHO -->
   <section id="echo" class="hidden">
-    <div class="echo-top"><span id="echoRound">Spell Echo</span><span id="echoBest"></span></div>
+    <div class="echo-top"><span id="echoRound">🎵 Ready?</span><span id="echoBest"></span></div>
     <div class="echo-pads">
       <button class="pad U" data-pad="U" aria-label="Blue">💧</button><button class="pad R" data-pad="R" aria-label="Red">🔥</button>
       <button class="pad P" data-pad="P" aria-label="Purple">🔮</button><button class="pad G" data-pad="G" aria-label="Gold">✨</button>
@@ -1092,7 +1092,7 @@ function go(id, quiet){
   if (current === "pop" && id !== "pop"){ popStop(); $("popGo").classList.remove("hidden"); }
   if (current === "fog" && id !== "fog") clearInterval(fog.timer);
   if (id !== "shop") shopArmed = null;
-  current = id;
+  current = id; markSeen(id);
   Object.keys(screens).forEach(k => $(k).classList.toggle("hidden", k !== id));
   $("homeBtn").classList.toggle("hidden", id === "home"); $("screenTitle").textContent = screens[id];
   scrollTo(0, 0);
@@ -1116,6 +1116,11 @@ function go(id, quiet){
   if (id === "home" && !quiet) say("Pick a magic game!");
 }
 document.querySelectorAll("[data-go]").forEach(b => b.onclick = () => go(b.dataset.go));
+/* "NEW" on a home tile lasts until she opens that game once */
+let seenGames = load("luna_seen", {});
+function renderNewTags(){ document.querySelectorAll(".game-btn .newtag").forEach(t => t.classList.toggle("hidden", !!seenGames[t.closest("[data-go]").dataset.go])); }
+function markSeen(id){ if (!seenGames[id] && document.querySelector(`[data-go="${id}"] .newtag`)){ seenGames[id] = Date.now(); store("luna_seen", seenGames); renderNewTags(); } }
+renderNewTags();
 $("homeBtn").onclick = () => go("home");
 
 /* ---------- WINDOW MAGIC ---------- */
@@ -1579,13 +1584,13 @@ Format: the first line is only the title (no quotes, no "Title:"). Then the stor
 };
 
 /* ---------- MEMORY MATCH ---------- */
-let mem = [], memOpen = [], memLock = false, memTries = 0;
+let mem = [], memOpen = [], memLock = false, memTries = 0, memMisses = 0;
 function newMemory(){
   const all = allCards(), petsIn = all.filter(c => c.pet).sort(() => Math.random() - 0.5).slice(0, 2);
   const rest = all.filter(c => !c.pet).sort(() => Math.random() - 0.5).slice(0, 6 - petsIn.length);
   const picks = petsIn.concat(rest);
   mem = picks.concat(picks).map((c, i) => ({ c, k: c.name, done: false, id: i })).sort(() => Math.random() - 0.5);
-  memOpen = []; memLock = false; memTries = 0; $("memAgain").classList.add("hidden"); renderMemory();
+  memOpen = []; memLock = false; memTries = 0; memMisses = 0; $("memAgain").classList.add("hidden"); renderMemory();
   say("Memory match! Flip two cards. Can you find the pairs?");
 }
 function renderMemory(){
@@ -1614,6 +1619,7 @@ function flipMem(i){
       } else say(`${mem[a].c.say}! A match!`);
     }, 450);
   } else {
+    memMisses++; setTimeout(boop, 350); if (memMisses <= 2) say(memMisses === 1 ? "Not a match. Try again!" : "Not those two. Try again!");
     setTimeout(() => { memOpen = []; memLock = false; renderMemory(); }, 1100);
   }
   $("memTries").textContent = `Tries: ${memTries}`;
@@ -2131,7 +2137,7 @@ renderBrushes();
 /* ---------- SPELL ECHO ---------- */
 const ECHO_NOTE = { U: 523, R: 659, P: 784, G: 1047 }, ECHO_NAME = { U: "blue", R: "red", P: "purple", G: "gold" };
 const echo = { seq: [], pos: 0, busy: false, on: false, misses: 0, best: load("luna_echo_best", 0), startBest: 0, speed: 650 };
-function renderEchoTop(){ $("echoRound").textContent = echo.seq.length ? `Round ${echo.seq.length}` : "Spell Echo"; $("echoBest").textContent = echo.best ? `Best: ${echo.best}` : ""; }
+function renderEchoTop(){ $("echoRound").textContent = echo.seq.length ? `Round ${echo.seq.length}` : "🎵 Ready?"; $("echoBest").textContent = echo.best ? `Best: ${echo.best}` : ""; }
 function echoLight(k, ms){
   const b = document.querySelector(`[data-pad="${k}"]`); b.classList.add("lit");
   tone([ECHO_NOTE[k]], ms / 1000 * 0.6, "sine", 0.09, 0.22); setTimeout(() => b.classList.remove("lit"), ms * 0.8);
@@ -2614,7 +2620,7 @@ $("diplomaBtn").onclick = async () => {
 /* ---------- ART STUDIO ---------- */
 let drawings = load("luna_drawings", []);
 function renderStudio(){
-  const g = $("stGallery"); g.innerHTML = ""; $("stH").classList.toggle("hidden", !drawings.length);
+  const g = $("stGallery"); g.innerHTML = drawings.length ? "" : `<div class="empty-note">🖼️ Your paintings will live here. Tap New painting to make your first one!</div>`;
   drawings.slice().reverse().forEach(d => {
     const el = document.createElement("div"); el.className = "bk";
     el.innerHTML = `<img src="${d.img}" alt="Painting"><div class="nm">${new Date(d.at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</div><button class="del" aria-label="Remove painting">✕</button>`;
@@ -2800,7 +2806,7 @@ $("ntNew").onclick = () => ask({ emo: "🔄", q: "Start a new game?", spoken: "S
 
 /* ---------- BACKUP & RESTORE ---------- */
 $("bkSave").onclick = async () => {
-  const data = JSON.stringify({ app: "luna-spell-car", v: 4, at: new Date().toISOString(), stars, xp, owned, eggs, theme, stats, treasures, cast, pets, stories, drawings });
+  const data = JSON.stringify({ app: "luna-spell-car", v: 4, at: new Date().toISOString(), stars, xp, owned, eggs, theme, stats, treasures, cast, pets, stories, drawings, seen: seenGames });
   const name = `luna-spellbook-${new Date().toISOString().slice(0, 10)}.json`;
   try {
     if (downloadsCap) await downloadsCap.save({ filename: name, data: new Blob([data], { type: "application/json" }) });
@@ -2840,6 +2846,8 @@ $("bkFile").onchange = () => {
     if (d.owned && typeof d.owned === "object") Object.keys(d.owned).forEach(k => { if (SHOP.some(i => i.id === k)) owned[k] = owned[k] || Date.now(); });
     store("luna_owned", owned);
     if (d.eggs && typeof d.eggs === "object") Object.keys(d.eggs).forEach(k => { if (EGGS.some(e => e.id === k)) eggs[k] = eggs[k] || Date.now(); });
+    if (d.seen && typeof d.seen === "object") Object.keys(d.seen).forEach(k => { if (screens[k] !== undefined) seenGames[k] = seenGames[k] || Date.now(); });
+    store("luna_seen", seenGames); renderNewTags();
     store("luna_eggs", eggs); renderKindRow(); renderAccRow(); renderBrushes(); renderStars();
     if (Array.isArray(d.drawings)){ const have2 = new Set(drawings.map(x => x.id)), merged2 = drawings.slice();
       d.drawings.filter(x => x && typeof x.img === "string" && /^data:image\/(jpeg|png);base64,/.test(x.img) && x.img.length < 800000)

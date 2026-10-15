@@ -371,6 +371,42 @@ async def backup_has_progress(pg, mode):
     assert len(d["stats"]["lessons"]) == 12 and d["treasures"].get("scholar"), "backup is missing Magic School or Star Map progress"
     await home(pg)
 
+@test
+async def new_tags_clear(pg, mode):
+    # "NEW" on a home tile goes away once Luna has opened that game, and stays gone (it's saved and backed up).
+    tag = "[data-go=stars] .newtag"
+    await pg.evaluate("delete seenGames.stars; store('luna_seen', seenGames); renderNewTags()")
+    assert await pg.is_visible(tag), "NEW tag missing on a game she hasn't opened"
+    await pg.click("[data-go=stars]"); await home(pg)
+    assert not await pg.is_visible(tag) and await pg.evaluate("!!load('luna_seen', {}).stars"), "NEW tag didn't clear after a visit"
+    if mode == "web":
+        await pg.evaluate("go('book', true)"); await pg.click("#bkSave"); await pg.wait_for_timeout(300)
+        d = json.loads([x for x in await pg.evaluate("window.__saved") if x["filename"].endswith(".json")][-1]["text"])
+        assert d.get("seen", {}).get("stars"), "backup is missing which games she's seen"
+        await home(pg)
+
+@test
+async def gentle_feedback(pg, mode):
+    # Little moments that used to be silent or confusing.
+    await pg.click("[data-go=memory]")
+    order = await pg.evaluate("mem.map(m => m.k)"); b = next(i for i, k in enumerate(order) if k != order[0])
+    n0 = await pg.evaluate("tonesPlayed")
+    await pg.click("#memGrid .mcard >> nth=0"); await pg.click(f"#memGrid .mcard >> nth={b}"); await pg.wait_for_timeout(500)
+    assert await pg.evaluate("tonesPlayed") >= n0 + 3, "no sound when two cards don't match"
+    if mode == "android":
+        spoken = [c["t"] for c in await pg.evaluate("window.__calls") if isinstance(c, dict) and "t" in c]
+        assert "try again" in spoken[-1].lower(), f"mismatch not spoken: {spoken[-1:]}"
+    await home(pg)
+    await pg.click("[data-go=echo]")
+    assert "Spell Echo" not in await pg.inner_text("#echoRound"), "Spell Echo name shown twice"
+    await home(pg)
+    keep = await pg.evaluate("drawings"); await pg.evaluate("drawings = []")
+    try:
+        await pg.click("[data-go=studio]"); assert await pg.is_visible("#stGallery .empty-note"), "empty Art Studio has no friendly note"
+    finally:
+        await pg.evaluate("d => { drawings = d; }", keep)
+    await home(pg)
+
 STACK = None
 
 async def stroke(pg):
