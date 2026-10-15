@@ -1,11 +1,13 @@
 # Changelog
 
 ## Unreleased
+
+## 1.9.0 (2026-10-15)
+- **Fixes:** leaving Treasure Catch mid-round could hide Start when she came back (in 1.8.0). Please update from 1.8.0.
 - 🌷 Three new secrets (nine in all): wake Faerie Pop's sleepy owl, catch three gems in one Treasure Catch round, and
   finish a lesson with your eyes closed. Finding every secret opens the hidden **Secret Garden** colors (pink and
   green, with drifting petals) in the Star Shop. Secrets found mid-game celebrate after the round, not over it.
 - Seasonal and garden decorations now float behind the app instead of over the game tiles.
-- Fix: leaving Treasure Catch mid-round and coming back no longer hides the Start button.
 - 🗓️ Weekly challenge: a different goal each week (catch 20 faeries, cast 5 spells, win Memory Match twice, …) shown on
   home and read aloud when tapped. Finishing earns a special sticker (its own row in My Spellbook) and +5 stars.
   Missing a week costs nothing. Progress and challenge stickers are in backups.
