@@ -572,6 +572,7 @@ body.theme-forest{--bg:#ECF8EE;--bg2:#D5F0DA;--violet:#2E9B5C;--line:#C6E8CE;--c
           <option value="en-US-AvaNeural">Ava</option><option value="en-US-EmmaNeural">Emma</option><option value="en-US-GuyNeural">Guy</option></select>
           <button id="cloudVoiceTest">🔊 Test</button></div>
       </div>
+      <div class="voiceset"><b>How she's doing</b> <span class="pnote">(kept on this device only)</span><div id="parentStats" class="pnote" style="margin-top:4px;line-height:1.5"></div></div>
       <div class="voiceset"><b>Reading voice</b>
         <div class="rowbtns"><button data-quiet="0">🔔 Chimes on</button><button data-quiet="1">🤫 Quiet car (voice only)</button></div>
         <div class="rowbtns"><button data-rate="0.8">Slower</button><button data-rate="1">Normal</button><button data-rate="1.15">Faster</button></div>
@@ -1226,7 +1227,7 @@ function go(id, quiet){
   if (id === "night") openNight();
   if (id === "home" && !quiet) say("Pick a magic game!");
 }
-document.querySelectorAll("[data-go]").forEach(b => b.onclick = () => go(b.dataset.go));
+document.querySelectorAll("[data-go]").forEach(b => b.onclick = () => { bumpStat("play_" + b.dataset.go); go(b.dataset.go); });
 /* An odd game out spans its whole row instead of sitting alone in half of it (tile count changes with Story Time). */
 function updateHomeGrid(){
   const g = document.querySelector(".games"), tiles = [...g.querySelectorAll(".game-btn:not(.wide)")];
@@ -1397,6 +1398,7 @@ function newCount(){
     const b = document.createElement("button"); b.className = "ans"; b.textContent = n;
     b.onclick = () => {
       if (!$("cNext").classList.contains("hidden")) return;
+      if (!cMissed){ bumpStat("countTries"); if (n === t) bumpStat("countFirst"); }  // first try on this card, for grown-ups
       if (n === t){
         if (!cMissed) bumpStat("countStreak"); cMissed = true; chal("count");
         b.classList.add("right"); addStar(); burst(); chime();
@@ -1439,6 +1441,7 @@ $("bQ").onclick = sayBattle;
 document.querySelectorAll("#battle .yesno .ans").forEach(b => b.onclick = () => {
   if (!$("bNext").classList.contains("hidden")) return;
   const truth = bAtk.p >= bDef.t, pick = b.dataset.yes === "1";
+  if (!bMissed){ bumpStat("battleTries"); if (pick === truth) bumpStat("battleFirst"); }
   if (pick === truth){
     if (!bMissed) bumpStat("battleStreak"); bMissed = true;
     b.classList.add("right"); addStar(); burst(); chime();
@@ -2579,6 +2582,21 @@ function renderBadges(){
   if (!ks.length) B.innerHTML = `<span class="empty-note">Finish a weekly challenge to earn one!</span>`;
   $("badgeCount").textContent = ks.length ? String(ks.length) : "";
 }
+
+/* ---------- FOR GROWN-UPS: how she's doing (local stats only, never sent anywhere) ---------- */
+function renderParentStats(){
+  const pct = (a, b) => b ? `${a} of ${b} right on the first try (${Math.round(100 * a / b)}%)` : "not played yet";
+  const plays = Object.keys(stats).filter(k => k.startsWith("play_") && screens[k.slice(5)]).map(k => [screens[k.slice(5)], stats[k]]).sort((a, b) => b[1] - a[1]);
+  const lines = [
+    `Favorite games: ${plays.length ? plays.slice(0, 5).map(([n, c]) => `${n} (${c})`).join(", ") : "none yet"}`,
+    `Count the Mana: ${pct(stats.countFirst || 0, stats.countTries || 0)}`,
+    `Who Wins: ${pct(stats.battleFirst || 0, stats.battleTries || 0)}`,
+    `Magic School: ${CORE.filter(l => stats.lessons[l.id]).length} of ${CORE.length} lessons` + (LESSONS.some(l => l.bonus && stats.lessons[l.id]) ? ", plus bonus lessons" : ""),
+    `Stars earned in all: ${xp} (level ${levelFor(xp) + 1})`,
+  ];
+  const box = $("parentStats"); box.innerHTML = ""; lines.forEach(t => { const d = document.createElement("div"); d.textContent = t; box.appendChild(d); });
+}
+document.querySelector(".grownup").addEventListener("toggle", e => { if (e.target.open) renderParentStats(); });
 
 /* ---------- PROGRESS STATS ---------- */
 let stats = load("luna_stats", {});

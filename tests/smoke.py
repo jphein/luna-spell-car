@@ -768,6 +768,25 @@ async def creature_backgrounds(pg, mode):
 
 def pets_ok(p): return p and p.get("kind") == "mermaid" and p.get("bg") == "space"
 
+@test
+async def parent_stats(pg, mode):
+    # For grown-ups: which games she plays and how her first-try accuracy is going. On the device only.
+    f0 = await pg.evaluate("stats.play_fog || 0")
+    for _ in range(2): await pg.click("[data-go=fog]"); await home(pg)
+    assert await pg.evaluate("stats.play_fog") == f0 + 2, "game plays not counted"
+    await pg.click("[data-go=count]")
+    t0, r0 = await pg.evaluate("[stats.countTries || 0, stats.countFirst || 0]")
+    await pg.evaluate("[...document.querySelectorAll('#cAns .ans')].find(b => +b.textContent === total(cCur)).click()")
+    await pg.click("#cNext")
+    await pg.evaluate("[...document.querySelectorAll('#cAns .ans')].find(b => +b.textContent !== total(cCur)).click()")
+    await pg.evaluate("[...document.querySelectorAll('#cAns .ans')].find(b => +b.textContent === total(cCur)).click()")
+    assert await pg.evaluate("[stats.countTries, stats.countFirst]") == [t0 + 2, r0 + 1], "first-try accuracy counted wrong"
+    await home(pg)
+    await pg.evaluate("document.querySelector('.grownup').open = true"); await pg.wait_for_timeout(100)
+    txt = await pg.inner_text("#parentStats")
+    assert "Magic Fog" in txt and "%" in txt and "first try" in txt, f"grown-up stats missing: {txt[:200]}"
+    await pg.evaluate("document.querySelector('.grownup').open = false")
+
 STACK = None
 
 async def stroke(pg):
