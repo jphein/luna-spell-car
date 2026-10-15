@@ -13,8 +13,8 @@ account, then checking it live. Read `worker/README.md` and `CLAUDE.md` for back
 
 ## Steps
 1. Unzip `luna-spell-car-repo.zip` (it includes the full git history and tags) and `cd luna-spell-car`.
-   Check `git status` is clean. Create a **private** GitHub repo `luna-spell-car` under the owner's account
-   (private because it contains Wizards of the Coast card art for personal use), then
+   Check `git status` is clean. Create a GitHub repo `luna-spell-car` under the owner's account (the card art is
+   used as free fan content under the Wizards Fan Content Policy; see README), then
    `git remote add origin <repo URL>` and `git push -u origin main --tags`.
    Pushing starts the CI workflow (`.github/workflows/ci.yml`: tests + APK build, no secrets needed).
 2. Needs Node 20+ and Python 3.10+. `cd worker && npm ci`.

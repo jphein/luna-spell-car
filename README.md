@@ -1,8 +1,31 @@
 # Luna's Spell Car ✨
 
-A car-friendly Magic: The Gathering learning app for a young child, built around her
-**Prismari Artistry** Commander deck. Every prompt is read aloud, buttons are big, and
-most games work without reading.
+A free, car-friendly app that teaches a young child to play Magic: The Gathering, built around one
+**Prismari Artistry** (blue-red) Commander deck. Every prompt is read aloud, buttons are big, most games work
+without reading, and there's an eyes-closed mode for car rides.
+
+<p>
+<img src="docs/screenshots/home.jpg" width="180" alt="Home screen with games">
+<img src="docs/screenshots/window.jpg" width="180" alt="Window Magic: spot colors outside to cast cards">
+<img src="docs/screenshots/listen.jpg" width="180" alt="Eyes-closed lesson: tap the blue or red half">
+<img src="docs/screenshots/catch.jpg" width="180" alt="Treasure Catch">
+<img src="docs/screenshots/maker.jpg" width="180" alt="Make a Creature">
+</p>
+
+## Install (Android)
+
+1. Download `luna-spell-car.apk` from the [latest release](../../releases/latest).
+2. Open it on the tablet and allow "Install unknown apps" for the app that opened it
+   (Fire tablets: Settings → Security & Privacy → Apps from Unknown Sources).
+3. Updates install over the old version and keep all saved progress (see the signing note under **Build**).
+
+**No server, works offline.** The released APK has no server address or token built in. Everything runs on the
+tablet. Grown-ups can optionally connect their own **Spell Car server** (stories, AI pictures, neural voices; see
+`server/README.md`) under **For grown-ups**. No ads, accounts, analytics, or data collection; saved progress stays
+on the device unless you make a backup file yourself. (The web build loads its font from Google Fonts; the APK
+  bundles it.)
+
+There's also a web build (`make build` → `dist/web/index.html`), where Story Time can use Claude.
 
 ## Games
 
@@ -20,7 +43,7 @@ most games work without reading.
 | **Magic Fog** | A card hides in fog that slowly clears; pick the matching picture (faster = more stars). |
 | **Magic School** | Twelve spoken lessons from the Spellbook PDF, from colors to Rootha's Elemental trick, plus a guided practice turn and a printable diploma. |
 | **Star Map** | Twelve harder hidden treasures that light up a dragon constellation; all twelve unlock the Starlight theme. |
-| **Star Shop & levels** | Spend stars on creatures, accessories, themes, and brushes; ten levels from lifetime stars; six hidden secrets. |
+| **Star Shop & levels** | Spend stars on creatures, accessories, themes, and brushes; ten levels from lifetime stars; nine hidden secrets that open a Secret Garden theme. |
 | **Count the Mana** | Tap each mana symbol to count it, then pick the total. |
 | **Who Wins?** | Power vs. toughness, with dots to compare. |
 | **Rootha Says** | Simon Says read aloud; eyes-free. |
@@ -54,15 +77,10 @@ make apk          # → build/luna-spell-car.apk at the version in VERSION
 make build        # web only → dist/web/index.html
 ```
 
-The APK is signed with `android/luna-debug.keystore` (password `android`, alias `luna`).
-It's a throwaway family key, committed on purpose so any machine can build an update that
-installs over the old one. `versionCode` is derived from `VERSION`, so `make release` handles upgrades.
-
-## Install on the tablet
-
-1. Copy `luna-spell-car.apk` to the tablet (USB, Drive, email, or `adb install`).
-2. Open it and allow "Install unknown apps" for whichever app opened it.
-3. Fire tablets: Settings → Security & Privacy → Apps from Unknown Sources.
+The APK is signed with `android/luna-debug.keystore` (password `android`, alias `luna`), a **public debug key**
+committed on purpose so any machine (and CI) can build an update that installs over the old one. That also means
+anyone could sign an APK that installs over it, so only install APKs from this repo's Releases page.
+`versionCode` is derived from `VERSION`, so each release installs over the last.
 
 ## Text-to-speech
 
@@ -82,3 +100,14 @@ install/update **Speech Services by Google** and download a high-quality English
   to move it between the tablet and the web version.
 
 See CHANGELOG.md for release notes.
+
+## Fan content, credits, and licenses
+
+Luna's Spell Car is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards. Portions of the materials used are property of Wizards of the Coast. ©Wizards of the Coast LLC.
+
+- Card art in `web/cards.json` is © Wizards of the Coast; artists are credited in the app (For grown-ups). Images via
+  [Scryfall](https://scryfall.com). The app is free and always will be: no ads, no purchases, no donations.
+- No Wizards logos or trademarks are used. The mana symbols are simple drawings made for this app (a water drop and a
+  flame); the app icon uses Rootha's card art.
+- Font: [Fredoka](https://github.com/hafontia/Fredoka-One), SIL Open Font License 1.1 (`web/fonts/OFL.txt`).
+- PDF export: [jsPDF](https://github.com/parallax/jsPDF) 2.5.1, MIT license (`web/vendor/`).

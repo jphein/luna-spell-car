@@ -730,6 +730,17 @@ async def secret_garden(pg, mode):
     assert await pg.evaluate("theme") == "garden" and await pg.evaluate("document.body.classList.contains('theme-garden')"), "garden colors don't apply"
     await pg.click('[data-item="theme:night"] button'); await home(pg)
 
+FCP_NOTICE = ("Luna's Spell Car is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards. "
+              "Portions of the materials used are property of Wizards of the Coast. ©Wizards of the Coast LLC.")
+
+@test
+async def fan_content_notice(pg, mode):
+    # Wizards' Fan Content Policy notice, word for word, in the app's grown-ups panel and the README.
+    await pg.evaluate("document.querySelector('.grownup').open = true")
+    assert (await pg.inner_text("#fcpNotice")).strip() == FCP_NOTICE, "Fan Content notice missing or changed in the app"
+    assert FCP_NOTICE in open(os.path.join(ROOT, "README.md"), encoding="utf-8").read(), "Fan Content notice missing from README"
+    await pg.evaluate("document.querySelector('.grownup').open = false")
+
 STACK = None
 
 async def stroke(pg):

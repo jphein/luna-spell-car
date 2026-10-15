@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- Going public as free fan content: the Wizards Fan Content Policy notice is in For grown-ups and the README, the
+  README is rewritten for the public (install from Releases, screenshots, offline by default, credits and licenses),
+  Fredoka's OFL license now ships with the font, and public files no longer mention the kids' ages or names.
 
 ## 1.9.0 (2026-10-15)
 - **Fixes:** leaving Treasure Catch mid-round could hide Start when she came back (in 1.8.0). Please update from 1.8.0.

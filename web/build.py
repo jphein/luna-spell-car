@@ -29,5 +29,6 @@ shutil.rmtree(A, ignore_errors=True)
 os.makedirs(os.path.join(A, "fonts")); os.makedirs(os.path.join(A, "vendor"))
 open(os.path.join(A, "index.html"), "w", encoding="utf-8").write(android)
 shutil.copy(os.path.join(W, "fonts", "Fredoka-Variable.ttf"), os.path.join(A, "fonts"))
+shutil.copy(os.path.join(W, "fonts", "OFL.txt"), os.path.join(A, "fonts"))  # the font license travels with the font
 shutil.copy(os.path.join(W, "vendor", "jspdf.umd.min.js"), os.path.join(A, "vendor"))
 print(f"built v{version}: dist/web/index.html and android/assets/")

@@ -8,15 +8,16 @@ Reorder freely; each item should be small enough for one PR, with a clear "done 
 - [x] **Practice Turn 3**: an opponent's-turn lesson: choosing which creature blocks, double blocks, and saving Rootha.
 - [x] **Lesson replays as voice-only car mode**: listen to a lesson with eyes closed, answering by tapping big colored halves.
 - [x] **Listen mode, part 2**: spoken versions of the tap-only pages (card parts, paying with lands, putting a turn in order).
-- [ ] **Second-deck edition, slice 1: deck switcher.** ⏸ On hold: it needs new card art, and CLAUDE.md forbids adding new
+- [ ] **Second deck, slice 1: deck switcher.** ⏸ On hold: it needs new card art, and CLAUDE.md forbids adding new
       copyrighted art. Unblock with a grown-up decision on where the second deck's card images come from. Add First Flight card data (white/blue, with art) and a "Whose deck?"
       picker so every game can use the second deck's cards. Done when: switching decks changes Window Magic, Count, Who Wins, and Memory; tested.
-- [ ] **Second-deck edition, slice 2: flying & reach in Who Wins.** Flyers can only be blocked by flying/reach; harder questions for older kids.
+- [ ] **Second deck, slice 2: flying & reach in Who Wins.** Flyers can only be blocked by flying/reach; harder questions for older kids.
 - [x] **Cloud voice cache**: keep recent neural-voice clips on the device so repeated phrases work offline in the car.
 - [ ] **Coloring pages, slice 2: from her own creatures.** Trace her drawn (or server-made) creature pictures into
       outlines with edge detection and add them to the coloring page picker. Never trace the deck's card art (© WotC).
 
 ## Later
+- [ ] Move to a private release key (the debug key is public). Needs a tablet reinstall with Backup/Restore first.
 - [x] Treasure Catch: catch Goldspan Dragon's falling coins in a basket (drag game).
 - [x] Weekly challenge: a different goal each week ("catch 20 faeries") with a special sticker.
 - [x] More secrets and a hidden "Secret Garden" theme unlocked by finding all six.
