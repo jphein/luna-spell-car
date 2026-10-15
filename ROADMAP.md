@@ -16,7 +16,7 @@ Reorder freely; each item should be small enough for one PR, with a clear "done 
 - [ ] **Coloring pages**: outline versions of her deck's art to color in Art Studio.
 
 ## Later
-- [ ] Treasure Catch: catch Goldspan Dragon's falling coins in a basket (drag game).
+- [x] Treasure Catch: catch Goldspan Dragon's falling coins in a basket (drag game).
 - [ ] Weekly challenge: a different goal each week ("catch 20 faeries") with a special sticker.
 - [ ] More secrets and a hidden "Secret Garden" theme unlocked by finding all six.
 - [ ] Magic movies for Art Studio paintings ("make my painting move").

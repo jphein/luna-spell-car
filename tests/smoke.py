@@ -600,6 +600,28 @@ async def sticker_scene(pg, mode):
         assert sc["items"]["meadow"][0]["x"] == 1 and sc["items"]["meadow"][0]["y"] == 0, "restored positions not kept on the picture"
     await pg.evaluate("xp = __xp0; true"); await home(pg)
 
+@test
+async def treasure_catch(pg, mode):
+    # Goldspan Dragon drops treasure; slide the basket to catch it. 30-second rounds, no penalties.
+    await pg.click("[data-go=catch]"); s0 = await pg.evaluate("stars")
+    await pg.click("#catchGo"); assert await pg.evaluate("tc.on"), "round didn't start"
+    f = await pg.locator("#catchField").bounding_box()
+    await pg.mouse.click(f["x"] + f["width"] * 0.2, f["y"] + f["height"] * 0.9)
+    assert abs(await pg.evaluate("tc.x") - 0.2) < 0.05, "basket didn't follow the finger"
+    b = await pg.locator("#catchBasket").bounding_box(); assert b["width"] >= 100, f"basket too small to catch in a bumpy car ({b['width']:.0f}px)"
+    n = await pg.evaluate("tc.score")
+    await pg.evaluate("catchSpawn(); const it = tc.items[tc.items.length - 1]; it.x = tc.x; it.y = 0.8; catchAdvance(0.2)")
+    assert await pg.evaluate("tc.score") > n, "treasure over the basket wasn't caught"
+    m = await pg.evaluate("tc.score")
+    await pg.evaluate("catchSpawn(); const it = tc.items[tc.items.length - 1]; it.x = tc.x > 0.5 ? 0.1 : 0.9; it.y = 0.8; catchAdvance(0.2)")
+    assert await pg.evaluate("tc.score") == m, "treasure far from the basket was caught"
+    await pg.evaluate("tc.end = Date.now()"); await pg.wait_for_function("!tc.on", timeout=5000)
+    assert await pg.evaluate("stars") > s0 and await pg.evaluate("stats.catchBest") >= m, "no stars or best score after the round"
+    assert await pg.is_visible("#catchGo"), "no Play again button"
+    await dismiss(pg)
+    await pg.click("#catchGo"); await home(pg)
+    assert not await pg.evaluate("tc.on") and await pg.locator("#catchField .tcoin").count() == 0, "round kept running after leaving"
+
 STACK = None
 
 async def stroke(pg):

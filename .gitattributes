@@ -1,0 +1,3 @@
+# Both agent lanes add lines under "## Unreleased" at once; keep both sides instead of conflicting.
+# (Only for append-only files: ROADMAP checkbox edits would be duplicated by union.)
+CHANGELOG.md merge=union
