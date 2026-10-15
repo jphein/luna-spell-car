@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- 🐲 Magic School bonus lesson: **Practice Turn 2**, a harder guided turn: pay for Goldspan Dragon, haste, Treasure,
+  flyers blocking flyers, who's defeated, blocked attackers don't hit the player, tapped creatures can't block, and
+  Treasure worth two with Goldspan out. It glows once the twelve are done and never hides the diploma.
 - ✨ Little polish: "NEW" on a home tile goes away once she's opened that game (saved and in backups); Memory Match
   gives a soft sound on a miss and says "Try again!" the first two times; an empty Art Studio says where paintings
   will live; Spell Echo no longer shows its name twice.

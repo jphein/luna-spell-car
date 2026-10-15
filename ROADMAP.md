@@ -4,7 +4,8 @@ The nightly routine (see DEVELOPMENT.md) takes the top unchecked item under **Ne
 Reorder freely; each item should be small enough for one PR, with a clear "done when".
 
 ## Next
-- [ ] **Practice Turn 2**: a harder guided turn with Goldspan Dragon, Treasure, and blocking decisions.
+- [x] **Practice Turn 2**: a harder guided turn with Goldspan Dragon, Treasure, and blocking decisions (bonus lesson).
+- [ ] **Practice Turn 3**: an opponent's-turn lesson: choosing which creature blocks, double blocks, and saving Rootha.
 - [ ] **Lesson replays as voice-only car mode**: listen to a lesson with eyes closed, answering by tapping big colored halves.
 - [ ] **Second-deck edition, slice 1: deck switcher.** ⏸ On hold: it needs new card art, and CLAUDE.md forbids adding new
       copyrighted art. Unblock with a grown-up decision on where the second deck's card images come from. Add First Flight card data (white/blue, with art) and a "Whose deck?"

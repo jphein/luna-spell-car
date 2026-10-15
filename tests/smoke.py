@@ -353,7 +353,7 @@ async def solve_page(pg):
 async def magic_school(pg, mode):
     s0 = await pg.evaluate("stars")
     await pg.click("[data-go=school]")
-    assert await pg.locator("#lessonList .ltile").count() == 12, "should have 12 lessons"
+    assert await pg.locator("#lessonList .ltile:not(.bonus)").count() == 12, "should have 12 lessons"
     assert await pg.locator("#lessonList .ltile.upnext").count() == 1, "next lesson not highlighted"
     # a wrong answer shakes and doesn't advance
     await pg.click('[data-lesson="colors"]', force=True)
@@ -362,7 +362,7 @@ async def magic_school(pg, mode):
     await wrong.click(); assert await pg.locator("#lNext").count() == 0, "wrong answer advanced the lesson"
     await solve_page(pg); await dismiss(pg)
     assert await pg.evaluate("!!stats.lessons.colors"), "lesson 1 not recorded"
-    for lid in await pg.evaluate("LESSONS.map(l => l.id).filter(id => id !== 'colors')"):
+    for lid in await pg.evaluate("CORE.map(l => l.id).filter(id => id !== 'colors')"):
         await pg.evaluate("go('school', true)"); await pg.click(f'[data-lesson="{lid}"]', force=True)
         for _ in range(await pg.evaluate("lsn.l.pages.length")): await solve_page(pg)
         await dismiss(pg)
@@ -378,6 +378,32 @@ async def magic_school(pg, mode):
     else: names = [c["saved"] for c in await pg.evaluate("window.__calls") if isinstance(c, dict) and "saved" in c]
     assert any("Diploma" in n for n in names), f"diploma PDF not saved ({names})"
     await dismiss(pg); await home(pg)
+
+@test
+async def practice_turn_2(pg, mode):
+    # A harder bonus turn (Goldspan Dragon, Treasure, blocking). It glows once school is done but never hides the diploma.
+    await pg.evaluate("go('school', true)")
+    tile = '[data-lesson="practice2"]'
+    assert await pg.locator(tile + ".bonus").count() == 1, "no bonus Practice Turn 2 tile"
+    if not await pg.evaluate("!!stats.lessons.practice2"):
+        assert await pg.locator(tile + ".upnext").count() == 1, "bonus lesson should glow after the twelve"
+    assert await pg.is_visible("#diplomaBtn"), "a bonus lesson hid the diploma"
+    s0 = await pg.evaluate("stars"); first = await pg.evaluate("!stats.lessons.practice2")
+    await pg.click(tile, force=True)
+    kinds = await pg.evaluate("lsn.l.pages.map(p => p.t)"); text = await pg.evaluate("JSON.stringify(lsn.l.pages)")
+    assert "pay" in kinds and kinds.count("quiz") >= 8, f"Practice Turn 2 too thin: {kinds}"
+    for word in ("Goldspan Dragon", "Treasure", "block", "tapped"): assert word in text, f"Practice Turn 2 never mentions {word}"
+    wrong = None
+    for i in range(len(kinds)):
+        if kinds[i] == "quiz" and wrong is None:
+            wrong = pg.locator("#lOpts .lopt:not([data-ok])").first; await wrong.click()
+            assert await pg.locator("#lNext").count() == 0, "wrong answer advanced the lesson"
+        await solve_page(pg)
+    await dismiss(pg)
+    assert await pg.evaluate("!!stats.lessons.practice2"), "Practice Turn 2 not recorded"
+    if first: assert await pg.evaluate("stars") >= s0 + 3, "no stars for the bonus lesson"
+    await pg.evaluate("go('school', true)"); assert await pg.is_visible("#diplomaBtn"), "diploma gone after the bonus"
+    await home(pg)
 
 @test
 async def star_map_treasures(pg, mode):
@@ -399,7 +425,8 @@ async def backup_has_progress(pg, mode):
     await pg.evaluate("go('book', true)"); await pg.click("#bkSave"); await pg.wait_for_timeout(300)
     d = json.loads([s for s in await pg.evaluate("window.__saved") if s["filename"].endswith(".json")][-1]["text"])
     assert d["v"] == 4 and d["xp"] >= 15 and d["owned"].get("kind:fox") and d["eggs"].get("rootha"), "backup is missing levels, purchases, or secrets"
-    assert len(d["stats"]["lessons"]) == 12 and d["treasures"].get("scholar"), "backup is missing Magic School or Star Map progress"
+    done = await pg.evaluate("Object.keys(stats.lessons)")
+    assert len(done) >= 12 and set(d["stats"]["lessons"]) == set(done) and d["treasures"].get("scholar"), "backup is missing Magic School or Star Map progress"
     await home(pg)
 
 @test

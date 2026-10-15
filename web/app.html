@@ -388,6 +388,7 @@ body.theme-forest{--bg:#ECF8EE;--bg2:#D5F0DA;--violet:#2E9B5C;--line:#C6E8CE;--c
 .ltile .emo{font-size:40px;line-height:1}
 .ltile b{font-size:16px;line-height:1.15}
 .ltile .num{position:absolute;top:8px;left:10px;font-size:13px;color:var(--muted);font-weight:700}
+.ltile.bonus{background:linear-gradient(160deg,var(--surface),var(--chip));border:2px dashed var(--gold)}
 .ltile.done::after{content:"✓";position:absolute;top:6px;right:8px;width:26px;height:26px;border-radius:50%;background:var(--good);color:#fff;font-weight:700;display:grid;place-items:center}
 .ltile.upnext{box-shadow:0 0 0 4px var(--gold),0 4px 0 var(--line);animation:pulse 1.8s ease-in-out infinite}
 .diploma-btn{width:100%;margin-top:14px;padding:18px;border-radius:999px;font-size:21px;font-weight:700;color:#2B1650;background:linear-gradient(90deg,#FFD976,#FFC94A,#FFE9A8);box-shadow:0 5px 0 rgba(0,0,0,.18)}
@@ -1112,7 +1113,7 @@ function go(id, quiet){
   if (id === "echo"){ echo.seq = []; renderEchoTop(); $("echoGo").textContent = "Start ▶"; $("echoGo").classList.remove("hidden"); say("Spell Echo! Watch the colors light up, then tap them in the same order. Tap start!"); }
   if (id === "pop"){ renderPopTop(); $("popTime").style.width = "100%"; say("Faerie Pop! Catch the faeries when they peek out. Tap start!"); }
   if (id === "fog") newFog();
-  if (id === "school"){ renderSchool(); if (!quiet) say(Object.keys(stats.lessons).length === LESSONS.length ? "You finished Magic School! Tap Get my diploma!" : "Magic School! Tap the glowing lesson to start."); }
+  if (id === "school"){ renderSchool(); if (!quiet) say(CORE.every(l => stats.lessons[l.id]) ? "You finished Magic School! Tap Get my diploma!" : "Magic School! Tap the glowing lesson to start."); }
   if (id === "stars"){ renderStarMap(); if (!quiet) say("The Star Map! Find treasures to light up the stars. Tap a star for a clue."); }
   if (id === "shop"){ renderShop(); say(`Star Shop! You have ${stars} stars to spend.`); }
   if (id === "studio"){ renderStudio(); say("Art studio! Tap new painting, or tap a painting to keep working on it."); }
@@ -2286,7 +2287,7 @@ function bumpStat(k, n = 1){ setStat(k, (stats[k] || 0) + n); }
 
 /* ---------- STAR MAP: twelve hidden treasures ---------- */
 const TREASURES = [
-  { id: "scholar", emo: "🎓", name: "Scholar Star", hint: "Finish every lesson in Magic School.", prog: () => [Object.keys(stats.lessons).length, LESSONS.length] },
+  { id: "scholar", emo: "🎓", name: "Scholar Star", hint: "Finish every lesson in Magic School.", prog: () => [CORE.filter(l => stats.lessons[l.id]).length, CORE.length] },
   { id: "echo", emo: "🎵", name: "Echo Star", hint: "Remember 8 colors in a row in Spell Echo.", prog: () => [Math.min(8, load("luna_echo_best", 0)), 8] },
   { id: "faerie", emo: "🧚", name: "Faerie Star", hint: "Catch 25 faeries in one game of Faerie Pop.", prog: () => [Math.min(25, load("luna_pop_best", 0)), 25] },
   { id: "collector", emo: "📚", name: "Collector Star", hint: "Cast every card in your deck at least once.", prog: () => [CARDS.filter(c => cast[c.name]).length, CARDS.length] },
@@ -2463,17 +2464,41 @@ const LESSONS = [
    { t: "quiz", q: "The 3/3 Elemental hits Dad. He had 18 life. How much now?", opts: [{ e: "1️⃣5️⃣", l: "15", ok: 1 }, { e: "1️⃣7️⃣", l: "17" }, { e: "1️⃣8️⃣", l: "18" }] },
    { t: "info", v: `<span class="big">👋✨</span>`, text: "Now say <b>done</b>! That was a real Prismari turn. Great job, wizard!" },
  ]},
+ { id: "practice2", emo: "🐲", title: "Practice Turn 2", bonus: true, pages: [
+   { t: "info", v: `<div class="mini-board">${fig("Storm-Kiln Artist")}<figure><span class="big">🏝️🏝️⛰️⛰️</span><div>4 lands</div></figure></div>`,
+     text: "A harder turn! You have <b>Storm-Kiln Artist</b> and 4 lands. In your hand: <b>Goldspan Dragon</b> and a <b>Mountain</b>. Dad has 20 life and a <b>Faerie Mastermind</b>." },
+   { t: "quiz", q: "You untapped and drew a card. Now you play your Mountain. How many lands do you have?", opts: [{ e: "5️⃣", l: "5", ok: 1 }, { e: "4️⃣", l: "4" }, { e: "6️⃣", l: "6" }], why: "4 lands and 1 more makes 5!" },
+   { t: "pay", card: "Goldspan Dragon", lands: ["U", "R", "U", "R", "R"], text: "<b>Goldspan Dragon</b> costs 5: two red, plus three of any color. Tap all your lands!" },
+   { t: "quiz", v: `<div class="mini-board">${fig("Storm-Kiln Artist")}</div>`, q: "Goldspan Dragon is a creature, not an instant or a sorcery. Does Storm-Kiln Artist make a Treasure?",
+     opts: [{ e: "🚫", l: "No", ok: 1 }, { e: "💰", l: "Yes" }], why: "Magecraft only wakes up for instants and sorceries. A creature doesn't count!" },
+   { t: "quiz", v: ART("Goldspan Dragon"), q: "Goldspan Dragon just arrived. Can it attack this turn?", opts: [{ e: "⚡", l: "Yes, it has haste", ok: 1 }, { e: "⏳", l: "Not yet" }], why: "Haste! It can attack right away." },
+   { t: "quiz", v: ART("Goldspan Dragon"), q: "Goldspan Dragon attacks! What do you get?", opts: [{ e: "💰", l: "A Treasure", ok: 1 }, { e: "🃏", l: "A card" }, { e: "🌀", l: "An Elemental" }], why: "Whenever Goldspan Dragon attacks, you get a Treasure!" },
+   { t: "quiz", v: `<div class="mini-board">${fig("Goldspan Dragon")}<span class="big">vs</span>${fig("Faerie Mastermind")}</div>`, q: "Dad's Faerie Mastermind can fly too. Can it block the Dragon?",
+     opts: [{ e: "✅", l: "Yes", ok: 1 }, { e: "🚫", l: "No" }], why: "Flyers can block flyers!" },
+   { t: "quiz", v: `<div class="mini-board">${fig("Goldspan Dragon")}<span class="big">vs</span>${fig("Faerie Mastermind")}</div>`, q: "Faerie Mastermind blocks the Dragon. Who is defeated?",
+     opts: [{ i: "Faerie Mastermind", l: "Faerie Mastermind", ok: 1 }, { i: "Goldspan Dragon", l: "Goldspan Dragon" }, { e: "🤝", l: "Both" }], why: "The Dragon hits for 4, and the Faerie can only take 1. The Faerie hits for 2, and the Dragon can take 4." },
+   { t: "quiz", q: "The Faerie blocked the Dragon. Does Dad lose any life?", opts: [{ e: "🚫", l: "No", ok: 1 }, { e: "❤️", l: "Yes, 4" }], why: "A blocked creature hits the blocker, not the player." },
+   { t: "info", v: `<span class="big">👋 ➜ 🧔</span>`, text: "You say done. Now it's <b>Dad's turn</b>. His <b>Thunderclap Drake</b>, a 2/1 flyer, attacks you!" },
+   { t: "quiz", v: `<div class="mini-board">${fig("Goldspan Dragon")}</div>`, q: "Goldspan Dragon attacked on your turn, so it's still tapped, turned sideways. Can it block?",
+     opts: [{ e: "😴", l: "No, it's tapped", ok: 1 }, { e: "🛡️", l: "Yes" }], why: "Tapped creatures can't block. Your cards untap at the start of your next turn." },
+   { t: "quiz", v: `<div class="mini-board">${fig("Storm-Kiln Artist")}<span class="big">vs</span>${fig("Thunderclap Drake")}</div>`, q: "Can Storm-Kiln Artist block the flying Drake?",
+     opts: [{ e: "🚫", l: "No", ok: 1 }, { e: "✅", l: "Yes" }], why: "Storm-Kiln Artist can't fly, so the Drake soars right over it." },
+   { t: "quiz", q: "The Drake hits you for 2. You had 20 life. How much now?", opts: [{ e: "1️⃣8️⃣", l: "18", ok: 1 }, { e: "2️⃣0️⃣", l: "20" }, { e: "2️⃣2️⃣", l: "22" }] },
+   { t: "quiz", v: `<span class="big">💰</span>`, q: "Your turn again! Goldspan Dragon is still out. How much mana does your Treasure make?", opts: [{ e: "2️⃣", l: "Two", ok: 1 }, { e: "1️⃣", l: "One" }], why: "Goldspan Dragon makes every Treasure worth two mana!" },
+   { t: "info", v: `<span class="big">🐲✨</span>`, text: "You planned a <b>dragon turn</b> and kept track of blockers. That's real wizard thinking!" },
+ ]},
 ];
+const CORE = LESSONS.filter(l => !l.bonus);  // the twelve that earn the diploma; bonus lessons never hide it
 let lsn = null;
 function renderSchool(){
   const L = $("lessonList"); L.innerHTML = "";
-  const nextIdx = LESSONS.findIndex(l => !stats.lessons[l.id]);
+  const coreLeft = CORE.some(l => !stats.lessons[l.id]), nextIdx = LESSONS.findIndex(l => !stats.lessons[l.id] && (!l.bonus || !coreLeft));
   LESSONS.forEach((l, i) => {
-    const b = document.createElement("button"); b.className = "ltile" + (stats.lessons[l.id] ? " done" : "") + (i === nextIdx ? " upnext" : "");
-    b.dataset.lesson = l.id; b.innerHTML = `<span class="num">${i + 1}</span><span class="emo">${l.emo}</span><b>${l.title}</b>`;
+    const b = document.createElement("button"); b.className = "ltile" + (l.bonus ? " bonus" : "") + (stats.lessons[l.id] ? " done" : "") + (i === nextIdx ? " upnext" : "");
+    b.dataset.lesson = l.id; b.innerHTML = `<span class="num">${l.bonus ? "⭐ Bonus" : i + 1}</span><span class="emo">${l.emo}</span><b>${l.title}</b>`;
     b.onclick = () => startLesson(l.id); L.appendChild(b);
   });
-  $("diplomaBtn").classList.toggle("hidden", nextIdx !== -1);
+  $("diplomaBtn").classList.toggle("hidden", coreLeft);
 }
 function startLesson(id){
   const l = LESSONS.find(x => x.id === id); lsn = { l, i: 0, mistakes: 0 };
@@ -2598,7 +2623,7 @@ async function diplomaCanvas(){
   x.fillStyle = "#2B1650"; x.font = "700 210px Fredoka, Arial, sans-serif"; x.fillText("Luna", W_ / 2, 920);
   x.fillStyle = "#6E5F8F"; x.font = "500 60px Fredoka, Arial, sans-serif"; x.fillText("has finished all twelve lessons and is now a", W_ / 2, 1040);
   x.fillStyle = "#7B4BE0"; x.font = "700 110px Fredoka, Arial, sans-serif"; x.fillText("Prismari Apprentice", W_ / 2, 1180);
-  x.font = "64px 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif"; x.fillText(LESSONS.map(l => l.emo).join(" "), W_ / 2, 1300);
+  x.font = "64px 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif"; x.fillText(CORE.map(l => l.emo).join(" "), W_ / 2, 1300);
   x.strokeStyle = "#6E5F8F"; x.lineWidth = 3; x.beginPath(); x.moveTo(400, 1480); x.lineTo(950, 1480); x.moveTo(1250, 1480); x.lineTo(1800, 1480); x.stroke();
   x.fillStyle = "#6E5F8F"; x.font = "500 44px Fredoka, Arial, sans-serif";
   x.fillText(new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" }), 675, 1460); x.fillText("Date", 675, 1540); x.fillText("Teacher", 1525, 1540);
