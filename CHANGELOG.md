@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+
+## 1.8.0 (2026-10-15)
 - 💰 New mini game, **Treasure Catch**: Goldspan Dragon flies across the night sky dropping coins (+1) and gems (+3);
   slide the big basket to catch them. 30-second rounds, nothing to lose, stars like Faerie Pop, and a best score
   (kept in progress stats, so it's in backups).
