@@ -363,6 +363,8 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .shopitem button.owned{background:var(--chip);color:var(--ink)}
 .shopitem button.armed{background:var(--gold);color:#2B1650;animation:pulse 1s ease-in-out infinite}
 .shopitem.poor button:not(.owned){background:var(--chip);color:var(--muted)}
+.pegico{position:relative;display:inline-block;line-height:1}
+.pegico svg{position:absolute;width:.62em;height:.62em;top:-.22em;right:-.18em}
 .pick.locked{opacity:.45;filter:grayscale(.6);position:relative}
 .pick.locked::after{content:"🔒";position:absolute;right:-4px;bottom:-4px;font-size:16px}
 .secrets{display:flex;flex-wrap:wrap;gap:8px}
@@ -1071,6 +1073,9 @@ const KINDS = [
   { id: "turtle", emo: "🐢", name: "Turtle", end: ["shell", "toes", "pebble"], shop: 15 },
   { id: "flamingo", emo: "🦩", name: "Flamingo", end: ["feathers", "legs", "pink"], shop: 15 },
   { id: "mermaid", emo: "🧜‍♀️", name: "Mermaid", end: ["tail", "shell", "splash"], shop: 15 },
+  // no pegasus emoji on older tablets: a running horse plus wings drawn on the canvas (and a little wing in the picker)
+  { id: "pegasus", emo: "🐎", name: "Pegasus", end: ["wings", "cloud", "mane"], shop: 15, wings: true,
+    icon: `<span class="pegico">🐎<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 20C4 11 10 4 21 3c-2 3-3 5-6 6 2 0 3 0 4-1-2 3-5 5-8 5 1 1 3 1 4 0-3 3-7 5-12 7z" fill="#fff" stroke="#9C86D9" stroke-width="1.4" stroke-linejoin="round"/></svg></span>` },
 ];
 /* Where the creature lives: the magic picture's background. "sparkle" is the original look (and the default). */
 const BGS = [{ id: "sparkle", emo: "✨", label: "Sparkles" }, { id: "castle", emo: "🏰", label: "Castle" }, { id: "beach", emo: "🏖️", label: "Beach" },
@@ -1139,12 +1144,22 @@ function petArt(p){
   x.fillStyle = "rgba(255,255,255,.35)"; x.beginPath(); x.ellipse(240, 316, 150, 26, 0, 0, Math.PI * 2); x.fill();
   x.fillStyle = "#000"; x.font = "210px 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif"; x.textAlign = "center"; x.textBaseline = "middle";
   x.fillText(KINDS.find(k => k.id === p.kind).emo, 240, 185);
+  if (KINDS.find(k => k.id === p.kind).wings) drawWing(x);
   const acc = ACCS.find(a => a.id === (p.acc || "none"));
   if (acc && acc.id !== "none"){
-    x.save(); x.translate(acc.id === "rainbow" ? 120 : 352, acc.id === "rainbow" ? 92 : 86); x.rotate(acc.id === "glasses" ? 0 : 0.22);
+    const winged = KINDS.find(k => k.id === p.kind).wings;  // the wing fills the usual corner: wear it on the head instead
+    x.save(); x.translate(acc.id === "rainbow" ? 120 : winged ? 150 : 352, acc.id === "rainbow" ? 92 : winged ? 56 : 86); x.rotate(acc.id === "glasses" ? 0 : 0.22);
     x.font = "104px 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif"; x.fillText(acc.emo, 0, 0); x.restore();
   }
   return (artCache[key] = cv);
+}
+function drawWing(x){  // a white feathered wing rising from the horse's back
+  x.save(); x.translate(272, 140); x.strokeStyle = "#CBB8F5"; x.lineWidth = 3;
+  [[-1.75, 112], [-1.45, 128], [-1.15, 132], [-0.85, 118], [-0.6, 96]].forEach(([a, len], i) => {
+    x.save(); x.rotate(a); x.beginPath(); x.ellipse(len / 2, 0, len / 2, 17 - i, 0, 0, Math.PI * 2); x.fillStyle = "#FFFFFF"; x.fill(); x.stroke(); x.restore();
+  });
+  x.beginPath(); x.ellipse(10, -20, 36, 26, -0.6, 0, Math.PI * 2); x.fillStyle = "#FFFFFF"; x.fill(); x.stroke();
+  x.restore();
 }
 function petToCard(p){
   const k = KINDS.find(x => x.id === p.kind), c = petCost(p);
@@ -1327,7 +1342,8 @@ function renderKindRow(){
   const row = $("kindRow"); row.innerHTML = "";
   KINDS.forEach(k => {
     const locked = k.shop && !isOwned("kind:" + k.id);
-    const b = document.createElement("button"); b.className = "pick" + (locked ? " locked" : ""); b.dataset.k = k.id; b.textContent = k.emo; b.setAttribute("aria-label", k.name);
+    const b = document.createElement("button"); b.className = "pick" + (locked ? " locked" : ""); b.dataset.k = k.id; b.setAttribute("aria-label", k.name);
+    if (k.icon) b.innerHTML = k.icon; else b.textContent = k.emo;
     b.onclick = () => { if (locked) return lockedTap(k.name, k.shop); const wasAuto = !draft.custom; draft.kind = k.id; if (wasAuto) draft.name = makeName(k.id); renderMaker(); plink("U"); say(`${k.name}!`); };
     row.appendChild(b);
   });
@@ -2332,7 +2348,7 @@ function gardenPetals(on){
 }
 applyTheme();
 const SHOP = [].concat(
-  KINDS.filter(k => k.shop).map(k => ({ id: "kind:" + k.id, cat: "New creatures", emo: k.emo, name: k.name, price: k.shop })),
+  KINDS.filter(k => k.shop).map(k => ({ id: "kind:" + k.id, cat: "New creatures", emo: k.emo, icon: k.icon, name: k.name, price: k.shop })),
   ACCS.filter(a => a.shop).map(a => ({ id: "acc:" + a.id, cat: "Accessories", emo: a.emo, name: a.label, price: a.shop })),
   [{ id: "theme:night", emo: "🌙", price: 0 }, { id: "theme:rainbow", emo: "🌈", price: 25 }, { id: "theme:ocean", emo: "🌊", price: 25 },
    { id: "theme:candy", emo: "🍬", price: 25 }, { id: "theme:forest", emo: "🌳", price: 25 }, { id: "theme:starlight", emo: "🌌", price: 999 }, { id: "theme:garden", emo: "🌷", price: 999 }].map(t => ({ ...t, cat: "App colors", name: THEMES[t.id.slice(6)] })),
@@ -2352,7 +2368,7 @@ function renderShop(){
       const own = itemOwned(it), isTheme = it.id.startsWith("theme:"), using = isTheme && theme === it.id.slice(6);
       const d = document.createElement("div"); d.className = "shopitem" + (!own && stars < it.price ? " poor" : ""); d.dataset.item = it.id;
       const label = own ? (isTheme ? (using ? "Using ✓" : "Use") : "Yours ✓") : shopArmed === it.id ? "Tap again!" : `⭐ ${it.price}`;
-      d.innerHTML = `<div class="emo">${it.emo}</div><b></b><button class="${own && !(isTheme && !using) ? "owned" : ""}${shopArmed === it.id ? " armed" : ""}">${label}</button>`;
+      d.innerHTML = `<div class="emo">${it.icon || it.emo}</div><b></b><button class="${own && !(isTheme && !using) ? "owned" : ""}${shopArmed === it.id ? " armed" : ""}">${label}</button>`;
       d.querySelector("b").textContent = it.name;
       d.querySelector("button").onclick = () => shopTap(it);
       g.appendChild(d);

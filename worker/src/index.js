@@ -8,7 +8,7 @@ const PLACES = {
   school: "Strixhaven, a school for young wizards", car: "a family car trip where magic happens outside the window",
 };
 const KINDS = Object.fromEntries(["unicorn", "horse", "dragon", "owl", "otter", "butterfly", "fox", "panda", "dolphin", "penguin", "turtle", "flamingo", "mermaid"].map(k => [k, k]));
-Object.assign(KINDS, { kitty: "fluffy kitten", puppy: "fluffy puppy", fairy: "little fairy", bunny: "bunny rabbit" });
+Object.assign(KINDS, { pegasus: "winged pegasus horse", kitty: "fluffy kitten", puppy: "fluffy puppy", fairy: "little fairy", bunny: "bunny rabbit" });
 const COLORS = { U: "sky blue", R: "warm red and orange", P: "purple" };
 const ACCS = { none: "", crown: "wearing a tiny golden crown", bow: "wearing a pink bow", flower: "with a flower behind its ear",
   star: "holding a glowing star", hat: "wearing a little top hat", glasses: "wearing cool sunglasses", rainbow: "with a rainbow arching behind it",
@@ -41,7 +41,8 @@ const KIND_MOTION = { unicorn: "the unicorn tosses its mane and its horn glows",
   fox: "the fox swishes its fluffy tail and tilts its head", panda: "the panda waves and nibbles a bamboo leaf",
   dolphin: "the dolphin leaps and splashes sparkly water", penguin: "the penguin waddles and flaps its little wings",
   turtle: "the turtle slowly peeks out and smiles", flamingo: "the flamingo stands on one leg and fluffs its pink feathers",
-  mermaid: "the mermaid flips her shimmering tail and blows a bubble" };
+  mermaid: "the mermaid flips her shimmering tail and blows a bubble",
+  pegasus: "the pegasus flaps its feathery wings and lifts into the sky" };
 const VIDEO_STYLE = "Gentle, magical, happy animation for a young child. Slow, soft movement, twinkling sparkles, a slow camera push-in. " +
   "Keep the same art style and colors as the picture. Nothing scary, no sudden movements, no text. " +
   "Audio: soft magical chimes and sparkles, no speech, no music with words.";

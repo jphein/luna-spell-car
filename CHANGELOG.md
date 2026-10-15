@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- 🐎 The Pegasus joins the Star Shop creatures (15 stars): a running horse with a white feathered wing drawn on its
+  picture (there's no pegasus emoji on older tablets), and its accessory sits on its head. The Spell Car server can
+  draw and animate it too.
 
 ## 1.10.0 (2026-10-15)
 - 📊 For grown-ups → "How she's doing": her favorite games, Count the Mana and Who Wins first-try accuracy, lessons

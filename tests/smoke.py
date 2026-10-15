@@ -830,6 +830,21 @@ async def button_contrast(pg, mode):
     finally:
         await pg.emulate_media(color_scheme="light")
 
+@test
+async def pegasus(pg, mode):
+    # Pegasus: a Star Shop creature drawn as a horse with real feathered wings (no pegasus emoji on older tablets).
+    k = await pg.evaluate("KINDS.find(k => k.id === 'pegasus')")
+    assert k and k.get("shop") and k.get("wings"), f"no winged pegasus in the shop: {k}"
+    white = """(p => { const d = petArt(p).getContext('2d').getImageData(200, 10, 200, 150).data; let n = 0;
+               for (let i = 0; i < d.length; i += 4) if (d[i] > 235 && d[i + 1] > 235 && d[i + 2] > 235) n++; return n; })"""
+    with_wings = await pg.evaluate(f"{white}({{ kind: 'pegasus', color: 'P', acc: 'none', bg: 'space' }})")
+    without = await pg.evaluate(f"(() => {{ const k = KINDS.find(k => k.id === 'pegasus'); k.wings = false; for (const c in artCache) delete artCache[c];"
+                                f" const n = {white}({{ kind: 'pegasus', color: 'P', acc: 'none', bg: 'space' }}); k.wings = true; for (const c in artCache) delete artCache[c]; return n; }})()")
+    assert with_wings - without > 1500, f"wings not drawn (white px {with_wings} vs {without})"
+    await pg.click("[data-go=maker]")
+    assert await pg.locator('#kindRow [data-k="pegasus"] svg').count() == 1, "picker has no pegasus icon"
+    await home(pg)
+
 STACK = None
 
 async def stroke(pg):

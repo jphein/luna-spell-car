@@ -28,7 +28,7 @@ Reorder freely; each item should be small enough for one PR, with a clear "done 
 - [ ] Grown-up "Get voices ready for the trip" button: pre-cache lesson and game phrases (costs Azure TTS; ask first).
 - [x] Parent stats: which games she plays, how her counting accuracy changes.
 - [x] More creature kinds (mermaid; fox was already in the shop) and backgrounds (castle, beach, space, meadow).
-- [ ] Pegasus: needs a drawn winged horse (there's no pegasus emoji older tablets can show).
+- [x] Pegasus: needs a drawn winged horse (there's no pegasus emoji older tablets can show).
 - [ ] Sticker scene, part 2: more pictures (beach, space, under the sea), bigger/smaller stickers by pinching, and
       "print my scene" for the fridge.
 - [ ] Spanish voice + text toggle.

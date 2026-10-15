@@ -15,7 +15,7 @@ fails = []
 IMPL = os.environ.get("SPELLCAR_IMPL", "python")
 def check(ok, msg): print(("  ok   " if ok else "  FAIL ") + f"{IMPL}: " + msg); ok or fails.append(msg)
 
-s = Stack(IMAGES_PER_DAY=3, STORIES_PER_DAY=5, VIDEOS_PER_DAY=3)
+s = Stack(IMAGES_PER_DAY=4, STORIES_PER_DAY=5, VIDEOS_PER_DAY=3)
 try:
     u = s.url
     st, _, _ = call(u, "/health", token="wrong"); check(st == 401, "rejects a bad token")
@@ -33,6 +33,7 @@ try:
     st, _, _ = call(u, "/image", {"kind": "kraken", "color": "P", "power": "fly"}); check(st == 400, "rejects unknown creature kinds")
     st, _, b = call(u, "/image", {"kind": "fox", "color": "R", "acc": "wand", "power": "zoom"}); check(st == 200, "accepts Star Shop creatures and accessories")
     st, _, _ = call(u, "/image", {"kind": "mermaid", "color": "U", "power": "heart"}); check(st == 200, "accepts the mermaid")
+    st, _, _ = call(u, "/image", {"kind": "pegasus", "color": "P", "power": "fly"}); check(st == 200, "accepts the pegasus")
     st, _, _ = call(u, "/image", {"kind": "kitty", "color": "U", "power": "heart"}); check(st == 429, "enforces the daily picture cap")
     st, h, b = call(u, "/tts", {"text": "Hi Luna! <b>sparkle</b>", "voice": "en-US-AnaNeural", "rate": 0.9})
     check(st == 200 and h["Content-Type"].startswith("audio/") and len(b) > 100, "tts returns audio")
