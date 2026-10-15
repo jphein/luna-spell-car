@@ -146,7 +146,7 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 
 /* rootha says */
 .says{text-align:center}
-.says .face{width:180px;height:180px;border-radius:50%;object-fit:cover;object-position:50% 25%;border:6px solid var(--violet);display:block;margin:4px auto 10px;transition:transform .2s}
+.says .face{width:clamp(180px,34vmin,300px);height:clamp(180px,34vmin,300px);border-radius:50%;object-fit:cover;object-position:50% 25%;border:6px solid var(--violet);display:block;margin:4px auto 10px;transition:transform .2s}
 .says .face.talk{animation:bob .5s ease-in-out 3}
 @keyframes bob{50%{transform:scale(1.06) rotate(-3deg)}}
 .cmd{font-size:clamp(26px,6.5vw,38px);font-weight:700;min-height:2.6em;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;padding:0 8px}
@@ -257,13 +257,14 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .slot.U{border-color:#2E8FE0}.slot.R{border-color:#EF5A31}.slot.N{border-color:#9C93AF}
 .slot.full{border-style:solid;animation:pop .35s cubic-bezier(.2,1.6,.4,1)}
 .slot .sym{width:40px;height:40px}
-.bubfield{position:relative;height:min(54vh,520px);border-radius:26px;overflow:hidden;background:radial-gradient(120% 90% at 50% 100%,#6A3BC4,#2B1658 70%);margin-top:12px;touch-action:manipulation}
+.bubfield{position:relative;height:min(54vh,820px);border-radius:26px;overflow:hidden;background:radial-gradient(120% 90% at 50% 100%,#6A3BC4,#2B1658 70%);margin-top:12px;touch-action:manipulation}
 .bub{position:absolute;bottom:-96px;width:84px;height:84px;border-radius:50%;display:grid;place-items:center;padding:0;animation:rise var(--d) linear forwards;box-shadow:inset -6px -8px 14px rgba(0,0,0,.25),inset 6px 8px 14px rgba(255,255,255,.35)}
 .bub.U{background:radial-gradient(circle at 32% 30%,#D4ECFF,#4BA6F5 45%,#1F6FC4)}
 .bub.R{background:radial-gradient(circle at 32% 30%,#FFE0CF,#FF7E4F 45%,#C9391A)}
 .bub svg{width:46px;height:46px}
 .bub.popped{animation:popout .28s ease-out forwards}
 .bub.nope svg{animation:wob .35s}
+@media (min-width:640px) and (min-height:640px){.bub{width:112px;height:112px;bottom:-124px}.bub svg{width:60px;height:60px}}
 @keyframes rise{to{transform:translateY(calc(-1 * var(--h)))}}
 @keyframes popout{to{transform:translateY(var(--y)) scale(1.7);opacity:0}}
 @keyframes wob{25%{transform:rotate(-18deg) scale(.9)}75%{transform:rotate(18deg) scale(.9)}}
@@ -342,17 +343,17 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 /* spell echo */
 .echo-top{display:flex;justify-content:space-between;font-size:20px;font-weight:700;margin:0 4px 10px}
 .echo-top span:last-child{color:var(--muted);font-weight:600;font-size:17px}
-.echo-pads{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:460px;margin:0 auto}
-.pad{aspect-ratio:1;border-radius:34px;font-size:clamp(44px,13vw,70px);box-shadow:0 6px 0 rgba(0,0,0,.2);transition:transform .1s,filter .1s}
+.echo-pads{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:min(720px,calc(100vh - 290px));min-width:min(100%,300px);margin:0 auto}
+.pad{aspect-ratio:1;border-radius:34px;font-size:clamp(44px,11vmin,110px);box-shadow:0 6px 0 rgba(0,0,0,.2);transition:transform .1s,filter .1s}
 .pad.U{background:linear-gradient(160deg,#4BA6F5,#1F6FC4)}.pad.R{background:linear-gradient(160deg,#FF8556,#D9411E)}
 .pad.P{background:linear-gradient(160deg,#B07CFF,#6A35D0)}.pad.G{background:linear-gradient(160deg,#FFD976,#E3A615)}
 .pad.lit{filter:brightness(1.45) saturate(1.2);transform:scale(1.06);box-shadow:0 0 34px rgba(255,255,255,.75),0 6px 0 rgba(0,0,0,.2)}
 /* faerie pop */
 .poptime{height:14px;border-radius:99px;background:var(--chip);overflow:hidden;margin:0 4px 12px}
 .poptime i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--gold),var(--violet));border-radius:99px}
-.popgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:480px;margin:0 auto}
+.popgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:min(720px,calc(100vh - 300px));min-width:min(100%,300px);margin:0 auto}
 .hole{position:relative;aspect-ratio:1;border-radius:50%;overflow:hidden;background:radial-gradient(circle at 50% 70%,#9A6BFF,#3B1C7A 70%);box-shadow:inset 0 -8px 16px rgba(0,0,0,.35);padding:0}
-.hole .popwho{position:absolute;inset:0;display:grid;place-items:center;font-size:clamp(40px,12vw,62px);transform:translateY(105%);transition:transform .16s ease-out}
+.hole .popwho{position:absolute;inset:0;display:grid;place-items:center;font-size:clamp(40px,11vmin,110px);transform:translateY(105%);transition:transform .16s ease-out}
 .hole.up .popwho{transform:translateY(0)}
 .hole.got{box-shadow:0 0 0 5px var(--gold),inset 0 -8px 16px rgba(0,0,0,.35)}
 /* magic fog */
@@ -2682,7 +2683,7 @@ function spawnBubble(){
   const k = needCol.length && Math.random() < 0.55 ? rnd(needCol) : rnd(["U", "R"]);
   const b = document.createElement("button"); b.className = "bub " + k; b.innerHTML = BUB_SVG[k];
   b.setAttribute("aria-label", k === "U" ? "Blue bubble" : "Red bubble");
-  b.style.left = Math.round(8 + Math.random() * Math.max(10, W_ - 100)) + "px";
+  b.style.left = Math.round(8 + Math.random() * Math.max(10, W_ - 128)) + "px";
   const sp = BUB_SPEEDS[bubSpeed]; b.style.setProperty("--d", (sp.min + Math.random() * sp.spread).toFixed(2) + "s"); b.style.setProperty("--h", (H_ + 200) + "px");
   b.addEventListener("animationend", ev => { if (ev.animationName === "rise" || ev.animationName === "popout") b.remove(); });
   b.addEventListener("pointerdown", ev => { ev.preventDefault(); popBubble(b, k); });

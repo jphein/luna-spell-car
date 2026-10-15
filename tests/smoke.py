@@ -417,6 +417,32 @@ async def kid_friendly_asks(pg, mode):
     await home(pg)
 
 @test
+async def tablet_size_games(pg, mode):
+    # On the tablet the games fill the screen (big targets for a bumpy car), and in landscape Start stays on screen.
+    async def size(sel): b = await pg.locator(sel).first.bounding_box(); return b["width"], b["y"] + b["height"]
+    try:
+        await pg.set_viewport_size({"width": 800, "height": 1280})
+        await pg.click("[data-go=echo]"); w, _ = await size(".pad"); assert w >= 300, f"Spell Echo pads only {w:.0f}px"
+        await home(pg); await pg.click("[data-go=pop]"); w, _ = await size(".hole"); assert w >= 200, f"Faerie Pop pools only {w:.0f}px"
+        await home(pg); await pg.click("[data-go=says]"); w, _ = await size("#saysFace"); assert w >= 240, f"Rootha only {w:.0f}px"
+        await home(pg); await pg.click("[data-go=bubbles]"); await pg.wait_for_timeout(300)
+        w, _ = await size(".bub"); assert w >= 100, f"bubbles only {w:.0f}px"
+        h = (await pg.locator("#bubField").bounding_box())["height"]; assert h >= 600, f"bubble field only {h:.0f}px tall"
+        await home(pg)
+        await pg.set_viewport_size({"width": 1280, "height": 800})
+        for game, btn in (("echo", "#echoGo"), ("pop", "#popGo")):
+            await pg.click(f"[data-go={game}]"); _, bottom = await size(btn)
+            assert bottom <= 800, f"{game}: Start is below the screen in landscape ({bottom:.0f}px)"
+            await home(pg)
+        await pg.click("[data-go=says]"); _, bottom = await size("#saysPlay"); assert bottom <= 800, f"says: Start below the screen ({bottom:.0f}px)"
+        await home(pg)
+    finally:
+        await pg.set_viewport_size({"width": 400, "height": 860})
+    await pg.click("[data-go=echo]"); w, _ = await size(".pad")
+    assert w <= 200 and await pg.evaluate("document.documentElement.scrollWidth <= innerWidth + 1"), "phone layout broke"
+    await home(pg)
+
+@test
 async def cloud_connect(pg, mode):
     if mode != "android": return
     await pg.evaluate("document.querySelector('.grownup').open = true")
