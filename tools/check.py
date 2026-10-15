@@ -29,6 +29,18 @@ check(gos <= screens, "every home tile has a screen" + (f": {sorted(gos - screen
 check(all(f'<section id="{g}"' in src for g in gos), "every screen has a <section>")
 stored = set(re.findall(r'store\("(luna_\w+)"', script)); loaded = set(re.findall(r'load\("(luna_\w+)"', script))
 check(stored <= loaded, "every saved key is loaded back" + (f": {sorted(stored - loaded)}" if stored - loaded else ""))
+css = src[src.index("<style>"):src.index("</style>")]
+standalone = set(re.findall(r"(?:^|[},])\s*\.([\w-]+)\s*(?=[{:,])", css, re.M))
+nested = re.findall(r"\.([\w-]+)[^{},]*?\s\.([\w-]+)\b[^{]*\{", css)
+ALLOWED = {("grownup", "summary"), ("pbar", "i")}
+clash = sorted({f".{par} .{child}" for par, child in nested if child in standalone and child != par
+                and not re.search(r"\.%s\.%s|\.%s\b" % (par, child, child + "-"), css) and (par, child) not in ALLOWED})
+NESTED_OK = {".celebrate .box", ".pmodal .box", ".mana-btn .count", ".mini .cost", ".petcard .bar", ".petcard .cost", ".shopitem .emo",
+             ".shop-head .big", ".bk .nm", ".stage h2", ".mcard .f", ".mcard .b", ".game-btn .ico", ".hole .popwho", ".celebrate .bigemo",
+             # deliberate size/spacing tweaks of the same component inside a container:
+             ".pmodal .petcard", ".pmodal .rowbtns", ".slot .sym", ".voiceset .rowbtns", ".yesno .ans"}
+clash = [x for x in clash if x not in NESTED_OK]
+check(not clash, "no CSS class is styled both on its own and as a nested class (style clashes)" + (f": {clash}" if clash else ""))
 check(src.count("__CARDS__") == 1 and "__VERSION__" in src, "build placeholders present")
 check(len(src) < 400_000, f"app.html source size {len(src)//1024} KB")
 print("\n" + ("All checks passed." if not fails else f"{len(fails)} check(s) failed.")); sys.exit(1 if fails else 0)

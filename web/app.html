@@ -174,7 +174,7 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .bk.locked::after{content:"?";position:absolute;top:24%;left:0;right:0;text-align:center;font-size:40px;font-weight:700;color:var(--muted)}
 .bk .times{position:absolute;top:6px;right:6px;background:var(--gold);color:#2B1650;font-weight:700;font-size:13px;padding:2px 7px;border-radius:99px}
 .bk .del{position:absolute;top:4px;left:4px;width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.45);color:#fff;font-size:15px}
-.empty-note{color:var(--muted);font-size:16px;padding:6px 4px}
+.empty-note{color:var(--muted);font-size:16px;padding:6px 4px;grid-column:1/-1}
 
 .voiceset{background:var(--surface);border-radius:16px;padding:10px 12px;margin:8px 0;color:var(--ink)}
 .voiceset .rowbtns button.on{background:var(--violet);color:#fff}
@@ -303,6 +303,67 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .vmedia .brew{position:absolute;inset:0;display:grid;place-items:center;background:rgba(43,22,80,.6);color:#fff;font-size:19px;font-weight:700;text-align:center;padding:12px}
 .celmedia{margin-bottom:4px}
 .bk .mv{position:absolute;bottom:26%;right:6px;background:rgba(0,0,0,.5);color:#fff;font-size:13px;border-radius:99px;padding:2px 7px}
+/* levels, shop, secrets */
+.stars .lvl{font-size:13px;background:var(--violet);color:#fff;border-radius:99px;padding:2px 8px;margin-left:2px}
+.lvl-line{margin:8px auto 0;font-size:17px;font-weight:600;color:var(--violet)}
+.lvlbar{max-width:260px;margin:6px auto 0}
+.spark{cursor:pointer}
+.rootha.spin{animation:rspin .9s cubic-bezier(.3,1.4,.5,1)}
+@keyframes rspin{to{transform:rotate(360deg) scale(1.05)}}
+.season{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.season span{position:absolute;top:-40px;font-size:28px;opacity:.7;animation:fall linear infinite}
+@keyframes fall{to{transform:translateY(110vh) rotate(200deg)}}
+.starfall{position:fixed;top:-40px;font-size:30px;pointer-events:none;z-index:31;animation:fall 2.4s ease-in forwards}
+.shop-head{background:var(--surface);border-radius:24px;padding:14px;text-align:center;box-shadow:0 4px 0 var(--line)}
+.shop-head .big{font-size:40px;font-weight:700}
+.shopgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.shopitem{background:var(--surface);border-radius:20px;padding:12px 10px;text-align:center;box-shadow:0 4px 0 var(--line);display:flex;flex-direction:column;align-items:center;gap:6px}
+.shopitem .emo{font-size:46px;line-height:1.1}
+.shopitem b{font-size:16px}
+.shopitem button{padding:10px 14px;border-radius:99px;background:var(--violet);color:#fff;font-size:16px;font-weight:700;min-width:96px}
+.shopitem button.owned{background:var(--chip);color:var(--ink)}
+.shopitem button.armed{background:var(--gold);color:#2B1650;animation:pulse 1s ease-in-out infinite}
+.shopitem.poor button:not(.owned){background:var(--chip);color:var(--muted)}
+.pick.locked{opacity:.45;filter:grayscale(.6);position:relative}
+.pick.locked::after{content:"🔒";position:absolute;right:-4px;bottom:-4px;font-size:16px}
+.secrets{display:flex;flex-wrap:wrap;gap:8px}
+.secrets button{width:62px;height:62px;border-radius:18px;background:var(--surface);box-shadow:0 3px 0 var(--line);font-size:32px}
+/* spell echo */
+.echo-top{display:flex;justify-content:space-between;font-size:20px;font-weight:700;margin:0 4px 10px}
+.echo-top span:last-child{color:var(--muted);font-weight:600;font-size:17px}
+.echo-pads{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:460px;margin:0 auto}
+.pad{aspect-ratio:1;border-radius:34px;font-size:clamp(44px,13vw,70px);box-shadow:0 6px 0 rgba(0,0,0,.2);transition:transform .1s,filter .1s}
+.pad.U{background:linear-gradient(160deg,#4BA6F5,#1F6FC4)}.pad.R{background:linear-gradient(160deg,#FF8556,#D9411E)}
+.pad.P{background:linear-gradient(160deg,#B07CFF,#6A35D0)}.pad.G{background:linear-gradient(160deg,#FFD976,#E3A615)}
+.pad.lit{filter:brightness(1.45) saturate(1.2);transform:scale(1.06);box-shadow:0 0 34px rgba(255,255,255,.75),0 6px 0 rgba(0,0,0,.2)}
+/* faerie pop */
+.poptime{height:14px;border-radius:99px;background:var(--chip);overflow:hidden;margin:0 4px 12px}
+.poptime i{display:block;height:100%;width:100%;background:linear-gradient(90deg,var(--gold),var(--violet));border-radius:99px}
+.popgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:480px;margin:0 auto}
+.hole{position:relative;aspect-ratio:1;border-radius:50%;overflow:hidden;background:radial-gradient(circle at 50% 70%,#9A6BFF,#3B1C7A 70%);box-shadow:inset 0 -8px 16px rgba(0,0,0,.35);padding:0}
+.hole .popwho{position:absolute;inset:0;display:grid;place-items:center;font-size:clamp(40px,12vw,62px);transform:translateY(105%);transition:transform .16s ease-out}
+.hole.up .popwho{transform:translateY(0)}
+.hole.got{box-shadow:0 0 0 5px var(--gold),inset 0 -8px 16px rgba(0,0,0,.35)}
+/* magic fog */
+.fogpic{border-radius:18px;overflow:hidden;aspect-ratio:4/3;background:#ddd}
+#fogImg{width:100%;height:100%;object-fit:cover;display:block;transition:filter 1.6s linear}
+.fogopts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.fogopts button{padding:0;border-radius:16px;overflow:hidden;aspect-ratio:1;box-shadow:0 4px 0 var(--line);border:3px solid transparent}
+.fogopts button img{width:100%;height:100%;object-fit:cover;display:block}
+.fogopts button.right{border-color:var(--good);box-shadow:0 0 0 4px var(--good)}
+.fogopts button.wrong{animation:shake .4s}
+/* themes (bought in the Star Shop) */
+body.theme-rainbow{--bg:#FFF1F8;--bg2:#E6F3FF;--violet:#D9418F;--line:#F3CDE3;--chip:#FFF0F7}
+body.theme-ocean{--bg:#E6F7FF;--bg2:#C9EEFF;--violet:#1C7FB8;--line:#BDE3F5;--chip:#E9F7FD}
+body.theme-candy{--bg:#FFF0F5;--bg2:#FFE0EE;--violet:#E05A9A;--line:#F8CADF;--chip:#FFF0F5}
+body.theme-forest{--bg:#ECF8EE;--bg2:#D5F0DA;--violet:#2E9B5C;--line:#C6E8CE;--chip:#EEF9F0}
+@media (prefers-color-scheme:dark){
+  body.theme-rainbow{--bg:#2A1236;--bg2:#123A52;--surface:#3A1F4E;--violet:#FF7AC3;--line:#5B3470;--chip:#4A2A60}
+  body.theme-ocean{--bg:#06263A;--bg2:#0C4A66;--surface:#0F3550;--violet:#4FC3F7;--line:#1F5878;--chip:#164563}
+  body.theme-candy{--bg:#33142A;--bg2:#4A1A3C;--surface:#451E3D;--violet:#FF8CC6;--line:#6A2C58;--chip:#5A2550}
+  body.theme-forest{--bg:#0F2A1A;--bg2:#18412A;--surface:#183A26;--violet:#5CD68E;--line:#2A5C3D;--chip:#224D33}
+}
+@media (prefers-reduced-motion:reduce){.season,.starfall{display:none}.rootha.spin{animation:none}}
 /* celebration */
 .celebrate{position:fixed;inset:0;background:rgba(20,8,48,.82);display:grid;place-items:center;z-index:20;padding:24px}
 .celebrate .box{background:var(--surface);border-radius:30px;padding:18px;max-width:420px;width:100%;text-align:center;animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
@@ -324,26 +385,31 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
     <button class="home-btn hidden" id="homeBtn" aria-label="Back to games">🏠</button>
     <div class="title" id="screenTitle"></div>
     <button class="icon-btn" id="voiceBtn" aria-label="Turn voice off">🔊</button>
-    <div class="stars" aria-label="Stars"><span>⭐</span><span id="starCount">0</span></div>
+    <button class="stars" id="starsBtn" aria-label="Stars and Star Shop"><span>⭐</span><span id="starCount">0</span><span class="lvl" id="lvlBadge">Lv 1</span></button>
   </div>
 
   <!-- HOME -->
   <section id="home">
     <div class="hero">
       <img class="rootha" id="roothaImg" alt="Rootha">
-      <h1>Luna's Spell Car <span class="spark">✦</span></h1>
+      <h1>Luna's Spell Car <span class="spark" id="titleSpark">✦</span></h1>
+      <div class="lvl-line" id="lvlLine"></div><div class="pbar lvlbar"><i id="lvlBar"></i></div>
       <p>Pick a magic game!</p>
     </div>
     <div class="games">
       <button class="game-btn" data-go="window"><div class="ico" style="background:linear-gradient(135deg,#2E8FE0,#8A4FE6,#EF5A31)" id="icoWin"></div><b>Window Magic</b><span>Spot colors outside</span></button>
       <button class="game-btn hidden" data-go="story" id="storyTile"><div class="ico" style="background:#3E7BD6">📖</div><b>Story Time</b><span>Stories with your creatures</span></button>
-      <button class="game-btn" data-go="studio"><div class="ico" style="background:#FF7EB6">🎨</div><b>Art Studio <span class="newtag">NEW</span></b><span>Paint anything!</span></button>
+      <button class="game-btn" data-go="studio"><div class="ico" style="background:#FF7EB6">🎨</div><b>Art Studio</b><span>Paint anything!</span></button>
       <button class="game-btn" data-go="maker"><div class="ico" style="background:#E86BB8">🦄</div><b>Make a Creature</b><span>Unicorns, kitties, and more</span></button>
+      <button class="game-btn" data-go="echo"><div class="ico" style="background:linear-gradient(135deg,#4BA6F5,#B07CFF,#FFD976)">🎵</div><b>Spell Echo <span class="newtag">NEW</span></b><span>Copy the magic colors</span></button>
+      <button class="game-btn" data-go="pop"><div class="ico" style="background:#6A35D0">🧚</div><b>Faerie Pop <span class="newtag">NEW</span></b><span>Catch the faeries!</span></button>
+      <button class="game-btn" data-go="fog"><div class="ico" style="background:#7E8BA8">🌫️</div><b>Magic Fog <span class="newtag">NEW</span></b><span>Who's hiding?</span></button>
       <button class="game-btn" data-go="memory"><div class="ico" style="background:#8A4FE6">🃏</div><b>Memory Match</b><span>Find the pairs</span></button>
       <button class="game-btn" data-go="count"><div class="ico" style="background:var(--violet)">3</div><b>Count the Mana</b><span>Add up the cost</span></button>
       <button class="game-btn" data-go="battle"><div class="ico" style="background:var(--red)">⚔</div><b>Who Wins?</b><span>Power vs. toughness</span></button>
       <button class="game-btn" data-go="bubbles"><div class="ico" style="background:radial-gradient(circle at 30% 30%,#9ED2FF,#2E8FE0)">🫧</div><b>Mana Bubbles</b><span>Pop the right colors!</span></button>
       <button class="game-btn" data-go="says"><div class="ico" style="background:#1F9D63">🗣️</div><b>Rootha Says</b><span>Listen and move!</span></button>
+      <button class="game-btn wide" data-go="shop"><div class="ico" style="background:var(--gold)">🛍️</div><div><b>Star Shop <span class="newtag">NEW</span></b><span>Spend your stars on creatures, colors, and brushes</span></div></button>
       <button class="game-btn wide" data-go="night"><div class="ico" style="background:#D9411E">❤️</div><div><b>Game Night</b><span>Life counter and dice for real games at the table</span></div></button>
       <button class="game-btn wide" data-go="book"><div class="ico" style="background:var(--gold)">⭐</div><div><b>My Spellbook</b><span>Stickers, creatures, and cards you've cast</span></div></button>
     </div>
@@ -353,7 +419,7 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
       <p><b>Make a Creature:</b> she designs her own creature card. Stronger creatures cost more. Saved creatures appear in Window Magic, Count the Mana, and Who Wins.</p>
       <p><b>Story Time</b> asks Claude to write a short, gentle story starring the creatures she picks, then reads it aloud (it uses your Claude account, so it asks permission the first time). <b>Memory Match</b> is a flip-and-find pairs game. In <b>My Spellbook</b>, tap one of her creatures to edit it, and use <b>Print my creatures</b> to get a real-card-size PDF to cut out and sleeve.</p>
       <p><b>Rootha Says:</b> Simon Says, read aloud, no screen needed. You're the judge: if she moves when Rootha didn't say it, gotcha! Every correct answer earns a star, and every 10 stars earns a sticker in My Spellbook. Tap any question to hear it again. Everything is saved on this device only.</p>
-      <p><b>Mana Bubbles:</b> pop bubbles to pay a card's cost; colored slots need that color, gray slots take any. <b>Game Night</b> is a life counter (20 or 40 life, 2–4 players) with dice, a coin, and "who goes first." In Make a Creature she can <b>draw her own picture</b>, and <b>Art Studio</b> is free painting with a saved gallery. With a <b>Spell Car server</b> (below), the tablet app also gets Story Time, AI creature pictures, and natural neural voices from your Azure account. <b>Magic movies</b> (Google Veo, via the same server) let her cards and creatures move: tap a card in My Spellbook, or use "Make all deck cards move" below; each clip is made once, shared by all your devices, and plays offline. <b>Backup</b> in My Spellbook moves her creatures and stars between the tablet and the web version.</p>
+      <p><b>Mana Bubbles:</b> pop bubbles to pay a card's cost; colored slots need that color, gray slots take any. <b>Game Night</b> is a life counter (20 or 40 life, 2–4 players) with dice, a coin, and "who goes first." In Make a Creature she can <b>draw her own picture</b>, and <b>Art Studio</b> is free painting with a saved gallery. With a <b>Spell Car server</b> (below), the tablet app also gets Story Time, AI creature pictures, and natural neural voices from your Azure account. <b>Magic movies</b> (Google Veo, via the same server) let her cards and creatures move: tap a card in My Spellbook, or use "Make all deck cards move" below; each clip is made once, shared by all your devices, and plays offline. <b>Levels</b> come from every star she has ever earned, so spending stars in the <b>Star Shop</b> never lowers her level or stickers. There are six hidden <b>secrets</b>; the ❓ tiles in My Spellbook give hints. <b>Backup</b> in My Spellbook moves her creatures and stars between the tablet and the web version.</p>
       <div class="voiceset hidden" id="cloudSet"><b>Spell Car server (Azure)</b>
         <div class="pnote" style="margin:2px 0 6px">Adds Story Time, AI creature pictures, and natural voices. Uses your self-hosted Spell Car server; the Azure keys stay on the server.</div>
         <input id="cloudUrl" placeholder="Server address, e.g. https://spellcar.example.com" autocomplete="off" inputmode="url">
@@ -480,6 +546,43 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
     <div style="text-align:center"><button class="next hidden" id="memAgain">Play again</button></div>
   </section>
 
+  <!-- SPELL ECHO -->
+  <section id="echo" class="hidden">
+    <div class="echo-top"><span id="echoRound">Spell Echo</span><span id="echoBest"></span></div>
+    <div class="echo-pads">
+      <button class="pad U" data-pad="U" aria-label="Blue">💧</button><button class="pad R" data-pad="R" aria-label="Red">🔥</button>
+      <button class="pad P" data-pad="P" aria-label="Purple">🔮</button><button class="pad G" data-pad="G" aria-label="Gold">✨</button>
+    </div>
+    <div class="hint" id="echoHint">Watch the colors light up, then tap them in the same order.</div>
+    <div style="text-align:center"><button class="next" id="echoGo">Start ▶</button></div>
+  </section>
+
+  <!-- FAERIE POP -->
+  <section id="pop" class="hidden">
+    <div class="echo-top"><span id="popScore">🧚 0</span><span id="popBest"></span></div>
+    <div class="poptime"><i id="popTime"></i></div>
+    <div class="popgrid" id="popGrid"></div>
+    <div class="hint" id="popHint">Tap the faeries when they peek out! Unicorns are worth 3. Shh, don't wake the owl.</div>
+    <div style="text-align:center"><button class="next" id="popGo">Start ▶</button></div>
+  </section>
+
+  <!-- MAGIC FOG -->
+  <section id="fog" class="hidden">
+    <div class="stage">
+      <div class="fogpic"><img id="fogImg" alt="Someone hiding in the fog"></div>
+      <div class="question" id="fogQ">Who's hiding in the magic fog?</div>
+      <div class="fogopts" id="fogOpts"></div>
+      <div class="explain" id="fogExplain"></div>
+      <button class="next hidden" id="fogNext">Next ▶</button>
+    </div>
+  </section>
+
+  <!-- STAR SHOP -->
+  <section id="shop" class="hidden">
+    <div class="shop-head"><div class="big">⭐ <span id="shopStars">0</span></div><div class="pnote">Earn stars by playing. Shopping never lowers your level or your stickers!</div></div>
+    <div id="shopList"></div>
+  </section>
+
   <!-- ART STUDIO -->
   <section id="studio" class="hidden">
     <button class="save" id="stNew">🎨 New painting</button>
@@ -524,6 +627,8 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
     <h3 class="sec-h">My stickers</h3>
     <div class="stickers" id="stickers"></div>
     <div class="progress"><span id="stkNote"></span><div class="pbar"><i id="stkBar"></i></div></div>
+    <h3 class="sec-h">Secrets <span id="eggCount" style="color:var(--muted);font-size:16px"></span></h3>
+    <div class="secrets" id="secrets"></div>
     <h3 class="sec-h">My creatures</h3>
     <div class="book" id="petBook"></div>
     <button class="printbtn hidden" id="printBtn">🖨️ Print my creatures</button>
@@ -581,17 +686,43 @@ if (typeof stars !== "number") stars = 0;
 $("starCount").textContent = stars;
 
 const STICKERS = ["🦄", "🐴", "🌈", "🧚", "🐱", "🐶", "🌙", "💜", "🦋", "⭐", "🐉", "🔮", "🎀", "🌸", "👑", "🪄"];
-let pendingSticker = null;
-function addStar(){
-  stars++; $("starCount").textContent = stars; store("luna_stars", stars);
-  if (stars % 10 === 0){
-    const s = STICKERS[(stars / 10 - 1) % STICKERS.length];
-    if (!$("celebrate").classList.contains("hidden")) pendingSticker = s; else setTimeout(() => stickerParty(s), 900);
+// stars = spendable wallet; xp = every star ever earned (levels and stickers come from xp, so shopping never takes them away)
+let xp = load("luna_xp", null); if (typeof xp !== "number") xp = stars;
+let owned = load("luna_owned", {}), eggs = load("luna_eggs", {});
+const LEVELS = [[0, "Apprentice"], [15, "Spark Student"], [35, "Mana Mixer"], [60, "Spell Weaver"], [100, "Dragon Friend"],
+                [150, "Rainbow Wizard"], [220, "Archmage"], [300, "Prismari Star"], [400, "Legendary Wizard"], [520, "Planeswalker"]];
+function levelFor(x){ let l = 0; LEVELS.forEach((t, i) => { if (x >= t[0]) l = i; }); return l; }
+const celebQueue = [];
+function queueCelebrate(o){ if (window.__quietCelebrations) return; celebQueue.push(o); setTimeout(flushCelebrate, 900); }
+function flushCelebrate(){
+  if (!celebQueue.length || !$("celebrate").classList.contains("hidden") || !$("viewer").classList.contains("hidden") || !$("paint").classList.contains("hidden")) return;
+  showCelebrate(celebQueue.shift());
+}
+function renderStars(){
+  const lv = levelFor(xp); $("starCount").textContent = stars; $("lvlBadge").textContent = "Lv " + (lv + 1);
+  const next = LEVELS[lv + 1];
+  $("lvlLine").textContent = `Level ${lv + 1} · ${LEVELS[lv][1]}` + (next ? "" : " · the top level!");
+  $("lvlBar").style.width = next ? Math.round(100 * (xp - LEVELS[lv][0]) / (next[0] - LEVELS[lv][0])) + "%" : "100%";
+  if ($("shopStars")) $("shopStars").textContent = stars;
+}
+function addStar(n = 1){
+  const lv0 = levelFor(xp);
+  for (let i = 0; i < n; i++){
+    stars++; xp++;
+    if (xp % 10 === 0){
+      const sk = STICKERS[(xp / 10 - 1) % STICKERS.length];
+      queueCelebrate({ emo: sk, title: "New sticker!", sub: `${xp} stars earned! Look in My Spellbook.`, spoken: `Wow! ${xp} stars! You earned a new sticker!` });
+    }
   }
+  const lv = levelFor(xp);
+  if (lv > lv0){
+    stars += 5;
+    queueCelebrate({ emo: "🏅", title: `Level ${lv + 1}: ${LEVELS[lv][1]}!`, sub: "You leveled up! +5 bonus stars.",
+                     spoken: `Level up! You're a ${LEVELS[lv][1]} now! Here are five bonus stars!` });
+  }
+  store("luna_stars", stars); store("luna_xp", xp); renderStars();
 }
-function stickerParty(s){
-  showCelebrate({ emo: s, title: "New sticker!", sub: `${stars} stars! Look in My Spellbook.`, spoken: `Wow! ${stars} stars! You earned a new sticker!` });
-}
+function spendStars(n){ if (stars < n) return false; stars -= n; store("luna_stars", stars); renderStars(); return true; }
 
 /* ---------- voice + sound ---------- */
 let voice = null, rateMul = load("luna_rate", 1), voicePref = load("luna_voicename", "");
@@ -721,6 +852,12 @@ const KINDS = [
   { id: "otter", emo: "🦦", name: "Otter", end: ["splash", "paws", "whiskers"] },
   { id: "bunny", emo: "🐰", name: "Rabbit", end: ["hop", "ears", "fluff"] },
   { id: "butterfly", emo: "🦋", name: "Butterfly", end: ["wings", "flutter", "dust"] },
+  { id: "fox", emo: "🦊", name: "Fox", end: ["tail", "paws", "sniff"], shop: 15 },
+  { id: "panda", emo: "🐼", name: "Panda", end: ["bamboo", "paws", "fluff"], shop: 15 },
+  { id: "dolphin", emo: "🐬", name: "Dolphin", end: ["splash", "fin", "bubbles"], shop: 15 },
+  { id: "penguin", emo: "🐧", name: "Penguin", end: ["waddle", "flipper", "snow"], shop: 15 },
+  { id: "turtle", emo: "🐢", name: "Turtle", end: ["shell", "toes", "pebble"], shop: 15 },
+  { id: "flamingo", emo: "🦩", name: "Flamingo", end: ["feathers", "legs", "pink"], shop: 15 },
 ];
 const COLORS = { U: { name: "Blue", grad: ["#9ED2FF", "#2E8FE0"], frame: "#2E8FE0" }, R: { name: "Red", grad: ["#FFC08A", "#EF5A31"], frame: "#EF5A31" },
                  P: { name: "Purple", grad: ["#E7B8FF", "#7B4BE0"], frame: "#7B4BE0" } };
@@ -735,6 +872,8 @@ const ACCS = [
   { id: "none", emo: "🚫", label: "Nothing" }, { id: "crown", emo: "👑", label: "Crown" }, { id: "bow", emo: "🎀", label: "Bow" },
   { id: "flower", emo: "🌸", label: "Flower" }, { id: "star", emo: "⭐", label: "Star" }, { id: "hat", emo: "🎩", label: "Top hat" },
   { id: "glasses", emo: "🕶️", label: "Sunglasses" }, { id: "rainbow", emo: "🌈", label: "Rainbow" }, { id: "heart", emo: "💖", label: "Heart" },
+  { id: "gem", emo: "💎", label: "Gem", shop: 10 }, { id: "wand", emo: "🪄", label: "Wand", shop: 10 }, { id: "balloon", emo: "🎈", label: "Balloon", shop: 10 },
+  { id: "lollipop", emo: "🍭", label: "Lollipop", shop: 10 }, { id: "teddy", emo: "🧸", label: "Teddy bear", shop: 10 }, { id: "moon", emo: "🌙", label: "Moon", shop: 10 },
 ];
 const PRE = ["Princess", "Captain", "Sir", "Lady", "Little", "Professor", "Queen", "Duchess", "Twinkle", "Baby"];
 const MID = ["Star", "Moon", "Glitter", "Twinkle", "Rainbow", "Cupcake", "Thunder", "Velvet", "Sparkle", "Bubble", "Velvet", "Sugar", "Comet"];
@@ -817,16 +956,20 @@ function showCelebrate({ img, emo, title, sub, spoken, clip }){
 }
 $("celOk").onclick = () => {
   $("celebrate").classList.add("hidden"); $("celMedia").innerHTML = "";
-  if (pendingSticker){ const s = pendingSticker; pendingSticker = null; setTimeout(() => stickerParty(s), 250); }
+  setTimeout(flushCelebrate, 250);
 };
 
 /* ---------- navigation ---------- */
-const screens = { home: "", studio: "Art Studio", bubbles: "Mana Bubbles", night: "Game Night", window: "Window Magic", story: "Story Time", memory: "Memory Match", maker: "Make a Creature", count: "Count the Mana", battle: "Who Wins?", says: "Rootha Says", book: "My Spellbook" };
+const screens = { home: "", echo: "Spell Echo", pop: "Faerie Pop", fog: "Magic Fog", shop: "Star Shop", studio: "Art Studio", bubbles: "Mana Bubbles", night: "Game Night", window: "Window Magic", story: "Story Time", memory: "Memory Match", maker: "Make a Creature", count: "Count the Mana", battle: "Who Wins?", says: "Rootha Says", book: "My Spellbook" };
 let current = "home";
 function go(id, quiet){
   if (current === "says" && id !== "says") stopSays();
   if (current === "story" && id !== "story") stopStory();
   if (current === "bubbles" && id !== "bubbles") stopBubbles();
+  if (current === "echo" && id !== "echo") echoStop();
+  if (current === "pop" && id !== "pop"){ popStop(); $("popGo").classList.remove("hidden"); }
+  if (current === "fog" && id !== "fog") clearInterval(fog.timer);
+  if (id !== "shop") shopArmed = null;
   current = id;
   Object.keys(screens).forEach(k => $(k).classList.toggle("hidden", k !== id));
   $("homeBtn").classList.toggle("hidden", id === "home"); $("screenTitle").textContent = screens[id];
@@ -840,6 +983,10 @@ function go(id, quiet){
   if (id === "says") say("Rootha says, let's play! Do what Rootha says. But if Rootha doesn't say it, don't move! Tap start.");
   if (id === "book") renderBook();
   if (id === "bubbles") newBubbles();
+  if (id === "echo"){ echo.seq = []; renderEchoTop(); $("echoGo").textContent = "Start ▶"; $("echoGo").classList.remove("hidden"); say("Spell Echo! Watch the colors light up, then tap them in the same order. Tap start!"); }
+  if (id === "pop"){ renderPopTop(); $("popTime").style.width = "100%"; say("Faerie Pop! Catch the faeries when they peek out. Tap start!"); }
+  if (id === "fog") newFog();
+  if (id === "shop"){ renderShop(); say(`Star Shop! You have ${stars} stars to spend.`); }
   if (id === "studio"){ renderStudio(); say("Art studio! Tap new painting, or tap a painting to keep working on it."); }
   if (id === "night") openNight();
   if (id === "home" && !quiet) say("Pick a magic game!");
@@ -880,6 +1027,8 @@ function addMana(k){
   if (pool.U + pool.R + add > 14){ say("Your mana is full! Cast a glowing card."); boop(); return; }
   const before = allCards().filter(canPay).length;
   if (k === "P"){ pool.U++; pool.R++; tone([660, 523], 0.08, "sine", 0.08); } else { pool[k]++; plink(k); }
+  spellSeq = (spellSeq + k).slice(-5);
+  if (spellSeq === "URURP"){ spellSeq = ""; burst(40); if (findEgg("spell")) return; say("The secret spell! Rainbow sparkles!"); }
   renderPool(); const after = allCards().filter(canPay).length; renderShelf();
   const glow = after > before ? " A new card is glowing!" : "";
   if (k === "P") say(`Purple! That's blue and red together!${glow}`);
@@ -904,11 +1053,18 @@ function renderMaker(){
   $("pVal").textContent = draft.p; $("tVal").textContent = draft.t;
   if (document.activeElement !== $("petName")) $("petName").value = draft.name;
 }
-KINDS.forEach(k => {
-  const b = document.createElement("button"); b.className = "pick"; b.dataset.k = k.id; b.textContent = k.emo; b.setAttribute("aria-label", k.name);
-  b.onclick = () => { const wasAuto = !draft.custom; draft.kind = k.id; if (wasAuto) draft.name = makeName(k.id); renderMaker(); plink("U"); say(`${k.name}!`); };
-  $("kindRow").appendChild(b);
-});
+const isOwned = id => !!owned[id];
+function lockedTap(name, price){ boop(); say(`The ${name} is in the Star Shop for ${price} stars!`); setTimeout(() => go("shop"), 1400); }
+function renderKindRow(){
+  const row = $("kindRow"); row.innerHTML = "";
+  KINDS.forEach(k => {
+    const locked = k.shop && !isOwned("kind:" + k.id);
+    const b = document.createElement("button"); b.className = "pick" + (locked ? " locked" : ""); b.dataset.k = k.id; b.textContent = k.emo; b.setAttribute("aria-label", k.name);
+    b.onclick = () => { if (locked) return lockedTap(k.name, k.shop); const wasAuto = !draft.custom; draft.kind = k.id; if (wasAuto) draft.name = makeName(k.id); renderMaker(); plink("U"); say(`${k.name}!`); };
+    row.appendChild(b);
+  });
+}
+renderKindRow();
 Object.entries(COLORS).forEach(([id, c]) => {
   const b = document.createElement("button"); b.className = "swatch"; b.dataset.c = id; b.textContent = c.name;
   b.style.background = id === "P" ? "linear-gradient(135deg,#2E8FE0,#8A4FE6,#EF5A31)" : c.frame;
@@ -920,11 +1076,16 @@ POWERS.forEach(p => {
   b.onclick = () => { draft.power = p.id; renderMaker(); plink("R"); say(p.label + "! " + p.text.replace(/\(.*\)/, "")); };
   $("powRow").appendChild(b);
 });
-ACCS.forEach(a => {
-  const b = document.createElement("button"); b.className = "pick"; b.dataset.a = a.id; b.textContent = a.emo; b.setAttribute("aria-label", a.label);
-  b.onclick = () => { draft.acc = a.id; renderMaker(); tick(4); say(a.id === "none" ? "Nothing extra." : `${a.label}!`); };
-  $("accRow").appendChild(b);
-});
+function renderAccRow(){
+  const row = $("accRow"); row.innerHTML = "";
+  ACCS.forEach(a => {
+    const locked = a.shop && !isOwned("acc:" + a.id);
+    const b = document.createElement("button"); b.className = "pick" + (locked ? " locked" : ""); b.dataset.a = a.id; b.textContent = a.emo; b.setAttribute("aria-label", a.label);
+    b.onclick = () => { if (locked) return lockedTap(a.label, a.shop); draft.acc = a.id; renderMaker(); tick(4); say(a.id === "none" ? "Nothing extra." : `${a.label}!`); };
+    row.appendChild(b);
+  });
+}
+renderAccRow();
 document.querySelectorAll("[data-st]").forEach(b => b.onclick = () => {
   const k = b.dataset.st, lo = k === "p" ? 0 : 1, v = Math.max(lo, Math.min(9, draft[k] + +b.dataset.d));
   if (v === draft[k]){ boop(); return; }
@@ -944,6 +1105,8 @@ $("savePet").onclick = () => {
   const before = pets;
   if (wasEdit){ pets = pets.map(x => x.id === editId ? p : x); } else { pets = pets.concat([p]); if (pets.length > 60) pets = pets.slice(-60); }
   if (!store("luna_pets", pets)){ pets = before; boop(); say("Your Spellbook is too full! Ask a grown-up to remove a creature first."); return; }
+  if (/luna/i.test(p.name)) setTimeout(() => findEgg("luna"), 1200);
+  if (p.p === 9 && p.t === 9) setTimeout(() => findEgg("mega"), 1200);
   if (!wasEdit) addStar();
   editId = null;
   const pw = POWERS.find(x => x.id === p.power);
@@ -1067,13 +1230,14 @@ document.querySelectorAll("[data-pace]").forEach(b => b.onclick = () => {
 
 /* ---------- SPELLBOOK ---------- */
 function renderBook(){
-  const earned = Math.floor(stars / 10), st = $("stickers"); st.innerHTML = "";
+  const earned = Math.floor(xp / 10), st = $("stickers"); st.innerHTML = "";
   for (let i = 0; i < Math.max(earned + 1, 8); i++){
     const sp = document.createElement("span"); sp.className = "stk" + (i < earned ? "" : " empty"); sp.textContent = STICKERS[i % STICKERS.length]; st.appendChild(sp);
   }
-  const left = 10 - (stars % 10);
+  const left = 10 - (xp % 10);
   $("stkNote").textContent = `${left} more star${left > 1 ? "s" : ""} to your next sticker!`;
-  $("stkBar").style.width = ((stars % 10) * 10) + "%";
+  $("stkBar").style.width = ((xp % 10) * 10) + "%";
+  renderSecrets();
   const pb = $("petBook"); pb.innerHTML = "";
   if (!pets.length) pb.innerHTML = `<div class="empty-note">No creatures yet. Go to Make a Creature!</div>`;
   pets.slice().reverse().forEach(p => {
@@ -1394,7 +1558,18 @@ PAINT_COLORS.forEach(col => {
   b.onclick = () => { pColor = col; if (pTool === "erase" || pTool === "rainbow") setTool("pen"); document.querySelectorAll("#pColors .sw").forEach(x => x.classList.toggle("on", x === b)); tick(3); };
   $("pColors").appendChild(b);
 });
-function setTool(t){ pTool = t; document.querySelectorAll("[data-tool]").forEach(x => x.classList.toggle("on", x.dataset.tool === t)); }
+let pEmo = "🦄";
+function renderBrushes(){
+  document.querySelectorAll(".tool.shopbrush").forEach(x => x.remove());
+  const anchor = document.querySelector('[data-tool="erase"]');
+  [["brush:gold", "gold", "🌟", "Gold glitter"], ["brush:unicorn", "emo:🦄", "🦄", "Unicorn stamp"], ["brush:star", "emo:⭐", "⭐", "Star stamp"]].forEach(([id, tool, emo, label]) => {
+    if (!isOwned(id)) return;
+    const b = document.createElement("button"); b.className = "tool shopbrush"; b.dataset.tool = tool; b.textContent = emo; b.setAttribute("aria-label", label);
+    b.onclick = () => { setTool(tool); tick(4); say(label + "!"); };
+    anchor.parentNode.insertBefore(b, anchor);
+  });
+}
+function setTool(t){ pTool = t; if (t.startsWith("emo:")) pEmo = t.slice(4); document.querySelectorAll("[data-tool]").forEach(x => x.classList.toggle("on", x.dataset.tool === t)); }
 document.querySelectorAll("[data-tool]").forEach(b => b.onclick = () => { setTool(b.dataset.tool); tick(4); say({ pen: "Crayon!", rainbow: "Rainbow!", sparkle: "Sparkles!", stamp: "Hearts!", erase: "Eraser!" }[b.dataset.tool]); });
 document.querySelectorAll("[data-size]").forEach(b => b.onclick = () => { pSize = +b.dataset.size; document.querySelectorAll("[data-size]").forEach(x => x.classList.toggle("on", x === b)); tick(2); });
 function pPos(e){ const r = pc.getBoundingClientRect(); return { x: (e.clientX - r.left) * pc.width / r.width, y: (e.clientY - r.top) * pc.height / r.height }; }
@@ -1409,6 +1584,15 @@ function heartAt(x, y, r, col){
   px.bezierCurveTo(x + r * 0.6, y - r * 1.3, x + r * 1.6, y - r * 0.2, x, y + r * 0.9); px.fill(); px.restore();
 }
 function pStroke(a, b){
+  if (pTool.startsWith("emo:")){
+    const d = Math.hypot(b.x - a.x, b.y - a.y); pDist += d;
+    if (pDist >= pSize * 2.6 || d === 0){
+      pDist = 0; px.save(); px.font = `${Math.round(pSize * 2.2)}px 'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif`;
+      px.textAlign = "center"; px.textBaseline = "middle"; px.fillStyle = "#000"; px.fillText(pEmo, b.x, b.y); px.restore();
+    }
+    return;
+  }
+  if (pTool === "gold" && Math.random() < 0.35) starAt(b.x + (Math.random() - .5) * pSize * 1.6, b.y + (Math.random() - .5) * pSize * 1.6, pSize * 0.35, "#FFFFFF");
   if (pTool === "sparkle" || pTool === "stamp"){
     const d = Math.hypot(b.x - a.x, b.y - a.y); pDist += d;
     const gap = pTool === "stamp" ? pSize * 2.2 : pSize * 1.1;
@@ -1422,6 +1606,7 @@ function pStroke(a, b){
   px.save(); px.lineCap = "round"; px.lineJoin = "round"; px.lineWidth = pSize;
   if (pTool === "erase"){ px.globalCompositeOperation = "destination-out"; px.strokeStyle = "#000"; }
   else if (pTool === "rainbow"){ pHue = (pHue + 6) % 360; px.strokeStyle = `hsl(${pHue},90%,60%)`; }
+  else if (pTool === "gold"){ const g = px.createLinearGradient(a.x - pSize, a.y - pSize, b.x + pSize, b.y + pSize); g.addColorStop(0, "#F7D774"); g.addColorStop(0.5, "#E3A615"); g.addColorStop(1, "#FFF3B0"); px.strokeStyle = g; }
   else px.strokeStyle = pColor;
   px.beginPath(); px.moveTo(a.x, a.y); px.lineTo(b.x, b.y); px.stroke(); px.restore();
 }
@@ -1685,6 +1870,254 @@ $("clipAll").onclick = async () => {
   refreshCloudUI(`🎬 Making ${n} movies. They'll appear in My Spellbook over the next few minutes.`);
 };
 
+/* ---------- SECRETS (Easter eggs) ---------- */
+const EGGS = [
+  { id: "rootha", emo: "🔮", name: "Rootha's secret", hint: "Rootha likes it when you tap her picture lots and lots of times." },
+  { id: "spell", emo: "🌀", name: "The secret spell", hint: "In Window Magic, tap blue, red, blue, red, and then purple." },
+  { id: "nat20", emo: "🎲", name: "Lucky twenty", hint: "In Game Night, roll a twenty on the big die." },
+  { id: "luna", emo: "💖", name: "Name twin", hint: "Make a creature that has your name in its name." },
+  { id: "mega", emo: "🦖", name: "Mega monster", hint: "Make a creature with nine power and nine toughness." },
+  { id: "shower", emo: "🌠", name: "Star shower", hint: "Tap the little sparkle next to the app's name five times fast." },
+];
+let spellSeq = "";
+function findEgg(id){
+  if (eggs[id]) return false;
+  const e = EGGS.find(x => x.id === id); if (!e) return false;
+  eggs[id] = Date.now(); store("luna_eggs", eggs); addStar(5);
+  burst(30); showCelebrate({ emo: e.emo, title: "You found a secret!", sub: `${e.name}. +5 stars!`, spoken: `You found a secret! ${e.name}! Five bonus stars!` });
+  return true;
+}
+function renderSecrets(){
+  const box = $("secrets"); box.innerHTML = ""; let n = 0;
+  EGGS.forEach(e => {
+    const got = !!eggs[e.id]; if (got) n++;
+    const b = document.createElement("button"); b.textContent = got ? e.emo : "❓"; b.setAttribute("aria-label", got ? e.name : "Secret hint");
+    b.onclick = () => say(got ? `${e.name}! You found it!` : `Here's a hint. ${e.hint}`);
+    box.appendChild(b);
+  });
+  $("eggCount").textContent = `${n} of ${EGGS.length}`;
+}
+let roothaTaps = 0, roothaTimer = null;
+$("roothaImg").onclick = () => {
+  roothaTaps++; clearTimeout(roothaTimer); roothaTimer = setTimeout(() => { roothaTaps = 0; }, 2000); tick(roothaTaps);
+  if (roothaTaps >= 7){
+    roothaTaps = 0; const im = $("roothaImg"); im.classList.remove("spin"); void im.offsetWidth; im.classList.add("spin");
+    if (!findEgg("rootha")) say("Hee hee! That tickles!");
+  }
+};
+let sparkTaps = 0, sparkTimer = null;
+function starShower(){
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  for (let i = 0; i < 28; i++){
+    const st = document.createElement("div"); st.className = "starfall"; st.textContent = rnd(["⭐", "🌟", "✨"]);
+    st.style.left = (Math.random() * 96) + "vw"; st.style.animationDelay = (Math.random() * 0.9) + "s"; document.body.appendChild(st);
+    setTimeout(() => st.remove(), 3600);
+  }
+}
+$("titleSpark").onclick = () => {
+  sparkTaps++; clearTimeout(sparkTimer); sparkTimer = setTimeout(() => { sparkTaps = 0; }, 2000); tick(sparkTaps + 2);
+  if (sparkTaps >= 5){ sparkTaps = 0; starShower(); if (!findEgg("shower")) say("Star shower!"); }
+};
+(function seasonDecor(){
+  const d = new Date(), m = d.getMonth() + 1, day = d.getDate();
+  const set = m === 10 && day >= 24 ? ["🎃", "🍬", "👻", "🍂"] : m === 12 ? ["❄️", "⛄", "❄️", "✨"] : null;
+  if (!set || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const box = document.createElement("div"); box.className = "season"; box.setAttribute("aria-hidden", "true");
+  for (let i = 0; i < 10; i++){
+    const sp = document.createElement("span"); sp.textContent = set[i % set.length];
+    sp.style.left = (i * 10 + Math.random() * 8) + "vw"; sp.style.animationDuration = (9 + Math.random() * 8) + "s"; sp.style.animationDelay = (-Math.random() * 12) + "s";
+    box.appendChild(sp);
+  }
+  document.body.prepend(box);
+})();
+
+/* ---------- STAR SHOP ---------- */
+const THEMES = { night: "Night sky", rainbow: "Rainbow", ocean: "Ocean", candy: "Candy", forest: "Forest" };
+let theme = load("luna_theme", "night");
+function applyTheme(){ Object.keys(THEMES).forEach(t => document.body.classList.toggle("theme-" + t, t === theme && t !== "night")); }
+applyTheme();
+const SHOP = [].concat(
+  KINDS.filter(k => k.shop).map(k => ({ id: "kind:" + k.id, cat: "New creatures", emo: k.emo, name: k.name, price: k.shop })),
+  ACCS.filter(a => a.shop).map(a => ({ id: "acc:" + a.id, cat: "Accessories", emo: a.emo, name: a.label, price: a.shop })),
+  [{ id: "theme:night", emo: "🌙", price: 0 }, { id: "theme:rainbow", emo: "🌈", price: 25 }, { id: "theme:ocean", emo: "🌊", price: 25 },
+   { id: "theme:candy", emo: "🍬", price: 25 }, { id: "theme:forest", emo: "🌳", price: 25 }].map(t => ({ ...t, cat: "App colors", name: THEMES[t.id.slice(6)] })),
+  [{ id: "brush:gold", emo: "🌟", name: "Gold glitter crayon", price: 12 }, { id: "brush:unicorn", emo: "🦄", name: "Unicorn stamp", price: 12 },
+   { id: "brush:star", emo: "⭐", name: "Star stamp", price: 12 }].map(b => ({ ...b, cat: "Art Studio" }))
+);
+let shopArmed = null;
+function itemOwned(it){ return it.price === 0 || isOwned(it.id); }
+function renderShop(){
+  renderStars();
+  const L = $("shopList"); L.innerHTML = "";
+  [...new Set(SHOP.map(i => i.cat))].forEach(cat => {
+    const h = document.createElement("h3"); h.className = "sec-h"; h.textContent = cat; L.appendChild(h);
+    const g = document.createElement("div"); g.className = "shopgrid"; L.appendChild(g);
+    SHOP.filter(i => i.cat === cat).forEach(it => {
+      const own = itemOwned(it), isTheme = it.id.startsWith("theme:"), using = isTheme && theme === it.id.slice(6);
+      const d = document.createElement("div"); d.className = "shopitem" + (!own && stars < it.price ? " poor" : ""); d.dataset.item = it.id;
+      const label = own ? (isTheme ? (using ? "Using ✓" : "Use") : "Yours ✓") : shopArmed === it.id ? "Tap again!" : `⭐ ${it.price}`;
+      d.innerHTML = `<div class="emo">${it.emo}</div><b></b><button class="${own && !(isTheme && !using) ? "owned" : ""}${shopArmed === it.id ? " armed" : ""}">${label}</button>`;
+      d.querySelector("b").textContent = it.name;
+      d.querySelector("button").onclick = () => shopTap(it);
+      g.appendChild(d);
+    });
+  });
+}
+function shopTap(it){
+  const isTheme = it.id.startsWith("theme:");
+  if (itemOwned(it)){
+    if (isTheme){ theme = it.id.slice(6); store("luna_theme", theme); applyTheme(); renderShop(); chime(); say(`${it.name} colors!`); }
+    else say(`You already have the ${it.name}!`);
+    return;
+  }
+  if (stars < it.price){ boop(); say(`The ${it.name} costs ${it.price} stars. You need ${it.price - stars} more. Play games to earn stars!`); return; }
+  if (shopArmed !== it.id){ shopArmed = it.id; renderShop(); tick(5); say(`The ${it.name} costs ${it.price} stars. Tap again to buy it!`); return; }
+  shopArmed = null; spendStars(it.price); owned[it.id] = Date.now(); store("luna_owned", owned);
+  renderKindRow(); renderAccRow(); renderBrushes();
+  if (isTheme){ theme = it.id.slice(6); store("luna_theme", theme); applyTheme(); }
+  renderShop();
+  const where = it.id.startsWith("kind:") || it.id.startsWith("acc:") ? "Find it in Make a Creature!" : it.id.startsWith("brush:") ? "Find it in Art Studio!" : "Look at the new colors!";
+  showCelebrate({ emo: it.emo, title: `You got the ${it.name}!`, sub: where, spoken: `Yay! You got the ${it.name}! ${where}` });
+}
+$("starsBtn").onclick = () => go("shop");
+renderBrushes();
+
+/* ---------- SPELL ECHO ---------- */
+const ECHO_NOTE = { U: 523, R: 659, P: 784, G: 1047 }, ECHO_NAME = { U: "blue", R: "red", P: "purple", G: "gold" };
+const echo = { seq: [], pos: 0, busy: false, on: false, misses: 0, best: load("luna_echo_best", 0), startBest: 0, speed: 650 };
+function renderEchoTop(){ $("echoRound").textContent = echo.seq.length ? `Round ${echo.seq.length}` : "Spell Echo"; $("echoBest").textContent = echo.best ? `Best: ${echo.best}` : ""; }
+function echoLight(k, ms){
+  const b = document.querySelector(`[data-pad="${k}"]`); b.classList.add("lit");
+  tone([ECHO_NOTE[k]], ms / 1000 * 0.6, "sine", 0.09, 0.22); setTimeout(() => b.classList.remove("lit"), ms * 0.8);
+}
+function echoPlay(){
+  echo.busy = true; echo.pos = 0; $("echoHint").textContent = "Watch and listen…";
+  echo.speed = Math.max(380, 650 - (echo.seq.length - 1) * 25);
+  let i = 0;
+  const step = () => {
+    if (!echo.on) return;
+    if (i >= echo.seq.length){ echo.busy = false; $("echoHint").textContent = "Your turn! Tap the same colors."; return; }
+    echoLight(echo.seq[i], echo.speed); if (quietCar) say(ECHO_NAME[echo.seq[i]]);
+    i++; setTimeout(step, echo.speed + 140);
+  };
+  setTimeout(step, 450);
+}
+function echoNext(){ if (!echo.on) return; echo.seq.push(rnd(["U", "R", "P", "G"])); echo.misses = 0; renderEchoTop(); echoPlay(); }
+function echoStop(){ echo.on = false; echo.busy = false; }
+$("echoGo").onclick = () => {
+  echo.on = true; echo.seq = []; echo.startBest = echo.best; $("echoGo").classList.add("hidden"); renderEchoTop();
+  say("Watch the magic colors, then copy them!"); setTimeout(echoNext, 1500);
+};
+function echoEnd(){
+  echoStop(); const r = echo.seq.length - 1;
+  $("echoGo").classList.remove("hidden"); $("echoGo").textContent = "Play again ▶"; $("echoHint").textContent = `You remembered ${Math.max(0, r)} in a row!`;
+  if (r > echo.startBest && r >= 3) showCelebrate({ emo: "🧠", title: "New record!", sub: `${r} colors in a row!`, spoken: `A new record! You remembered ${r} colors!` });
+  else say(`Great game! You remembered ${Math.max(0, r)} colors in a row!`);
+}
+document.querySelectorAll("[data-pad]").forEach(b => b.onclick = () => {
+  const k = b.dataset.pad;
+  if (!echo.on || echo.busy){ echoLight(k, 300); return; }
+  echoLight(k, 320);
+  if (k === echo.seq[echo.pos]){
+    echo.pos++;
+    if (echo.pos === echo.seq.length){
+      echo.busy = true; const r = echo.seq.length;
+      if (r >= 3) addStar();
+      if (r > echo.best){ echo.best = r; store("luna_echo_best", r); }
+      renderEchoTop(); burst(8);
+      say(r % 5 === 0 ? `Wow! ${r} in a row!` : rnd(["Yes!", "Perfect!", "Great memory!", "Sparkly!", "You got it!"]));
+      setTimeout(echoNext, 1100);
+    }
+  } else {
+    echo.misses++; boop();
+    if (echo.misses >= 2) echoEnd();
+    else { echo.busy = true; say("Oops! Watch again."); setTimeout(echoPlay, 1300); }
+  }
+});
+
+/* ---------- FAERIE POP ---------- */
+const pop = { on: false, score: 0, timer: null, tick: null, end: 0, dur: 30000, best: load("luna_pop_best", 0), up: {} };
+const POP_WHO = [["🧚", 1, "faerie"], ["🧚", 1, "faerie"], ["🧚", 1, "faerie"], ["🧚", 1, "faerie"], ["🦄", 3, "unicorn"], ["🦉", 0, "owl"]];
+(function buildHoles(){
+  const g = $("popGrid");
+  for (let i = 0; i < 9; i++){
+    const h = document.createElement("button"); h.className = "hole"; h.dataset.i = i; h.setAttribute("aria-label", "Magic pool");
+    h.innerHTML = '<span class="popwho"></span>';
+    h.addEventListener("pointerdown", e => { e.preventDefault(); popHit(i); });
+    g.appendChild(h);
+  }
+})();
+function renderPopTop(){ $("popScore").textContent = `🧚 ${pop.score}`; $("popBest").textContent = pop.best ? `Best: ${pop.best}` : ""; }
+function popHide(i){ delete pop.up[i]; const h = $("popGrid").children[i]; h.classList.remove("up"); }
+function popShow(){
+  if (!pop.on) return;
+  const free = [...Array(9).keys()].filter(i => !pop.up[i]); if (!free.length) return;
+  const i = rnd(free), who = rnd(POP_WHO), h = $("popGrid").children[i];
+  h.querySelector(".popwho").textContent = who[0]; h.classList.remove("got"); h.classList.add("up");
+  const showMs = Math.max(700, 1450 - pop.score * 22);
+  pop.up[i] = { who, t: setTimeout(() => popHide(i), showMs) };
+}
+function popLoop(){ if (!pop.on) return; popShow(); pop.timer = setTimeout(popLoop, Math.max(430, 900 - pop.score * 14)); }
+function popHit(i){
+  const u = pop.up[i]; if (!pop.on || !u) return;
+  clearTimeout(u.t); const h = $("popGrid").children[i];
+  if (u.who[1] === 0){ boop(); say("Shh! The owl is sleeping."); popHide(i); return; }
+  pop.score += u.who[1]; h.classList.add("got"); plink(u.who[1] > 1 ? "R" : "U"); if (u.who[1] > 1) burst(10);
+  renderPopTop(); setTimeout(() => popHide(i), 120);
+}
+function popStop(){
+  pop.on = false; clearTimeout(pop.timer); clearInterval(pop.tick);
+  Object.keys(pop.up).forEach(i => { clearTimeout(pop.up[i].t); popHide(+i); });
+}
+function popEnd(){
+  const prevBest = pop.best; popStop();
+  const earned = Math.max(1, Math.floor(pop.score / 5)); addStar(earned);
+  if (pop.score > pop.best){ pop.best = pop.score; store("luna_pop_best", pop.score); }
+  renderPopTop(); $("popGo").classList.remove("hidden"); $("popGo").textContent = "Play again ▶";
+  showCelebrate({ emo: pop.score > prevBest && pop.score > 0 ? "🏆" : "🧚", title: `You caught ${pop.score}!`,
+                  sub: `${pop.score > prevBest && pop.score > 0 ? "A new record! " : ""}+${earned} star${earned > 1 ? "s" : ""}`,
+                  spoken: `Time's up! You caught ${pop.score}! ${pop.score > prevBest && pop.score > 0 ? "That's a new record!" : ""}` });
+}
+$("popGo").onclick = () => {
+  pop.on = true; pop.score = 0; pop.up = {}; renderPopTop(); $("popGo").classList.add("hidden");
+  pop.end = Date.now() + pop.dur;
+  pop.tick = setInterval(() => {
+    const left = Math.max(0, pop.end - Date.now()); $("popTime").style.width = (100 * left / pop.dur) + "%";
+    if (!left) popEnd();
+  }, 100);
+  say("Ready, set, catch!"); setTimeout(popLoop, 700);
+};
+
+/* ---------- MAGIC FOG ---------- */
+const FOG_STEPS = [26, 18, 12, 7, 3, 0];
+const fog = { card: null, level: 0, timer: null, done: false, last: null };
+function setFog(){ $("fogImg").style.filter = FOG_STEPS[fog.level] ? `blur(${FOG_STEPS[fog.level]}px) saturate(.75) brightness(1.08)` : "none"; }
+function newFog(){
+  clearInterval(fog.timer); fog.done = false; fog.level = 0;
+  const pool_ = allCards(); do { fog.card = rnd(pool_); } while (fog.card === fog.last && pool_.length > 1); fog.last = fog.card;
+  const others = pool_.filter(c => c !== fog.card).sort(() => Math.random() - 0.5).slice(0, 2);
+  const opts = [fog.card, ...others].sort(() => Math.random() - 0.5);
+  $("fogImg").style.transition = "none"; setFog(); $("fogImg").src = fog.card.img; void $("fogImg").offsetWidth; $("fogImg").style.transition = "";
+  const box = $("fogOpts"); box.innerHTML = "";
+  opts.forEach(c => {
+    const b = document.createElement("button"); b.dataset.name = c.name; b.setAttribute("aria-label", c.name);
+    b.innerHTML = `<img src="${c.img}" alt="">`; b.onclick = () => fogPick(b, c); box.appendChild(b);
+  });
+  $("fogExplain").textContent = ""; $("fogNext").classList.add("hidden");
+  fog.timer = setInterval(() => { if (fog.level < FOG_STEPS.length - 1){ fog.level++; setFog(); } else clearInterval(fog.timer); }, 2000);
+  say("Who's hiding in the magic fog? Tap the picture that matches!");
+}
+function fogPick(b, c){
+  if (fog.done) return;
+  if (c === fog.card){
+    fog.done = true; clearInterval(fog.timer); fog.level = FOG_STEPS.length - 1; setFog(); b.classList.add("right");
+    const earned = fog.level < 3 ? 2 : 1; addStar(earned); chime(); burst(16);
+    $("fogExplain").textContent = `It's ${c.name}!${earned > 1 ? " Super fast! +2 stars" : ""}`; $("fogNext").classList.remove("hidden");
+    say(`It's ${c.say}! ${earned > 1 ? "Super fast! Two stars!" : "You found it!"}`);
+  } else { b.classList.remove("wrong"); void b.offsetWidth; b.classList.add("wrong"); boop(); say("Not that one! Look closer."); }
+}
+$("fogNext").onclick = newFog;
+
 /* ---------- ART STUDIO ---------- */
 let drawings = load("luna_drawings", []);
 function renderStudio(){
@@ -1855,7 +2288,10 @@ function changeLife(i, d){
 }
 document.querySelectorAll("[data-roll]").forEach(b => b.onclick = () => {
   const n = +b.dataset.roll, v = 1 + Math.floor(Math.random() * n), r = $("ntRoll");
-  r.classList.remove("spin"); void r.offsetWidth; r.classList.add("spin"); r.textContent = `🎲 ${v}`; tone([392, 523, 659], 0.06, "triangle", 0.05); say(`You rolled ${v}!`);
+  r.classList.remove("spin"); void r.offsetWidth; r.classList.add("spin"); r.textContent = `🎲 ${v}`; tone([392, 523, 659], 0.06, "triangle", 0.05);
+  if (n === 20 && v === 20){ burst(36); fanfare(); if (!findEgg("nat20")) say("A natural twenty! Critical sparkle!"); }
+  else if (n === 20 && v === 1) say("A one! Oopsie daisy!");
+  else say(`You rolled ${v}!`);
 });
 $("ntCoin").onclick = () => { const h = Math.random() < 0.5, r = $("ntRoll"); r.classList.remove("spin"); void r.offsetWidth; r.classList.add("spin"); r.textContent = h ? "🪙 Heads!" : "🪙 Tails!"; tick(5); say(h ? "Heads!" : "Tails!"); };
 $("ntFirst").onclick = () => {
@@ -1868,7 +2304,7 @@ $("ntNew").onclick = () => { if (!confirm("Start a new game?")) return; night.pl
 
 /* ---------- BACKUP & RESTORE ---------- */
 $("bkSave").onclick = async () => {
-  const data = JSON.stringify({ app: "luna-spell-car", v: 2, at: new Date().toISOString(), stars, cast, pets, stories, drawings });
+  const data = JSON.stringify({ app: "luna-spell-car", v: 3, at: new Date().toISOString(), stars, xp, owned, eggs, theme, cast, pets, stories, drawings });
   const name = `luna-spellbook-${new Date().toISOString().slice(0, 10)}.json`;
   try {
     if (downloadsCap) await downloadsCap.save({ filename: name, data: new Blob([data], { type: "application/json" }) });
@@ -1897,6 +2333,11 @@ $("bkFile").onchange = () => {
     if (Array.isArray(d.stories)){ const seen = new Set(stories.map(s => s.title + s.at));
       d.stories.filter(s => s && typeof s.title === "string" && typeof s.body === "string").forEach(s => { if (!seen.has(s.title + s.at)) stories.push({ title: s.title.slice(0, 120), body: s.body.slice(0, 4000), place: s.place, who: String(s.who || "").slice(0, 80), at: s.at || 0 }); });
       stories.sort((a, b) => (b.at || 0) - (a.at || 0)); stories = stories.slice(0, 30); store("luna_stories", stories); }
+    if (Number.isFinite(d.xp) && d.xp > xp){ xp = Math.floor(d.xp); store("luna_xp", xp); }
+    if (d.owned && typeof d.owned === "object") Object.keys(d.owned).forEach(k => { if (SHOP.some(i => i.id === k)) owned[k] = owned[k] || Date.now(); });
+    store("luna_owned", owned);
+    if (d.eggs && typeof d.eggs === "object") Object.keys(d.eggs).forEach(k => { if (EGGS.some(e => e.id === k)) eggs[k] = eggs[k] || Date.now(); });
+    store("luna_eggs", eggs); renderKindRow(); renderAccRow(); renderBrushes(); renderStars();
     if (Array.isArray(d.drawings)){ const have2 = new Set(drawings.map(x => x.id)), merged2 = drawings.slice();
       d.drawings.filter(x => x && typeof x.img === "string" && /^data:image\/(jpeg|png);base64,/.test(x.img) && x.img.length < 800000)
         .forEach(x => { const id = String(x.id || Date.now().toString(36)); if (!have2.has(id)){ merged2.push({ id, img: x.img, at: +x.at || Date.now() }); have2.add(id); } });
@@ -1907,6 +2348,7 @@ $("bkFile").onchange = () => {
   fr.readAsText(f);
 };
 
+renderStars();
 go("home", true);
 </script>
 </body>

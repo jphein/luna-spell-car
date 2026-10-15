@@ -15,6 +15,10 @@ most games work without reading.
 | **Mana Bubbles** | Pop floating blue/red bubbles to fill a card's cost slots; colored slots need that color, gray slots take any. |
 | **Story Time** | A gentle story starring her creatures, read aloud with sentence highlighting. Web: Claude (claude.ai `sample` capability). Tablet: Azure OpenAI via the Spell Car server. |
 | **Memory Match** | Flip-and-find pairs with deck art and her creatures. |
+| **Spell Echo** | Simon-style color-and-sound memory; longer and faster each round. |
+| **Faerie Pop** | 30-second tap-the-faeries; unicorns worth 3; leave the sleeping owl alone. |
+| **Magic Fog** | A card hides in fog that slowly clears; pick the matching picture (faster = more stars). |
+| **Star Shop & levels** | Spend stars on creatures, accessories, themes, and brushes; ten levels from lifetime stars; six hidden secrets. |
 | **Count the Mana** | Tap each mana symbol to count it, then pick the total. |
 | **Who Wins?** | Power vs. toughness, with dots to compare. |
 | **Rootha Says** | Simon Says read aloud; eyes-free. |

@@ -15,7 +15,7 @@ FAKE_CLAUDE = """
 window.__saved = [];
 const story = "The Purple Parade\\n\\nLuna and her friend walked to the castle. It was sunny.\\n\\nLuna counted one blue and one red mana. Sparkle! The end.";
 window.claude = { use: async n => n === 'sample' ? (async (prompt, o) => { window.__prompt = prompt; o && o.onText && o.onText({ text: story.slice(0, 30), delta: '' }); return { text: story, truncated: false }; })
-  : n === 'downloads' ? { save: async ({ filename, data }) => { window.__saved.push({ filename, size: data.size || data.length }); return { status: 'saved' }; } } : null };
+  : n === 'downloads' ? { save: async ({ filename, data }) => { window.__saved.push({ filename, size: data.size || data.length, text: filename.endsWith('.json') ? await data.text() : null }); return { status: 'saved' }; } } : null };
 """
 FAKE_ANDROID = """
 window.__calls = [];
@@ -36,6 +36,7 @@ def test(fn):
     results.append(fn); return fn
 
 async def home(pg): await pg.evaluate("go('home', true)")
+async def dismiss(pg): await pg.evaluate("celebQueue.length = 0; ['celebrate','viewer','petModal','paint'].forEach(i => document.getElementById(i).classList.add('hidden'))")
 
 @test
 async def home_renders(pg, mode):
@@ -206,6 +207,105 @@ async def game_night_turns(pg, mode):
     assert await pg.evaluate("night.turn") != t1 and await pg.evaluate("night.step") == 0, "turn didn't pass"
     await home(pg)
 
+@test
+async def level_up(pg, mode):
+    await pg.evaluate("window.__quietCelebrations = false; xp = 14; stars = 0; addStar()")
+    await pg.wait_for_function("!document.getElementById('celebrate').classList.contains('hidden')", timeout=3000)
+    assert "Level 2" in await pg.inner_text("#celTitle"), "no level-up celebration"
+    assert await pg.evaluate("stars") == 6 and await pg.evaluate("xp") == 15, "level-up bonus wrong"
+    assert "Spark Student" in await pg.inner_text("#lvlLine"), "home level line not updated"
+    await pg.evaluate("window.__quietCelebrations = true"); await dismiss(pg)
+
+@test
+async def star_shop(pg, mode):
+    await pg.evaluate("stars = 100; xp = Math.max(xp, 100); renderStars()")
+    await pg.click("[data-go=maker]")
+    assert await pg.locator('#kindRow .pick.locked[data-k="fox"]').count() == 1, "fox should start locked"
+    await pg.evaluate("go('shop', true)")
+    await pg.click('[data-item="kind:fox"] button'); assert await pg.evaluate("!owned['kind:fox']"), "one tap shouldn't buy"
+    await pg.click('[data-item="kind:fox"] button', force=True)
+    assert await pg.evaluate("!!owned['kind:fox'] && stars === 85"), "fox not bought"
+    await dismiss(pg)
+    await pg.click('[data-item="theme:rainbow"] button'); await pg.click('[data-item="theme:rainbow"] button', force=True); await dismiss(pg)
+    assert await pg.evaluate("document.body.classList.contains('theme-rainbow')"), "theme not applied"
+    await pg.click('[data-item="theme:night"] button')
+    assert await pg.evaluate("!document.body.classList.contains('theme-rainbow')"), "couldn't switch back to night"
+    await pg.click('[data-item="brush:unicorn"] button'); await pg.click('[data-item="brush:unicorn"] button', force=True); await dismiss(pg)
+    lv = await pg.evaluate("levelFor(xp)")
+    await pg.evaluate("go('maker', true)")
+    assert await pg.locator('#kindRow .pick.locked[data-k="fox"]').count() == 0, "fox still locked after buying"
+    assert await pg.evaluate("levelFor(xp)") == lv, "shopping changed the level"
+    assert await pg.locator('.tool[data-tool="emo:🦄"]').count() == 1, "unicorn stamp missing from Art Studio"
+    await home(pg)
+
+@test
+async def secrets(pg, mode):
+    await home(pg)
+    for _ in range(7): await pg.click("#roothaImg")
+    assert await pg.evaluate("!!eggs.rootha"), "Rootha secret not found"; await dismiss(pg)
+    for _ in range(5): await pg.click("#titleSpark")
+    assert await pg.evaluate("!!eggs.shower"), "star shower secret not found"; await dismiss(pg)
+    await pg.click("[data-go=window]")
+    for b in ["#addBlue", "#addRed", "#addBlue", "#addRed", "#addPurple"]: await pg.click(b)
+    assert await pg.evaluate("!!eggs.spell"), "secret spell not found"; await dismiss(pg)
+    await pg.evaluate("go('night', true)")
+    if await pg.is_visible("#ntStart"): await pg.click("#ntStart")
+    await pg.evaluate("window.__r = Math.random; Math.random = () => 0.999")
+    await pg.click("[data-roll='20']"); await pg.evaluate("Math.random = window.__r")
+    assert await pg.evaluate("!!eggs.nat20"), "natural twenty secret not found"; await dismiss(pg)
+    await pg.evaluate("go('maker', true); draft.name = 'Luna Moonbeam'; draft.p = 9; draft.t = 9; draft.custom = true; renderMaker()")
+    await pg.click("#savePet"); await pg.wait_for_timeout(1500); await dismiss(pg)
+    assert await pg.evaluate("!!eggs.luna && !!eggs.mega"), "creature secrets not found"
+    await pg.evaluate("go('book', true)")
+    assert "6 of 6" in await pg.inner_text("#eggCount"), "spellbook secret count wrong"
+    await home(pg)
+
+@test
+async def spell_echo(pg, mode):
+    s0 = await pg.evaluate("stars")
+    await pg.click("[data-go=echo]"); await pg.click("#echoGo")
+    for n in (1, 2, 3):
+        await pg.wait_for_function(f"echo.on && !echo.busy && echo.seq.length === {n}", timeout=12000)
+        for k in await pg.evaluate("echo.seq"): await pg.click(f'[data-pad="{k}"]')
+    await pg.wait_for_function("echo.seq.length === 4 && !echo.busy", timeout=12000)
+    assert await pg.evaluate("stars") >= s0 + 1, "no star after round 3"
+    for _ in range(2):
+        wrong = await pg.evaluate("['U','R','P','G'].find(k => k !== echo.seq[echo.pos])")
+        await pg.click(f'[data-pad="{wrong}"]')
+        await pg.wait_for_timeout(200)
+        if await pg.evaluate("echo.on"): await pg.wait_for_function("!echo.busy", timeout=12000)
+    assert await pg.evaluate("!echo.on") and await pg.is_visible("#echoGo"), "game didn't end after two misses"
+    await dismiss(pg); await home(pg)
+
+@test
+async def faerie_pop(pg, mode):
+    s0 = await pg.evaluate("stars")
+    await pg.click("[data-go=pop]"); await pg.evaluate("pop.dur = 3000"); await pg.click("#popGo")
+    for _ in range(30):
+        if not await pg.evaluate("pop.on") and await pg.evaluate("pop.end > 0") and _ > 2: break
+        await pg.evaluate("Object.keys(pop.up).forEach(i => popHit(+i))"); await pg.wait_for_timeout(150)
+    await pg.wait_for_function("!pop.on", timeout=6000)
+    assert await pg.evaluate("stars") >= s0 + 1, "no stars from Faerie Pop"
+    assert await pg.is_visible("#celebrate"), "no end-of-round celebration"
+    await dismiss(pg); await home(pg)
+
+@test
+async def magic_fog(pg, mode):
+    s0 = await pg.evaluate("stars")
+    await pg.click("[data-go=fog]")
+    assert "blur" in await pg.evaluate("document.getElementById('fogImg').style.filter"), "picture isn't foggy"
+    await pg.evaluate("[...document.querySelectorAll('#fogOpts button')].find(b => b.dataset.name === fog.card.name).click()")
+    assert await pg.is_visible("#fogNext") and await pg.evaluate("stars") > s0, "right answer not rewarded"
+    await home(pg)
+
+@test
+async def backup_has_progress(pg, mode):
+    if mode != "web": return
+    await pg.evaluate("go('book', true)"); await pg.click("#bkSave"); await pg.wait_for_timeout(300)
+    d = json.loads([s for s in await pg.evaluate("window.__saved") if s["filename"].endswith(".json")][-1]["text"])
+    assert d["v"] == 3 and d["xp"] >= 15 and d["owned"].get("kind:fox") and d["eggs"].get("rootha"), "backup is missing levels, purchases, or secrets"
+    await home(pg)
+
 STACK = None
 
 @test
@@ -271,7 +371,7 @@ async def magic_movies(pg, mode):
 
 async def run_mode(browser, mode):
     ctx = await browser.new_context(viewport={"width": 400, "height": 860}, has_touch=True)
-    await ctx.add_init_script((FAKE_CLAUDE if mode == "web" else FAKE_ANDROID) + "if(!localStorage.getItem('luna_pets')){" + SEED_PETS + "}")
+    await ctx.add_init_script("window.__quietCelebrations = true;" + (FAKE_CLAUDE if mode == "web" else FAKE_ANDROID) + "if(!localStorage.getItem('luna_pets')){" + SEED_PETS + "}")
     pg = await ctx.new_page(); errors = []
     pg.on("pageerror", lambda e: errors.append(str(e)))
     pg.on("console", lambda m: errors.append(m.text) if m.type == "error" and "fonts.g" not in m.text and "ERR_" not in m.text and not m.text.startswith("Failed to load resource") else None)

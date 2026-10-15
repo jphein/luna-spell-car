@@ -56,12 +56,14 @@ PLACES = {
     "sky": "the night sky, floating among friendly stars", "sea": "a shimmering kingdom under the sea",
     "school": "Strixhaven, a school for young wizards", "car": "a family car trip where magic happens outside the window",
 }
-KINDS = {k: k for k in ["unicorn", "horse", "dragon", "owl", "otter", "butterfly"]}
+KINDS = {k: k for k in ["unicorn", "horse", "dragon", "owl", "otter", "butterfly", "fox", "panda", "dolphin", "penguin", "turtle", "flamingo"]}
 KINDS.update({"kitty": "fluffy kitten", "puppy": "fluffy puppy", "fairy": "little fairy", "bunny": "bunny rabbit"})
 COLORS = {"U": "sky blue", "R": "warm red and orange", "P": "purple"}
 ACCS = {"none": "", "crown": "wearing a tiny golden crown", "bow": "wearing a pink bow", "flower": "with a flower behind its ear",
         "star": "holding a glowing star", "hat": "wearing a little top hat", "glasses": "wearing cool sunglasses",
-        "rainbow": "with a rainbow arching behind it", "heart": "with floating hearts around it"}
+        "rainbow": "with a rainbow arching behind it", "heart": "with floating hearts around it",
+        "gem": "wearing a sparkly gem", "wand": "holding a little magic wand", "balloon": "holding a balloon", "lollipop": "holding a swirly lollipop",
+        "teddy": "hugging a tiny teddy bear", "moon": "with a glowing crescent moon above it"}
 POWERS = {"fly": "flying on sparkly wings", "sparkle": "surrounded by twinkling sparkles", "heart": "with a gentle, kind smile",
           "zoom": "zooming along with little speed swooshes", "friend": "waving hello like a best friend"}
 VOICES = {"en-US-AnaNeural", "en-US-JennyNeural", "en-US-AriaNeural", "en-US-AvaNeural", "en-US-GuyNeural", "en-US-EmmaNeural"}
@@ -182,7 +184,10 @@ KIND_MOTION = {"unicorn": "the unicorn tosses its mane and its horn glows", "hor
                "kitty": "the kitten blinks, purrs, and swishes its tail", "puppy": "the puppy wags its tail and tilts its head",
                "fairy": "the fairy flutters her wings and sprinkles glitter", "dragon": "the little dragon flaps its wings and puffs a sparkle",
                "owl": "the owl blinks slowly and ruffles its feathers", "otter": "the otter waves a paw and splashes a sparkle",
-               "bunny": "the bunny wiggles its nose and hops", "butterfly": "the butterfly opens and closes its wings"}
+               "bunny": "the bunny wiggles its nose and hops", "butterfly": "the butterfly opens and closes its wings",
+               "fox": "the fox swishes its fluffy tail and tilts its head", "panda": "the panda waves and nibbles a bamboo leaf",
+               "dolphin": "the dolphin leaps and splashes sparkly water", "penguin": "the penguin waddles and flaps its little wings",
+               "turtle": "the turtle slowly peeks out and smiles", "flamingo": "the flamingo stands on one leg and fluffs its pink feathers"}
 VIDEO_STYLE = ("Gentle, magical, happy animation for a young child. Slow, soft movement, twinkling sparkles, a slow camera push-in. "
                "Keep the same art style and colors as the picture. Nothing scary, no sudden movements, no text. "
                "Audio: soft magical chimes and sparkles, no speech, no music with words.")

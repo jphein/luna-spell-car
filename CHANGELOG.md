@@ -1,6 +1,15 @@
 # Changelog
 
 ## Unreleased
+- Three new mini games: 🎵 Spell Echo (copy the color-and-sound pattern; gets longer and faster), 🧚 Faerie Pop
+  (30-second catch-the-faeries, unicorns worth 3, don't wake the owl), 🌫️ Magic Fog (guess who's hiding as the fog clears).
+- Levels: ten wizard ranks from Apprentice to Planeswalker, earned from lifetime stars, with a level-up celebration and
+  +5 bonus stars. Level shown in the top bar and on the home screen.
+- ⭐ Star Shop (tap the star counter): 6 new creatures, 6 accessories, 4 app color themes, and 3 Art Studio brushes
+  (gold glitter, unicorn stamp, star stamp). Two taps to buy. Spending never lowers levels or stickers.
+- 🔮 Six hidden secrets (+5 stars each) with hints in My Spellbook; seasonal decorations (Halloween week, December).
+- Backup v3 carries levels, purchases, secrets, and theme. Server accepts the new creatures and accessories.
+- Fixes: Faerie Pop style clash; "No creatures yet" wrapping. New static check catches CSS class clashes.
 
 ## 1.5.0 (2026-10-14)
 - 🎬 Magic movies with Google Veo: tap a card in My Spellbook (or 🎬 on a creature) → Make it move. Clips play
