@@ -12,7 +12,6 @@ Reorder freely; each item should be small enough for one PR, with a clear "done 
       copyrighted art. Unblock with a grown-up decision on where the second deck's card images come from. Add First Flight card data (white/blue, with art) and a "Whose deck?"
       picker so every game can use the second deck's cards. Done when: switching decks changes Window Magic, Count, Who Wins, and Memory; tested.
 - [ ] **Second-deck edition, slice 2: flying & reach in Who Wins.** Flyers can only be blocked by flying/reach; harder questions for older kids.
-- [ ] **Sticker book page**: drag earned stickers onto a scene (castle, sky, meadow) and save it. Done when: placements persist and back up.
 - [x] **Cloud voice cache**: keep recent neural-voice clips on the device so repeated phrases work offline in the car.
 - [ ] **Coloring pages**: outline versions of her deck's art to color in Art Studio.
 
@@ -27,7 +26,8 @@ Reorder freely; each item should be small enough for one PR, with a clear "done 
 - [ ] Grown-up "Get voices ready for the trip" button: pre-cache lesson and game phrases (costs Azure TTS; ask first).
 - [ ] Parent stats: which games she plays, how her counting accuracy changes.
 - [ ] More creature kinds (pegasus, mermaid, fox) and backgrounds (castle, beach, space).
-- [ ] Sticker book page where stickers can be placed and arranged.
+- [ ] Sticker scene, part 2: more pictures (beach, space, under the sea), bigger/smaller stickers by pinching, and
+      "print my scene" for the fridge.
 - [ ] Spanish voice + text toggle.
 
 ## Done

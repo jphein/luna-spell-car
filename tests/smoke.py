@@ -555,6 +555,51 @@ async def home_layout(pg, mode):
         await pg.set_viewport_size({"width": 400, "height": 860}); await home(pg)
     assert await pg.evaluate("document.documentElement.scrollWidth <= innerWidth + 1"), "home scrolls sideways on a phone"
 
+async def drag(pg, frm, x, y):
+    b = await frm.bounding_box()
+    await pg.mouse.move(b["x"] + b["width"] / 2, b["y"] + b["height"] / 2); await pg.mouse.down()
+    await pg.mouse.move(x, y, steps=8); await pg.mouse.up(); await pg.wait_for_timeout(100)
+
+@test
+async def sticker_scene(pg, mode):
+    # Earned stickers go onto a scene (tap or drag), can be moved or dragged off, persist per scene, and back up.
+    await pg.evaluate("window.__xp0 = xp; xp = Math.max(xp, 40); store('luna_scene', { bg: 'castle', items: {} }); scene = load('luna_scene'); true")
+    await pg.evaluate("go('book', true)"); await pg.click("#scOpen")
+    assert await pg.is_visible("#scene"), "sticker scene didn't open"
+    tray = pg.locator("#scTray button")
+    assert await tray.count() == await pg.evaluate("Math.min(Math.floor(xp / 10), STICKERS.length)"), "tray isn't the earned stickers"
+    bb = await tray.first.bounding_box(); assert bb["height"] >= 52 and bb["width"] >= 52, f"tray sticker too small ({bb})"
+    await tray.nth(0).click()
+    assert await pg.evaluate("scene.items.castle.length") == 1 and await pg.locator("#scStage .sc-st").count() == 1, "tapping a sticker didn't place it"
+    st = await pg.locator("#scStage").bounding_box()
+    await drag(pg, tray.nth(1), st["x"] + st["width"] * 0.3, st["y"] + st["height"] * 0.4)
+    it = await pg.evaluate("scene.items.castle[1]")
+    assert it and abs(it["x"] - 0.3) < 0.05 and abs(it["y"] - 0.4) < 0.05, f"drag didn't drop where the finger let go ({it})"
+    assert it["s"] == await pg.evaluate("STICKERS[1]"), "wrong sticker dropped"
+    await drag(pg, pg.locator("#scStage .sc-st").nth(1), st["x"] + st["width"] * 0.7, st["y"] + st["height"] * 0.6)
+    it = await pg.evaluate("scene.items.castle[1]")
+    assert abs(it["x"] - 0.7) < 0.05 and abs(it["y"] - 0.6) < 0.05, f"placed sticker didn't move ({it})"
+    assert len(await pg.evaluate("load('luna_scene').items.castle")) == 2, "placements not saved"
+    await pg.click("[data-scene=sky]")
+    assert await pg.locator("#scStage .sc-st").count() == 0 and await pg.evaluate("load('luna_scene').bg") == "sky", "sky scene didn't switch"
+    await pg.click("[data-scene=castle]"); assert await pg.locator("#scStage .sc-st").count() == 2, "castle stickers lost after switching"
+    await drag(pg, pg.locator("#scStage .sc-st").first, st["x"] + st["width"] / 2, st["y"] + st["height"] + 140)
+    assert await pg.evaluate("scene.items.castle.length") == 1, "dragging a sticker off didn't remove it"
+    assert await pg.evaluate("window.__back()") == "stay" and await pg.is_visible("#book"), "Back from the scene should go to My Spellbook"
+    if mode == "web":
+        await pg.click("#bkSave"); await pg.wait_for_timeout(300)
+        d = json.loads([s for s in await pg.evaluate("window.__saved") if s["filename"].endswith(".json")][-1]["text"])
+        assert len(d["scene"]["items"]["castle"]) == 1, "backup is missing the sticker scene"
+        # restoring adds the backup's stickers to the scene without erasing what's there; junk is dropped
+        d["scene"]["items"] = {"castle": [{"id": "r1", "s": "🦄", "x": 0.5, "y": 0.5}, {"id": "bad", "s": "<b>", "x": 0.1, "y": 0.1}],
+                               "meadow": [{"id": "r2", "s": "🌈", "x": 9, "y": -3}]}
+        await pg.set_input_files("#bkFile", files=[{"name": "b.json", "mimeType": "application/json", "buffer": json.dumps(d).encode()}])
+        await pg.wait_for_timeout(300)
+        sc = await pg.evaluate("load('luna_scene')")
+        assert len(sc["items"]["castle"]) == 2 and not any(i["s"] == "<b>" for i in sc["items"]["castle"]), f"restore didn't merge the scene ({sc})"
+        assert sc["items"]["meadow"][0]["x"] == 1 and sc["items"]["meadow"][0]["y"] == 0, "restored positions not kept on the picture"
+    await pg.evaluate("xp = __xp0; true"); await home(pg)
+
 STACK = None
 
 async def stroke(pg):

@@ -166,6 +166,18 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .stk{font-size:40px;line-height:1;animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
 .stk.empty{opacity:.18;filter:grayscale(1);animation:none}
 .progress{margin:10px 4px 0;color:var(--muted);font-size:16px}
+/* sticker scene */
+#scOpen{min-height:56px;font-size:19px;background:var(--violet);color:#fff}
+#scPick button{min-height:56px}
+.sc-stage{position:relative;height:min(52vh,520px);border-radius:24px;overflow:hidden;margin:10px 0;box-shadow:0 4px 0 var(--line);touch-action:none;background:linear-gradient(#9FD8FF 0 64%,#7FD37A 64%)}
+.sc-stage[data-bg=sky]{background:linear-gradient(#7FC4FF,#FFD1EC)}
+.sc-stage[data-bg=meadow]{background:linear-gradient(#BDE8FF 0 46%,#8EDB6F 46%)}
+.sc-deco{position:absolute;line-height:1;translate:-50% -50%;pointer-events:none}
+.sc-st{position:absolute;font-size:48px;line-height:1;translate:-50% -50%;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;filter:drop-shadow(0 3px 2px rgba(0,0,0,.25))}
+.sc-st.wig{animation:wob .35s}
+.sc-tray{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;background:var(--surface);border-radius:22px;padding:10px;box-shadow:0 4px 0 var(--line)}
+.sc-tray button{width:60px;height:60px;border-radius:16px;background:var(--chip);font-size:38px;line-height:1;touch-action:none}
+.sc-ghost{position:fixed;z-index:60;font-size:60px;line-height:1;translate:-50% -50%;pointer-events:none;filter:drop-shadow(0 8px 6px rgba(0,0,0,.3))}
 .pbar{height:14px;border-radius:99px;background:var(--chip);overflow:hidden;margin-top:6px}
 .pbar i{display:block;height:100%;background:linear-gradient(90deg,var(--violet),var(--gold));border-radius:99px}
 .book{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px}
@@ -742,11 +754,20 @@ body.theme-forest{--bg:#ECF8EE;--bg2:#D5F0DA;--violet:#2E9B5C;--line:#C6E8CE;--c
     </div>
   </section>
 
+  <!-- STICKER SCENE -->
+  <section id="scene" class="hidden">
+    <div class="chips" id="scPick"></div>
+    <div class="sc-stage" id="scStage" data-bg="castle"></div>
+    <div class="sc-tray" id="scTray"></div>
+    <div class="pnote">Drag a sticker onto the picture, or tap it. Drag a sticker off the picture to take it away.</div>
+  </section>
+
   <!-- SPELLBOOK -->
   <section id="book" class="hidden">
     <h3 class="sec-h">My stickers</h3>
     <div class="stickers" id="stickers"></div>
     <div class="progress"><span id="stkNote"></span><div class="pbar"><i id="stkBar"></i></div></div>
+    <div class="rowbtns"><button id="scOpen">🖼️ My sticker scene</button></div>
     <h3 class="sec-h">Secrets <span id="eggCount" style="color:var(--muted);font-size:16px"></span></h3>
     <div class="secrets" id="secrets"></div>
     <h3 class="sec-h">My creatures</h3>
@@ -1108,7 +1129,7 @@ $("celOk").onclick = () => {
 };
 
 /* ---------- navigation ---------- */
-const screens = { home: "", school: "Magic School", lesson: "", stars: "Star Map", echo: "Spell Echo", pop: "Faerie Pop", fog: "Magic Fog", shop: "Star Shop", studio: "Art Studio", bubbles: "Mana Bubbles", night: "Game Night", window: "Window Magic", story: "Story Time", memory: "Memory Match", maker: "Make a Creature", count: "Count the Mana", battle: "Who Wins?", says: "Rootha Says", book: "My Spellbook" };
+const screens = { home: "", school: "Magic School", lesson: "", stars: "Star Map", echo: "Spell Echo", pop: "Faerie Pop", fog: "Magic Fog", shop: "Star Shop", studio: "Art Studio", bubbles: "Mana Bubbles", night: "Game Night", window: "Window Magic", story: "Story Time", memory: "Memory Match", maker: "Make a Creature", count: "Count the Mana", battle: "Who Wins?", says: "Rootha Says", book: "My Spellbook", scene: "Sticker Scene" };
 let current = "home";
 function go(id, quiet){
   if (current === "says" && id !== "says") stopSays();
@@ -1131,6 +1152,7 @@ function go(id, quiet){
   if (id === "battle") newBattle();
   if (id === "says") say("Rootha says, let's play! Do what Rootha says. But if Rootha doesn't say it, don't move! Tap start.");
   if (id === "book") renderBook();
+  if (id === "scene") openScene();
   if (id === "bubbles") newBubbles();
   if (id === "echo"){ echo.seq = []; renderEchoTop(); $("echoGo").textContent = "Start ▶"; $("echoGo").classList.remove("hidden"); say("Spell Echo! Watch the colors light up, then tap them in the same order. Tap start!"); }
   if (id === "pop"){ renderPopTop(); $("popTime").style.width = "100%"; say("Faerie Pop! Catch the faeries when they peek out. Tap start!"); }
@@ -1443,6 +1465,7 @@ if (window.AndroidBridge){
 window.__back = () => {
   if (!$("ask").classList.contains("hidden")){ askDone(null); return "stay"; }
   if (current === "lesson"){ go("school"); return "stay"; }
+  if (current === "scene"){ go("book"); return "stay"; }
   if (!$("viewer").classList.contains("hidden")){ $("vClose").click(); return "stay"; }
   if (!$("paint").classList.contains("hidden")){ $("pCancel").click(); return "stay"; }
   if (!$("celebrate").classList.contains("hidden")){ $("celOk").click(); return "stay"; }
@@ -2964,9 +2987,76 @@ $("ntFlip").onclick = () => { night.flip = !night.flip; saveNight(); renderBoard
 $("ntNew").onclick = () => ask({ emo: "🔄", q: "Start a new game?", spoken: "Start a new game? Everyone's life goes back to the start.", yes: ["🔄", "New game"], no: ["❤️", "Keep playing"] },
   () => { night.players = null; saveNight(); openNight(); });
 
+/* ---------- STICKER SCENE ---------- */
+// Earned stickers (one of each kind) go onto a picture; placements are kept per scene as fractions of the picture.
+const SCENES = {
+  castle: { label: "🏰 Castle", say: "The castle!", deco: [["🏰", 50, 58, 120], ["☁️", 20, 14, 50], ["☁️", 74, 24, 40], ["🌞", 88, 10, 44]] },
+  sky: { label: "☁️ Sky", say: "Up in the sky!", deco: [["🌈", 55, 22, 96], ["☁️", 22, 34, 72], ["☁️", 72, 64, 84], ["☁️", 30, 82, 56]] },
+  meadow: { label: "🌼 Meadow", say: "The meadow!", deco: [["🌳", 16, 38, 96], ["🌞", 84, 12, 44], ["🌼", 34, 84, 34], ["🌷", 68, 78, 34], ["🍄", 86, 68, 38]] }
+};
+const SC_MAX = 40;
+let scene = load("luna_scene", { bg: "castle", items: {} }), scDrag = null;
+function scItems(){ return scene.items[scene.bg] || (scene.items[scene.bg] = []); }
+function saveScene(){ store("luna_scene", scene); }
+function scEarned(){ return Math.min(Math.floor(xp / 10), STICKERS.length); }
+function openScene(){
+  if (!SCENES[scene.bg]) scene.bg = "castle";
+  renderScene(); say(scEarned() ? "Sticker scene! Drag your stickers onto the picture." : "Earn ten stars to get your first sticker!");
+}
+function renderScene(){
+  const pk = $("scPick"); pk.innerHTML = "";
+  Object.entries(SCENES).forEach(([k, v]) => {
+    const b = document.createElement("button"); b.dataset.scene = k; b.textContent = v.label; b.className = scene.bg === k ? "on" : "";
+    b.onclick = () => { scene.bg = k; saveScene(); renderScene(); tick(5); say(v.say); }; pk.appendChild(b);
+  });
+  const st = $("scStage"); st.dataset.bg = scene.bg;
+  st.innerHTML = SCENES[scene.bg].deco.map(([e, x, y, z]) => `<span class="sc-deco" style="left:${x}%;top:${y}%;font-size:${z}px">${e}</span>`).join("");
+  scItems().forEach(it => {
+    const e = document.createElement("span"); e.className = "sc-st"; e.textContent = it.s; e.style.left = it.x * 100 + "%"; e.style.top = it.y * 100 + "%";
+    e.onpointerdown = ev => scStart(ev, it.s, it.id, e); st.appendChild(e);
+  });
+  const tr = $("scTray"); tr.innerHTML = "";
+  for (let i = 0; i < scEarned(); i++){
+    const b = document.createElement("button"); b.textContent = STICKERS[i]; b.setAttribute("aria-label", "Sticker " + (i + 1));
+    b.onpointerdown = ev => scStart(ev, STICKERS[i], null, b); tr.appendChild(b);
+  }
+  if (!scEarned()) tr.innerHTML = `<div class="empty-note">Earn 10 stars to get your first sticker!</div>`;
+}
+function scStart(ev, s, id, el){ ev.preventDefault(); scDrag = { s, id, el, x0: ev.clientX, y0: ev.clientY, moved: false, ghost: null }; }
+function scPlace(s, x, y){
+  const items = scItems();
+  if (items.length >= SC_MAX){ say("Your picture is full! Drag a sticker off to make room."); return; }
+  items.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), s, x: +x.toFixed(3), y: +y.toFixed(3) });
+  saveScene(); renderScene(); tone([659, 880], 0.07);
+}
+document.addEventListener("pointermove", ev => {
+  const d = scDrag; if (!d) return;
+  if (!d.moved){
+    if (Math.hypot(ev.clientX - d.x0, ev.clientY - d.y0) < 8) return;
+    d.moved = true; d.ghost = document.createElement("div"); d.ghost.className = "sc-ghost"; d.ghost.textContent = d.s; document.body.appendChild(d.ghost);
+    if (d.id) d.el.style.visibility = "hidden";
+  }
+  d.ghost.style.left = ev.clientX + "px"; d.ghost.style.top = ev.clientY + "px";
+});
+document.addEventListener("pointercancel", () => { if (scDrag){ if (scDrag.ghost) scDrag.ghost.remove(); scDrag = null; renderScene(); } });
+document.addEventListener("pointerup", ev => {
+  const d = scDrag; if (!d) return; scDrag = null; if (d.ghost) d.ghost.remove();
+  if (!d.moved){
+    if (!d.id) return scPlace(d.s, 0.2 + Math.random() * 0.6, 0.2 + Math.random() * 0.6);
+    d.el.classList.remove("wig"); void d.el.offsetWidth; d.el.classList.add("wig"); tick(6); return;
+  }
+  const r = $("scStage").getBoundingClientRect(), x = (ev.clientX - r.left) / r.width, y = (ev.clientY - r.top) / r.height, inside = x >= 0 && x <= 1 && y >= 0 && y <= 1;
+  if (!d.id){ if (inside) scPlace(d.s, x, y); return; }
+  const it = scItems().find(i => i.id === d.id); if (!it) return renderScene();
+  if (inside){ it.x = +x.toFixed(3); it.y = +y.toFixed(3); tick(4); }
+  else { scene.items[scene.bg] = scItems().filter(i => i !== it); tone([523, 392], 0.06); }
+  saveScene(); renderScene();
+});
+$("scOpen").onclick = () => go("scene");
+
 /* ---------- BACKUP & RESTORE ---------- */
 $("bkSave").onclick = async () => {
-  const data = JSON.stringify({ app: "luna-spell-car", v: 4, at: new Date().toISOString(), stars, xp, owned, eggs, theme, stats, treasures, cast, pets, stories, drawings, seen: seenGames });
+  const data = JSON.stringify({ app: "luna-spell-car", v: 4, at: new Date().toISOString(), stars, xp, owned, eggs, theme, stats, treasures, cast, pets, stories, scene, drawings, seen: seenGames });
   const name = `luna-spellbook-${new Date().toISOString().slice(0, 10)}.json`;
   try {
     if (downloadsCap) await downloadsCap.save({ filename: name, data: new Blob([data], { type: "application/json" }) });
@@ -3013,6 +3103,14 @@ $("bkFile").onchange = () => {
       d.drawings.filter(x => x && typeof x.img === "string" && /^data:image\/(jpeg|png);base64,/.test(x.img) && x.img.length < 800000)
         .forEach(x => { const id = String(x.id || Date.now().toString(36)); if (!have2.has(id)){ merged2.push({ id, img: x.img, at: +x.at || Date.now() }); have2.add(id); } });
       if (store("luna_drawings", merged2)) drawings = merged2; }
+    if (d.scene && d.scene.items && typeof d.scene.items === "object") Object.keys(SCENES).forEach(k => {
+      const src = d.scene.items[k]; if (!Array.isArray(src)) return;
+      const have = scene.items[k] || (scene.items[k] = []), ids = new Set(have.map(i => i.id)), fit = v => Math.max(0, Math.min(1, v));
+      src.filter(i => i && STICKERS.includes(i.s) && Number.isFinite(i.x) && Number.isFinite(i.y)).forEach(i => {
+        const id = String(i.id || Date.now().toString(36) + have.length).slice(0, 24);
+        if (!ids.has(id) && have.length < SC_MAX){ have.push({ id, s: i.s, x: fit(i.x), y: fit(i.y) }); ids.add(id); } });
+    });
+    saveScene();
     renderBook(); chime(); burst(18);
     say(added ? `Restored! ${added} creature${added > 1 ? "s" : ""} came home.` : "Restored! Everything was already here.");
   };

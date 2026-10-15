@@ -15,6 +15,8 @@
 - 🐲 Magic School bonus lesson: **Practice Turn 2**, a harder guided turn: pay for Goldspan Dragon, haste, Treasure,
   flyers blocking flyers, who's defeated, blocked attackers don't hit the player, tapped creatures can't block, and
   Treasure worth two with Goldspan out. It glows once the twelve are done and never hides the diploma.
+- 🖼️ Sticker scene: My Spellbook → "My sticker scene". Drag (or tap) her earned stickers onto a castle, sky, or meadow
+  picture, drag them around, or drag one off to take it away. Each picture keeps its own stickers, and they're in Backup.
 - ✨ Little polish: "NEW" on a home tile goes away once she's opened that game (saved and in backups); Memory Match
   gives a soft sound on a miss and says "Try again!" the first two times; an empty Art Studio says where paintings
   will live; Spell Echo no longer shows its name twice.
