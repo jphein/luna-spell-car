@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+
+## 1.7.0 (2026-10-15)
 - 🎓 Magic School: the printed Spellbook as twelve spoken, tappable lessons: colors, zones, parts of a card
   (tap the real card), kinds of cards, tapping lands to pay costs, putting a turn in order, combat with flying and
   haste, prowess and magecraft, Treasure, Rootha's Elemental trick, how to win, and a full guided Practice Turn.
