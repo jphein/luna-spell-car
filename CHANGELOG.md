@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- 🎧 Eyes-closed car mode in Magic School: "Listen with eyes closed" plays any lesson as voice only. Pages turn by
+  themselves, and she answers by tapping the big blue half or red half of the screen ("Tap blue for Library. Tap red
+  for Graveyard."). Finishing one earns a star.
 - 🐲 Magic School bonus lesson: **Practice Turn 2**, a harder guided turn: pay for Goldspan Dragon, haste, Treasure,
   flyers blocking flyers, who's defeated, blocked attackers don't hit the player, tapped creatures can't block, and
   Treasure worth two with Goldspan out. It glows once the twelve are done and never hides the diploma.

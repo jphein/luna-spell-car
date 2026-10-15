@@ -406,6 +406,34 @@ async def practice_turn_2(pg, mode):
     await home(pg)
 
 @test
+async def listen_mode(pg, mode):
+    # Eyes-closed car mode: lessons are read aloud, info pages turn by themselves, answers are two big colored halves.
+    await pg.evaluate("go('school', true)"); await pg.click("#listenBtn")
+    assert await pg.evaluate("listenMode") and await pg.is_visible("#lessonList .ltile.listen"), "listen mode didn't switch on"
+    s0 = await pg.evaluate("stars")
+    await pg.click('[data-lesson="zones"]', force=True)
+    assert await pg.evaluate("lsn.listen && lsn.lp.every(p => p.t === 'info' || p.t === 'quiz')"), "listen mode kept tap-only pages"
+    await pg.wait_for_function("lsn && lsn.lp[lsn.i].t === 'quiz'", timeout=15000)  # info pages turned by themselves
+    halves = pg.locator("#lPage .lhalf"); assert await halves.count() == 2, "quiz should be two big halves"
+    box = await halves.first.bounding_box(); vp = pg.viewport_size
+    assert box["height"] >= vp["height"] * 0.4 and box["width"] >= vp["width"] * 0.4, f"halves too small: {box}"
+    if mode == "android":
+        spoken = [c["t"] for c in await pg.evaluate("window.__calls") if isinstance(c, dict) and "t" in c]
+        assert "Tap blue" in spoken[-1] and "red" in spoken[-1], f"answers not read aloud: {spoken[-1:]}"
+    i0 = await pg.evaluate("lsn.i"); await pg.click("#lPage .lhalf:not([data-ok])"); await pg.wait_for_timeout(300)
+    assert await pg.evaluate("lsn.i") == i0, "a wrong half advanced the lesson"
+    while await pg.evaluate("current === 'lesson'"):
+        await pg.wait_for_function("current !== 'lesson' || (lsn.lp[lsn.i].t === 'quiz' && !lsn.answered)", timeout=15000)
+        if await pg.evaluate("current === 'lesson'"): await pg.click("#lPage .lhalf[data-ok]")
+    assert await pg.is_visible("#celebrate") and await pg.evaluate("stars") >= s0 + 1, "no celebration/star after listening"
+    await dismiss(pg)
+    # leaving in the middle never lets a late voice callback turn pages on a hidden screen
+    await pg.evaluate("go('school', true)"); await pg.click('[data-lesson="colors"]', force=True); await home(pg)
+    i0 = await pg.evaluate("lsn.i"); await pg.wait_for_timeout(2500)
+    assert await pg.evaluate("current") == "home" and await pg.evaluate("lsn.i") == i0, "listen lesson kept going after leaving"
+    await pg.evaluate("listenMode = false"); await home(pg)
+
+@test
 async def star_map_treasures(pg, mode):
     await pg.evaluate("setStat('battleStreak', 10); setStat('countStreak', 9); setStat('bubbleCasts', 10); checkTreasures()")
     assert await pg.evaluate("!!treasures.battle && !!treasures.bubble && !treasures.count"), "treasure thresholds wrong"
@@ -419,11 +447,17 @@ async def star_map_treasures(pg, mode):
     await pg.evaluate("go('shop', true)"); assert await pg.locator('[data-item="theme:starlight"]').count() == 1, "Starlight not shown in shop"
     await dismiss(pg); await home(pg)
 
+async def fresh_backup(pg):
+    # Tap Save and wait for THIS backup to land (a fixed sleep read a stale one when familiar was busy).
+    n = await pg.evaluate("window.__saved.filter(s => s.filename.endsWith('.json')).length")
+    await pg.click("#bkSave")
+    await pg.wait_for_function(f"window.__saved.filter(s => s.filename.endsWith('.json')).length > {n}", timeout=10000)
+    return json.loads([s for s in await pg.evaluate("window.__saved") if s["filename"].endswith(".json")][-1]["text"])
+
 @test
 async def backup_has_progress(pg, mode):
     if mode != "web": return
-    await pg.evaluate("go('book', true)"); await pg.click("#bkSave"); await pg.wait_for_timeout(300)
-    d = json.loads([s for s in await pg.evaluate("window.__saved") if s["filename"].endswith(".json")][-1]["text"])
+    await pg.evaluate("go('book', true)"); d = await fresh_backup(pg)
     assert d["v"] == 4 and d["xp"] >= 15 and d["owned"].get("kind:fox") and d["eggs"].get("rootha"), "backup is missing levels, purchases, or secrets"
     done = await pg.evaluate("Object.keys(stats.lessons)")
     assert len(done) >= 12 and set(d["stats"]["lessons"]) == set(done) and d["treasures"].get("scholar"), "backup is missing Magic School or Star Map progress"
@@ -438,8 +472,7 @@ async def new_tags_clear(pg, mode):
     await pg.click("[data-go=stars]"); await home(pg)
     assert not await pg.is_visible(tag) and await pg.evaluate("!!load('luna_seen', {}).stars"), "NEW tag didn't clear after a visit"
     if mode == "web":
-        await pg.evaluate("go('book', true)"); await pg.click("#bkSave"); await pg.wait_for_timeout(300)
-        d = json.loads([x for x in await pg.evaluate("window.__saved") if x["filename"].endswith(".json")][-1]["text"])
+        await pg.evaluate("go('book', true)"); d = await fresh_backup(pg)
         assert d.get("seen", {}).get("stars"), "backup is missing which games she's seen"
         await home(pg)
 

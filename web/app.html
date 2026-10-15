@@ -389,6 +389,19 @@ body.theme-forest{--bg:#ECF8EE;--bg2:#D5F0DA;--violet:#2E9B5C;--line:#C6E8CE;--c
 .ltile b{font-size:16px;line-height:1.15}
 .ltile .num{position:absolute;top:8px;left:10px;font-size:13px;color:var(--muted);font-weight:700}
 .ltile.bonus{background:linear-gradient(160deg,var(--surface),var(--chip));border:2px dashed var(--gold)}
+.listenbtn{margin:0 auto 12px;padding:12px 20px;min-height:52px;border-radius:99px;background:var(--surface);box-shadow:0 3px 0 var(--line);font-size:18px;font-weight:700}
+.listenbtn.on{background:var(--violet);color:#fff}
+.ltile.listen::before{content:"🎧";position:absolute;bottom:6px;right:10px;font-size:18px}
+.lhalves{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;min-height:min(60vh,760px)}
+.lhalf{border-radius:30px;color:#fff;font-size:24px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:14px;box-shadow:0 6px 0 rgba(0,0,0,.2)}
+.lhalf.U{background:linear-gradient(160deg,#4BA6F5,#1F6FC4)}.lhalf.R{background:linear-gradient(160deg,#FF8556,#D9411E)}
+.lhalf .oe{font-size:72px;line-height:1}
+.lhalf img{width:80%;aspect-ratio:4/3;object-fit:cover;border-radius:16px}
+.lhalf.right{box-shadow:0 0 0 6px var(--gold),0 6px 0 rgba(0,0,0,.2)}
+.lhalf.wrong{animation:shake .4s}
+.lbig{width:100%;min-height:min(56vh,700px);border-radius:30px;background:var(--chip);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;font-size:24px;line-height:1.4;font-weight:500}
+.lbig .oe{font-size:80px;line-height:1}
+.lbig b{color:var(--violet)}
 .ltile.done::after{content:"✓";position:absolute;top:6px;right:8px;width:26px;height:26px;border-radius:50%;background:var(--good);color:#fff;font-weight:700;display:grid;place-items:center}
 .ltile.upnext{box-shadow:0 0 0 4px var(--gold),0 4px 0 var(--line);animation:pulse 1.8s ease-in-out infinite}
 .diploma-btn{width:100%;margin-top:14px;padding:18px;border-radius:999px;font-size:21px;font-weight:700;color:#2B1650;background:linear-gradient(90deg,#FFD976,#FFC94A,#FFE9A8);box-shadow:0 5px 0 rgba(0,0,0,.18)}
@@ -667,6 +680,7 @@ body.theme-forest{--bg:#ECF8EE;--bg2:#D5F0DA;--violet:#2E9B5C;--line:#C6E8CE;--c
   <!-- MAGIC SCHOOL -->
   <section id="school" class="hidden">
     <div class="pnote" style="text-align:center;margin:0 0 10px;font-size:16px">Twelve lessons from your Spellbook. Tap the glowing one to start!</div>
+    <div style="text-align:center"><button class="listenbtn" id="listenBtn">🎧 Listen with eyes closed</button></div>
     <div class="lessons" id="lessonList"></div>
     <button class="diploma-btn hidden" id="diplomaBtn">🎓 Get my diploma!</button>
   </section>
@@ -2494,16 +2508,18 @@ function renderSchool(){
   const L = $("lessonList"); L.innerHTML = "";
   const coreLeft = CORE.some(l => !stats.lessons[l.id]), nextIdx = LESSONS.findIndex(l => !stats.lessons[l.id] && (!l.bonus || !coreLeft));
   LESSONS.forEach((l, i) => {
-    const b = document.createElement("button"); b.className = "ltile" + (l.bonus ? " bonus" : "") + (stats.lessons[l.id] ? " done" : "") + (i === nextIdx ? " upnext" : "");
+    const b = document.createElement("button"); b.className = "ltile" + (listenMode ? " listen" : "") + (l.bonus ? " bonus" : "") + (stats.lessons[l.id] ? " done" : "") + (i === nextIdx ? " upnext" : "");
     b.dataset.lesson = l.id; b.innerHTML = `<span class="num">${l.bonus ? "⭐ Bonus" : i + 1}</span><span class="emo">${l.emo}</span><b>${l.title}</b>`;
     b.onclick = () => startLesson(l.id); L.appendChild(b);
   });
   $("diplomaBtn").classList.toggle("hidden", coreLeft);
+  $("listenBtn").classList.toggle("on", listenMode); $("listenBtn").textContent = listenMode ? "🎧 Eyes-closed mode is on" : "🎧 Listen with eyes closed";
 }
 function startLesson(id){
-  const l = LESSONS.find(x => x.id === id); lsn = { l, i: 0, mistakes: 0 };
+  const l = LESSONS.find(x => x.id === id); lsn = { l, i: 0, mistakes: 0, listen: listenMode };
+  if (lsn.listen) lsn.lp = l.pages.filter(p => p.t === "info" || p.t === "quiz");  // tap-only pages (card parts, paying, ordering) need eyes
   current = "lesson"; Object.keys(screens).forEach(k => $(k).classList.toggle("hidden", k !== "lesson")); $("lesson").classList.remove("hidden");
-  $("homeBtn").classList.remove("hidden"); $("screenTitle").textContent = l.title; scrollTo(0, 0);
+  $("homeBtn").classList.remove("hidden"); $("screenTitle").textContent = l.title + (lsn.listen ? " 🎧" : ""); scrollTo(0, 0);
   renderLessonPage();
 }
 const plain = h => h.replace(/<[^>]+>/g, "");
@@ -2515,7 +2531,44 @@ function wireNav(){
   const n = $("lNext"); if (n) n.onclick = nextLessonPage;
 }
 function nextLessonPage(){ if (lsn.i < lsn.l.pages.length - 1){ lsn.i++; renderLessonPage(); } else finishLesson(); }
+/* Eyes-closed car mode: everything is read aloud, info pages turn by themselves, and she answers by tapping
+   the blue half or the red half of the screen. `alive` drops voice callbacks once she leaves or starts another lesson. */
+let listenMode = false;
+$("listenBtn").onclick = () => {
+  listenMode = !listenMode; renderSchool(); tick(4);
+  say(listenMode ? "Eyes-closed mode! Tap a lesson, then just listen. To answer, tap the blue side or the red side of the screen." : "Eyes-closed mode is off.");
+};
+function renderListenPage(){
+  const me = lsn, pg = me.lp[me.i], box = $("lPage"), t0 = Date.now(); me.answered = false;
+  $("lProg").innerHTML = me.lp.map((_, k) => `<i class="${k < me.i ? "on" : k === me.i ? "now" : ""}"></i>`).join("");
+  const alive = () => lsn === me && current === "lesson" && me.lp[me.i] === pg;
+  // a page stays at least ~1.8 s, so a voice that fails instantly can't race through the lesson
+  const next = () => { if (alive()) setTimeout(() => { if (!alive()) return; if (me.i < me.lp.length - 1){ me.i++; renderListenPage(); } else finishListen(); }, Math.max(700, 1800 - (Date.now() - t0))); };
+  if (pg.t === "info"){
+    box.innerHTML = `<button class="lbig" id="lText"><span class="oe">🎧</span><span>${pg.text}</span></button>`;
+    $("lText").onclick = () => say(plain(pg.text), next); say(plain(pg.text), next); return;
+  }
+  const right = pg.opts.find(o => o.ok), wrong = rnd(pg.opts.filter(o => !o.ok)), two = Math.random() < 0.5 ? [right, wrong] : [wrong, right];
+  const question = `${plain(pg.q)} Tap blue for ${two[0].l}. Tap red for ${two[1].l}.`;
+  box.innerHTML = `<div class="ltext" id="lText">${pg.q}</div><div class="lhalves" id="lOpts"></div><div class="why" id="lWhy"></div>`;
+  two.forEach((o, k) => {
+    const b = document.createElement("button"); b.className = "lhalf " + (k ? "R" : "U"); if (o.ok) b.dataset.ok = "1";
+    b.innerHTML = (o.i ? `<img src="${CB(o.i).img}" alt="">` : `<span class="oe">${o.e || "✨"}</span>`) + "<span></span>"; b.lastChild.textContent = o.l;
+    b.onclick = () => {
+      if (me.answered) return;
+      if (o.ok){ me.answered = true; b.classList.add("right"); chime(); burst(10); $("lWhy").textContent = pg.why || "That's right!"; say(pg.why || rnd(["That's right!", "Yes!", "You got it!"]), next); }
+      else { me.mistakes++; b.classList.remove("wrong"); void b.offsetWidth; b.classList.add("wrong"); boop(); say(`Not ${o.l}. Listen again. ${question}`); }
+    };
+    $("lOpts").appendChild(b);
+  });
+  $("lText").onclick = () => say(question); say(question);
+}
+function finishListen(){
+  const l = lsn.l; go("school", true); addStar();
+  showCelebrate({ emo: "🎧", title: "Great listening!", sub: `${l.title}. +1 star`, spoken: `Great listening! You did ${l.title} with your ears! One star for you!` });
+}
 function renderLessonPage(){
+  if (lsn.listen) return renderListenPage();
   const pg = lsn.l.pages[lsn.i], box = $("lPage");
   $("lProg").innerHTML = lsn.l.pages.map((_, k) => `<i class="${k < lsn.i ? "on" : k === lsn.i ? "now" : ""}"></i>`).join("");
   if (pg.t === "info"){
