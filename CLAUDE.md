@@ -26,4 +26,4 @@ Used in the car on an Android tablet and on claude.ai. Read DEVELOPMENT.md for t
   Big tap targets (≥ 52px). A game must be playable without reading.
 - Keep `web/app.html` under the size budget in `tools/check.py`. Match the existing style (Fredoka, purple palette).
 - Don't bump VERSION, tag, run `make release`, or touch `android/luna-debug.keystore`; releases are done by a human.
-- Card art is © Wizards of the Coast (personal use). Don't add new copyrighted art or characters.
+- Card art is © Wizards of the Coast (free fan content under the WotC Fan Content Policy). Don't add new copyrighted art or characters.
