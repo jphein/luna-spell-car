@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- New static check: released CHANGELOG sections must match what the last tag shipped (the `merge=union` rule can
+  slide an Unreleased line into a release during a rebase; this catches it).
 - 🖍️ Coloring pages in Art Studio: six line drawings to color (heart, star, flower, rainbow, castle, butterfly). The new
   🪣 paint bucket fills a space with one tap and stops at the lines (it also works on her own paintings). Finished pages
   save to her gallery with the lines on top.

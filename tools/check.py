@@ -50,5 +50,14 @@ check(not clash, "no CSS class is styled both on its own and as a nested class (
 native = [l.strip()[:60] for l in script.splitlines() if re.search(r"\b(confirm|alert|prompt)\(", l) and "grown-ups only" not in l]
 check(not native, "no browser dialogs in Luna's games (use ask())" + (f": {native}" if native else ""))
 check(src.count("__CARDS__") == 1 and "__VERSION__" in src, "build placeholders present")
+# Released CHANGELOG sections never change: `merge=union` once slid a lane's Unreleased line into 1.8.0 during a rebase.
+import subprocess
+def _git(*a): return subprocess.run(["git", *a], cwd=ROOT, capture_output=True, text=True, check=True).stdout
+def _released(t): i = t.find("\n## ", t.find("## Unreleased") + 1); return t[i:] if i >= 0 else ""
+try: _tag = _git("describe", "--tags", "--abbrev=0").strip(); _old = _released(_git("show", f"{_tag}:CHANGELOG.md"))
+except Exception: _tag = None  # shallow CI checkout has no tags
+if _tag:
+    _cur = _released(open(os.path.join(ROOT, "CHANGELOG.md"), encoding="utf-8").read())
+    check(_cur.endswith(_old), f"released CHANGELOG sections unchanged since {_tag} (new notes go under ## Unreleased)")
 check(len(src) < 400_000, f"app.html source size {len(src)//1024} KB")
 print("\n" + ("All checks passed." if not fails else f"{len(fails)} check(s) failed.")); sys.exit(1 if fails else 0)
