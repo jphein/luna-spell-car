@@ -27,7 +27,7 @@ try:
     check("Princess Starmane" in prompt and "sparkly castle" in prompt, "server builds the prompt from structured input")
     st, _, _ = call(u, "/story", {"characters": ["x"], "place": "volcano lair"}); check(st == 400, "rejects unknown places")
     st, _, _ = call(u, "/story", {"prompt": "write anything"}); check(st == 400, "rejects free-form prompts")
-    st, _, b = call(u, "/story", {"characters": ["FILTERME"], "place": "sea"}); check(st == 422, "maps Azure content filter to 422")
+    st, _, b = call(u, "/story", {"characters": ["FILTERME"], "place": "sea"}); check(st == 422, f"maps Azure content filter to 422 (got {st} {b[:120]!r})")
     st, _, b = call(u, "/image", {"kind": "unicorn", "color": "P", "acc": "crown", "power": "fly"})
     check(st == 200 and json.loads(b)["image"].startswith("data:image/png;base64,"), "image returns a data URL")
     st, _, _ = call(u, "/image", {"kind": "kraken", "color": "P", "power": "fly"}); check(st == 400, "rejects unknown creature kinds")
