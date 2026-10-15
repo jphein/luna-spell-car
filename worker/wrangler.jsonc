@@ -1,11 +1,11 @@
 {
-  // Spell Car server on Cloudflare Workers. KV and R2 are created automatically on first deploy.
+  // Spell Car server on Cloudflare Workers. KV namespace and R2 bucket were created on 2026-10-15.
   "name": "spellcar",
   "main": "src/index.js",
   "compatibility_date": "2026-09-01",
   "workers_dev": true,
-  "kv_namespaces": [{ "binding": "STATE" }],
-  "r2_buckets": [{ "binding": "CLIPS" }],
+  "kv_namespaces": [{ "binding": "STATE", "id": "f6623b0bd3c44f83a20b340855a4b950" }],
+  "r2_buckets": [{ "binding": "CLIPS", "bucket_name": "spellcar-clips" }],
   "triggers": { "crons": ["* * * * *"] },
   "vars": {
     "KID_NAME": "Luna",
