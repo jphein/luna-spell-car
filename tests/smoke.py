@@ -811,6 +811,25 @@ async def movie_night(pg, mode):
             clipKeys.clear(); ks.forEach(k => clipKeys.add(k)); }""", keep)
     await home(pg)
 
+@test
+async def button_contrast(pg, mode):
+    # White text on filled buttons stays readable (at least 4.5:1) in every app theme, light and dark.
+    try:
+        for scheme in ("light", "dark"):
+            await pg.emulate_media(color_scheme=scheme)
+            r = await pg.evaluate("""() => {
+              const lum = c => { const m = c.match(/[\\d.]+/g).map(Number), f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+                                 return 0.2126 * f(m[0]) + 0.7152 * f(m[1]) + 0.0722 * f(m[2]); };
+              const keep = theme, probe = document.createElement('div'); probe.style.background = 'var(--btn)'; document.body.appendChild(probe);
+              const out = {};
+              for (const t of Object.keys(THEMES)){ theme = t; applyTheme(); const c = getComputedStyle(probe).backgroundColor;
+                out[t] = /rgba\\(.*,\\s*0\\)$/.test(c) || c === 'transparent' ? 0 : 1.05 / (lum(c) + 0.05); }
+              theme = keep; applyTheme(); probe.remove(); return out; }""")
+            bad = {t: round(v, 2) for t, v in r.items() if v < 4.5}
+            assert not bad, f"{scheme}: white text on buttons is hard to read in {bad}"
+    finally:
+        await pg.emulate_media(color_scheme="light")
+
 STACK = None
 
 async def stroke(pg):

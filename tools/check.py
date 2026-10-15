@@ -49,6 +49,7 @@ check(not cclash, "no state class reuses a standalone component name (e.g. .tile
 check(not clash, "no CSS class is styled both on its own and as a nested class (style clashes)" + (f": {clash}" if clash else ""))
 native = [l.strip()[:60] for l in script.splitlines() if re.search(r"\b(confirm|alert|prompt)\(", l) and "grown-ups only" not in l]
 check(not native, "no browser dialogs in Luna's games (use ask())" + (f": {native}" if native else ""))
+check("background:var(--violet);color:#fff" not in css, "filled buttons use --btn (readable with white text in every theme), not --violet")
 check(src.count("__CARDS__") == 1 and "__VERSION__" in src, "build placeholders present")
 # Released CHANGELOG sections never change: `merge=union` once slid a lane's Unreleased line into 1.8.0 during a rebase.
 import subprocess

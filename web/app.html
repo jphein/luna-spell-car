@@ -110,7 +110,7 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .yesno{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
 .yesno .ans{font-size:23px}
 .explain{min-height:1.5em;margin-top:12px;font-size:19px;color:var(--muted)}
-.next{margin-top:14px;padding:16px 28px;border-radius:999px;background:var(--violet);color:#fff;font-size:22px;font-weight:700;box-shadow:0 5px 0 rgba(0,0,0,.2)}
+.next{margin-top:14px;padding:16px 28px;border-radius:999px;background:var(--btn);color:#fff;font-size:22px;font-weight:700;box-shadow:0 5px 0 rgba(0,0,0,.2)}
 .next:active{transform:translateY(3px)}
 
 /* creature maker */
@@ -144,7 +144,7 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .namerow{display:flex;gap:8px}
 .namerow input{flex:1;min-width:0;font-family:inherit;font-size:18px;padding:12px 14px;border-radius:16px;border:2px solid var(--line);background:var(--chip);color:var(--ink);user-select:text;-webkit-user-select:text}
 .dice{width:56px;height:52px;border-radius:16px;background:var(--chip);font-size:26px}
-.save{width:100%;padding:18px;border-radius:999px;background:var(--violet);color:#fff;font-size:22px;font-weight:700;box-shadow:0 5px 0 rgba(0,0,0,.2)}
+.save{width:100%;padding:18px;border-radius:999px;background:var(--btn);color:#fff;font-size:22px;font-weight:700;box-shadow:0 5px 0 rgba(0,0,0,.2)}
 
 /* rootha says */
 .says{text-align:center}
@@ -156,7 +156,7 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .gotcha{font-size:22px;font-weight:700;color:var(--red);min-height:1.4em}
 .pace{display:flex;gap:10px;justify-content:center;margin-top:10px}
 .pace button{padding:10px 18px;border-radius:99px;background:var(--chip);font-size:17px;font-weight:600}
-.pace button.on{background:var(--violet);color:#fff}
+.pace button.on{background:var(--btn);color:#fff}
 .bigplay{width:100%;padding:20px;border-radius:999px;font-size:26px;font-weight:700;color:#fff;background:var(--good);margin-top:14px;box-shadow:0 5px 0 rgba(0,0,0,.2)}
 .bigplay.stop{background:var(--red)}
 
@@ -167,7 +167,7 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .stk.empty{opacity:.18;filter:grayscale(1);animation:none}
 .progress{margin:10px 4px 0;color:var(--muted);font-size:16px}
 /* sticker scene */
-#scOpen{min-height:56px;font-size:19px;background:var(--violet);color:#fff}
+#scOpen{min-height:56px;font-size:19px;background:var(--btn);color:#fff}
 #scPick button{min-height:56px}
 .sc-stage{position:relative;height:min(52vh,520px);border-radius:24px;overflow:hidden;margin:10px 0;box-shadow:0 4px 0 var(--line);touch-action:none;background:linear-gradient(#9FD8FF 0 64%,#7FD37A 64%)}
 .sc-stage[data-bg=sky]{background:linear-gradient(#7FC4FF,#FFD1EC)}
@@ -191,7 +191,7 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .empty-note{color:var(--muted);font-size:16px;padding:6px 4px;grid-column:1/-1}
 
 .voiceset{background:var(--surface);border-radius:16px;padding:10px 12px;margin:8px 0;color:var(--ink)}
-.voiceset .rowbtns button.on{background:var(--violet);color:#fff}
+.voiceset .rowbtns button.on{background:var(--btn);color:#fff}
 .voiceset select{font-family:inherit;font-size:15px;padding:10px;border-radius:12px;border:2px solid var(--line);background:var(--chip);color:var(--ink);max-width:100%}
 /* story */
 .scrollrow{flex-wrap:wrap;padding:2px}
@@ -244,9 +244,9 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .askbtns button{min-height:104px;border-radius:24px;font-size:19px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px 6px;box-shadow:0 5px 0 rgba(0,0,0,.18)}
 .askbtns button:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.18)}
 .askbtns button i{font-style:normal;font-size:42px;line-height:1}
-.askbtns #askYes{background:var(--violet);color:#fff}
+.askbtns #askYes{background:var(--btn);color:#fff}
 .askbtns #askNo{background:var(--chip);color:var(--ink)}
-.askbtns #thNext{background:var(--violet);color:#fff}
+.askbtns #thNext{background:var(--btn);color:#fff}
 .askbtns #thStop{background:var(--chip);color:var(--ink)}
 @media (prefers-reduced-motion:reduce){.mcard .in{transition:none}.thinking i{animation:none}}
 /* paint */
@@ -313,14 +313,14 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .nt-roll.spin{animation:pop .4s cubic-bezier(.2,1.6,.4,1)}
 .chips{display:flex;gap:8px;flex-wrap:wrap}
 .chips button{padding:12px 18px;border-radius:99px;background:var(--chip);font-size:18px;font-weight:600}
-.chips button.on{background:var(--violet);color:#fff}
+.chips button.on{background:var(--btn);color:#fff}
 .preview-wrap{position:relative}
 .preview-wrap.painting::after{content:"🪄 Painting with magic…";position:absolute;inset:0;display:grid;place-items:center;background:rgba(43,22,80,.72);color:#fff;font-size:20px;font-weight:700;border-radius:18px;animation:glow 1.4s ease-in-out infinite}
 @keyframes glow{50%{background:rgba(123,75,224,.72)}}
 .voiceset input{font-family:inherit;font-size:15px;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:var(--chip);color:var(--ink);width:100%;margin:4px 0;user-select:text;-webkit-user-select:text}
 .speedrow{display:flex;gap:8px;justify-content:center;margin-top:10px}
 .speedrow button{padding:10px 16px;border-radius:99px;background:var(--surface);box-shadow:0 3px 0 var(--line);font-size:17px;font-weight:600}
-.speedrow button.on{background:var(--violet);color:#fff}
+.speedrow button.on{background:var(--btn);color:#fff}
 .nt-p.turn{box-shadow:0 0 0 5px var(--gold),0 0 26px rgba(255,201,74,.7)}
 .nt-banner{background:var(--surface);border-radius:22px;padding:12px 14px;margin:0 0 10px;box-shadow:0 4px 0 var(--line);text-align:center;transition:transform .5s ease}
 .nt-banner.flip{transform:rotate(180deg)}
@@ -333,7 +333,7 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .nt-steps button.past{opacity:.45}
 #ntNextTurn.go{animation:pulse 1s ease-in-out infinite;box-shadow:0 0 0 4px var(--gold),0 0 22px rgba(255,201,74,.8)}
 .nt-turnbtns{display:flex;gap:10px;justify-content:center}
-.nt-turnbtns button{padding:12px 18px;border-radius:99px;font-size:18px;font-weight:700;background:var(--violet);color:#fff}
+.nt-turnbtns button{padding:12px 18px;border-radius:99px;font-size:18px;font-weight:700;background:var(--btn);color:#fff}
 .nt-turnbtns button.alt{background:var(--chip);color:var(--ink)}
 /* magic movies */
 .vmedia{position:relative;width:100%;border-radius:20px;overflow:hidden;background:#1E1033;aspect-ratio:16/9}
@@ -343,7 +343,7 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .celmedia{margin-bottom:4px}
 .bk .mv{position:absolute;bottom:26%;right:6px;background:rgba(0,0,0,.5);color:#fff;font-size:13px;border-radius:99px;padding:2px 7px}
 /* levels, shop, secrets */
-.stars .lvl{font-size:13px;background:var(--violet);color:#fff;border-radius:99px;padding:2px 8px;margin-left:2px}
+.stars .lvl{font-size:13px;background:var(--btn);color:#fff;border-radius:99px;padding:2px 8px;margin-left:2px}
 .lvl-line{margin:8px auto 0;font-size:17px;font-weight:600;color:var(--violet)}
 .lvlbar{max-width:260px;margin:6px auto 0}
 .spark{cursor:pointer}
@@ -359,7 +359,7 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .shopitem{background:var(--surface);border-radius:20px;padding:12px 10px;text-align:center;box-shadow:0 4px 0 var(--line);display:flex;flex-direction:column;align-items:center;gap:6px}
 .shopitem .emo{font-size:46px;line-height:1.1}
 .shopitem b{font-size:16px}
-.shopitem button{padding:10px 14px;border-radius:99px;background:var(--violet);color:#fff;font-size:16px;font-weight:700;min-width:96px}
+.shopitem button{padding:10px 14px;border-radius:99px;background:var(--btn);color:#fff;font-size:16px;font-weight:700;min-width:96px}
 .shopitem button.owned{background:var(--chip);color:var(--ink)}
 .shopitem button.armed{background:var(--gold);color:#2B1650;animation:pulse 1s ease-in-out infinite}
 .shopitem.poor button:not(.owned){background:var(--chip);color:var(--muted)}
@@ -421,6 +421,15 @@ body.theme-forest{--bg:#ECF8EE;--bg2:#D5F0DA;--violet:#2E9B5C;--line:#C6E8CE;--c
   body.theme-garden{--bg:#13261A;--bg2:#3A1830;--surface:#1E3A27;--violet:#FF8FC4;--line:#2E5A3B;--chip:#244630}
   body.theme-forest{--bg:#0F2A1A;--bg2:#18412A;--surface:#183A26;--violet:#5CD68E;--line:#2A5C3D;--chip:#224D33}
 }
+/* Filled buttons with white text use --btn. --violet doubles as a text color (light in dark mode), so buttons get a
+   deeper shade where needed: every theme keeps white-on-button contrast at 4.5:1 or better (button_contrast test). */
+body{--btn:var(--violet)}
+body.theme-rainbow{--btn:#B8336F} body.theme-ocean{--btn:#176A9C} body.theme-candy{--btn:#C23F80} body.theme-forest{--btn:#23804A}
+@media (prefers-color-scheme:dark){
+  body{--btn:#6E44D8}
+  body.theme-rainbow{--btn:#B02A78} body.theme-ocean{--btn:#0E6E9E} body.theme-candy{--btn:#B8327A}
+  body.theme-starlight{--btn:#5B3FD6} body.theme-forest{--btn:#1E7A47} body.theme-garden{--btn:#B23A76}
+}
 @media (prefers-reduced-motion:reduce){.season,.starfall{display:none}.rootha.spin{animation:none}}
 /* magic school */
 .lessons{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
@@ -430,7 +439,7 @@ body.theme-forest{--bg:#ECF8EE;--bg2:#D5F0DA;--violet:#2E9B5C;--line:#C6E8CE;--c
 .ltile .num{position:absolute;top:8px;left:10px;font-size:13px;color:var(--muted);font-weight:700}
 .ltile.bonus{background:linear-gradient(160deg,var(--surface),var(--chip));border:2px dashed var(--gold)}
 .listenbtn{margin:0 auto 12px;padding:12px 20px;min-height:52px;border-radius:99px;background:var(--surface);box-shadow:0 3px 0 var(--line);font-size:18px;font-weight:700}
-.listenbtn.on{background:var(--violet);color:#fff}
+.listenbtn.on{background:var(--btn);color:#fff}
 .ltile.listen::before{content:"🎧";position:absolute;bottom:6px;right:10px;font-size:18px}
 .lhalves{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;min-height:min(60vh,760px)}
 .lhalf{border-radius:30px;color:#fff;font-size:24px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:14px;box-shadow:0 6px 0 rgba(0,0,0,.2)}
@@ -462,7 +471,7 @@ body.theme-forest{--bg:#ECF8EE;--bg2:#D5F0DA;--violet:#2E9B5C;--line:#C6E8CE;--c
 .lopt.right{border-color:var(--good);background:var(--surface);box-shadow:0 0 0 3px var(--good)}
 .lopt.wrong{animation:shake .4s}
 .lnav{display:flex;gap:10px;justify-content:center;margin-top:14px}
-.lnav button{padding:16px 28px;border-radius:999px;font-size:21px;font-weight:700;background:var(--violet);color:#fff;box-shadow:0 5px 0 rgba(0,0,0,.2)}
+.lnav button{padding:16px 28px;border-radius:999px;font-size:21px;font-weight:700;background:var(--btn);color:#fff;box-shadow:0 5px 0 rgba(0,0,0,.2)}
 .lnav button.alt{background:var(--chip);color:var(--ink)}
 .cardhot{position:relative;width:min(300px,78vw);margin:0 auto}
 .cardhot img{width:100%;display:block;border-radius:14px}
@@ -545,7 +554,7 @@ body.theme-forest{--bg:#ECF8EE;--bg2:#D5F0DA;--violet:#2E9B5C;--line:#C6E8CE;--c
       <button class="game-btn" data-go="catch"><div class="ico" style="background:linear-gradient(135deg,#FFD976,#E3A615)">💰</div><b>Treasure Catch <span class="newtag">NEW</span></b><span>Catch the dragon's treasure!</span></button>
       <button class="game-btn" data-go="fog"><div class="ico" style="background:#7E8BA8">🌫️</div><b>Magic Fog</b><span>Who's hiding?</span></button>
       <button class="game-btn" data-go="memory"><div class="ico" style="background:#8A4FE6">🃏</div><b>Memory Match</b><span>Find the pairs</span></button>
-      <button class="game-btn" data-go="count"><div class="ico" style="background:var(--violet)">3</div><b>Count the Mana</b><span>Add up the cost</span></button>
+      <button class="game-btn" data-go="count"><div class="ico" style="background:var(--btn)">3</div><b>Count the Mana</b><span>Add up the cost</span></button>
       <button class="game-btn" data-go="battle"><div class="ico" style="background:var(--red)">⚔</div><b>Who Wins?</b><span>Power vs. toughness</span></button>
       <button class="game-btn" data-go="bubbles"><div class="ico" style="background:radial-gradient(circle at 30% 30%,#9ED2FF,#2E8FE0)">🫧</div><b>Mana Bubbles</b><span>Pop the right colors!</span></button>
       <button class="game-btn" data-go="says"><div class="ico" style="background:#1F9D63">🗣️</div><b>Rootha Says</b><span>Listen and move!</span></button>
