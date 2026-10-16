@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- 🖨️ Sticker scene → "Print my scene": her decorated picture (background, decorations, and stickers) as a landscape
+  page to print and put on the fridge.
 - 🏖️ Sticker scene: three new pictures to decorate, the Beach, Space, and Under the sea. Each keeps its own stickers
   (and they're in backups).
 - ✨ New look for the home screen: every game has its own drawn badge instead of an emoji (a little Spell Car for

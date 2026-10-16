@@ -31,7 +31,8 @@ Reorder freely; each item should be small enough for one PR, with a clear "done 
 - [x] More creature kinds (mermaid; fox was already in the shop) and backgrounds (castle, beach, space, meadow).
 - [x] Pegasus: needs a drawn winged horse (there's no pegasus emoji older tablets can show).
 - [x] Sticker scene, part 2: more pictures (beach, space, under the sea).
-- [ ] Sticker scene, part 3: bigger/smaller stickers by pinching, and "print my scene" for the fridge.
+- [x] Sticker scene, part 3a: "print my scene" for the fridge.
+- [ ] Sticker scene, part 3b: bigger/smaller stickers by pinching.
 - [ ] Spanish voice + text toggle.
 
 ## Done
