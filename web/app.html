@@ -845,7 +845,7 @@ body.theme-rainbow{--btn:#B8336F} body.theme-ocean{--btn:#176A9C} body.theme-can
     <div class="chips" id="scPick"></div>
     <div class="sc-stage" id="scStage" data-bg="castle"></div>
     <div class="sc-tray" id="scTray"></div>
-    <div class="pnote">Drag a sticker onto the picture, or tap it. Drag a sticker off the picture to take it away.</div>
+    <div class="pnote">Drag a sticker onto the picture, or tap it. Tap a sticker on the picture to make it bigger. Drag it off the picture to take it away.</div>
     <button class="printbtn hidden" id="scPrint">🖨️ Print my scene</button>
   </section>
 
@@ -3524,14 +3524,14 @@ const SCENES = {
   space: { label: "🚀 Space", say: "Outer space!", deco: [["🪐", 22, 20, 70], ["🌙", 82, 14, 48], ["⭐", 54, 30, 26], ["✨", 36, 62, 30], ["🚀", 78, 62, 64], ["⭐", 12, 76, 22]] },
   sea: { label: "🐠 Under the sea", say: "Under the sea!", deco: [["🐠", 24, 30, 52], ["🐟", 72, 44, 44], ["🐙", 58, 82, 58], ["🐚", 18, 88, 32], ["🌿", 86, 80, 56], ["🦀", 38, 90, 34]] }
 };
-const SC_MAX = 40;
+const SC_MAX = 40, SC_SIZES = [1, 1.5, 2];  // tap a placed sticker to grow it: normal → bigger → biggest → normal
 let scene = load("luna_scene", { bg: "castle", items: {} }), scDrag = null;
 function scItems(){ return scene.items[scene.bg] || (scene.items[scene.bg] = []); }
 function saveScene(){ store("luna_scene", scene); }
 function scEarned(){ return Math.min(Math.floor(xp / 10), STICKERS.length); }
 function openScene(){
   if (!SCENES[scene.bg]) scene.bg = "castle";
-  renderScene(); say(scEarned() ? "Sticker scene! Drag your stickers onto the picture." : "Earn ten stars to get your first sticker!");
+  renderScene(); say(scEarned() ? "Sticker scene! Drag your stickers onto the picture. Tap one to make it bigger!" : "Earn ten stars to get your first sticker!");
 }
 function renderScene(){
   const pk = $("scPick"); pk.innerHTML = "";
@@ -3543,6 +3543,7 @@ function renderScene(){
   st.innerHTML = SCENES[scene.bg].deco.map(([e, x, y, z]) => `<span class="sc-deco" style="left:${x}%;top:${y}%;font-size:${z}px">${e}</span>`).join("");
   scItems().forEach(it => {
     const e = document.createElement("span"); e.className = "sc-st"; e.textContent = it.s; e.style.left = it.x * 100 + "%"; e.style.top = it.y * 100 + "%";
+    if (it.z > 1) e.style.fontSize = 48 * it.z + "px";
     e.onpointerdown = ev => scStart(ev, it.s, it.id, e); st.appendChild(e);
   });
   const tr = $("scTray"); tr.innerHTML = "";
@@ -3573,7 +3574,7 @@ function sceneCanvas(){
   x.textAlign = "center"; x.textBaseline = "middle";
   const EMOJI = "'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif";
   SCENES[scene.bg].deco.forEach(([e, l, t, z]) => { x.font = `${Math.round(z * k)}px ${EMOJI}`; x.fillText(e, l / 100 * W_, t / 100 * H_); });
-  x.font = `${Math.round(48 * k)}px ${EMOJI}`; scItems().forEach(it => x.fillText(it.s, it.x * W_, it.y * H_));
+  scItems().forEach(it => { x.font = `${Math.round(48 * k * (it.z || 1))}px ${EMOJI}`; x.fillText(it.s, it.x * W_, it.y * H_); });
   x.textAlign = "right"; x.fillStyle = "rgba(255,255,255,.9)"; x.font = "600 44px Fredoka, Arial, sans-serif"; x.fillText("✦ Made by Luna", W_ - 50, H_ - 50);
   return cv;
 }
@@ -3609,7 +3610,9 @@ document.addEventListener("pointerup", ev => {
   const d = scDrag; if (!d) return; scDrag = null; if (d.ghost) d.ghost.remove();
   if (!d.moved){
     if (!d.id) return scPlace(d.s, 0.2 + Math.random() * 0.6, 0.2 + Math.random() * 0.6);
-    d.el.classList.remove("wig"); void d.el.offsetWidth; d.el.classList.add("wig"); tick(6); return;
+    const it = scItems().find(i => i.id === d.id); if (!it) return;
+    const z = SC_SIZES[(SC_SIZES.indexOf(it.z || 1) + 1) % SC_SIZES.length]; if (z > 1) it.z = z; else delete it.z;
+    saveScene(); renderScene(); tone(z > 1 ? [659 + z * 200] : [523, 392], 0.07); say(z === 2 ? "Biggest!" : z > 1 ? "Bigger!" : "Back to small!"); return;
   }
   const r = $("scStage").getBoundingClientRect(), x = (ev.clientX - r.left) / r.width, y = (ev.clientY - r.top) / r.height, inside = x >= 0 && x <= 1 && y >= 0 && y <= 1;
   if (!d.id){ if (inside) scPlace(d.s, x, y); return; }
@@ -3679,8 +3682,8 @@ $("bkFile").onchange = () => {
       const src = d.scene.items[k]; if (!Array.isArray(src)) return;
       const have = scene.items[k] || (scene.items[k] = []), ids = new Set(have.map(i => i.id)), fit = v => Math.max(0, Math.min(1, v));
       src.filter(i => i && STICKERS.includes(i.s) && Number.isFinite(i.x) && Number.isFinite(i.y)).forEach(i => {
-        const id = String(i.id || Date.now().toString(36) + have.length).slice(0, 24);
-        if (!ids.has(id) && have.length < SC_MAX){ have.push({ id, s: i.s, x: fit(i.x), y: fit(i.y) }); ids.add(id); } });
+        const id = safeId(i.id, have.length), z = SC_SIZES.includes(i.z) && i.z > 1 ? i.z : 0;
+        if (!ids.has(id) && have.length < SC_MAX){ have.push({ id, s: i.s, x: fit(i.x), y: fit(i.y), ...(z ? { z } : {}) }); ids.add(id); } });
     });
     saveScene();
     renderBook(); chime(); burst(18);

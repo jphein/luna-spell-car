@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- 🔎 Sticker scene: tap a sticker on the picture to make it bigger (normal → bigger → biggest → back). Sizes are saved,
+  printed, and backed up. (A tap instead of a pinch: easier for small hands.) Restored sticker ids are now checked too.
 - 🖨️ Sticker scene → "Print my scene": her decorated picture (background, decorations, and stickers) as a landscape
   page to print and put on the fridge.
 - 🏖️ Sticker scene: three new pictures to decorate, the Beach, Space, and Under the sea. Each keeps its own stickers
