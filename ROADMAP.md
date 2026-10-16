@@ -30,8 +30,8 @@ Reorder freely; each item should be small enough for one PR, with a clear "done 
 - [x] Parent stats: which games she plays, how her counting accuracy changes.
 - [x] More creature kinds (mermaid; fox was already in the shop) and backgrounds (castle, beach, space, meadow).
 - [x] Pegasus: needs a drawn winged horse (there's no pegasus emoji older tablets can show).
-- [ ] Sticker scene, part 2: more pictures (beach, space, under the sea), bigger/smaller stickers by pinching, and
-      "print my scene" for the fridge.
+- [x] Sticker scene, part 2: more pictures (beach, space, under the sea).
+- [ ] Sticker scene, part 3: bigger/smaller stickers by pinching, and "print my scene" for the fridge.
 - [ ] Spanish voice + text toggle.
 
 ## Done

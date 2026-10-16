@@ -913,6 +913,25 @@ async def restore_rejects_bad_images(pg, mode):
     await pg.evaluate("drawings = drawings.filter(x => x.id !== 'badimg2'); pets = pets.filter(x => x.id !== 'badpet2'); cloudCaps = null")
     await home(pg)
 
+@test
+async def more_scenes(pg, mode):
+    # Sticker scene part 2: beach, space, and under-the-sea pictures, each keeping its own stickers (and in backups).
+    await pg.evaluate("window.__xp0 = xp; xp = Math.max(xp, 40); go('book', true)"); await pg.click("#scOpen")
+    castle_bg = await pg.evaluate("getComputedStyle(document.getElementById('scStage')).backgroundImage")
+    seen = set()
+    for k in ("beach", "space", "sea"):
+        await pg.click(f"[data-scene={k}]")
+        assert await pg.evaluate("scene.bg") == k and await pg.get_attribute("#scStage", "data-bg") == k, f"{k} scene didn't open"
+        bg = await pg.evaluate("getComputedStyle(document.getElementById('scStage')).backgroundImage")
+        assert bg != castle_bg and bg not in seen, f"{k} has no picture of its own"; seen.add(bg)
+        assert await pg.locator("#scStage .sc-deco").count() >= 3, f"{k} has no decorations"
+    await pg.click("#scTray button >> nth=0")
+    assert await pg.evaluate("scene.items.sea.length") >= 1, "sticker not placed in the sea"
+    if mode == "web":
+        await pg.evaluate("go('book', true)"); d = await fresh_backup(pg)
+        assert d["scene"]["items"].get("sea"), "backup is missing the sea stickers"
+    await pg.evaluate("scene.items.sea = []; scene.bg = 'castle'; saveScene(); xp = __xp0"); await home(pg)
+
 STACK = None
 
 async def stroke(pg):
