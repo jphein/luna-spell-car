@@ -1117,6 +1117,27 @@ async def painting_movies(pg, mode):
     await pg.click(f'#stGallery .bk:has([data-movie="{pid}"]) .del'); await pg.click("#askYes")
     assert not await pg.evaluate(f"clipKeys.has({json.dumps(key)})"), "removing the painting left its movie behind"
     await home(pg)
+@test
+async def generated_icons(pg, mode):
+    # Home tiles, the title bar, and the weekly challenge show drawn SVG badges, not emoji (older tablets lack some emoji).
+    await home(pg)
+    bad = await pg.evaluate("""[...document.querySelectorAll('.game-btn:not(.hidden)')].filter(b => {
+        const ico = b.querySelector('.ico'), svg = ico && ico.querySelector('svg.gico');
+        return !svg || [...ico.childNodes].some(n => n.nodeType === 3 && n.textContent.trim()) || ico.offsetWidth < 40; }).map(b => b.dataset.go)""")
+    assert not bad, f"tiles without a drawn badge: {bad}"
+    ids = await pg.evaluate("[...document.querySelectorAll('[id]')].map(e => e.id).filter((x, i, a) => a.indexOf(x) !== i)")
+    assert not ids, f"duplicate ids (badge gradients would collide): {ids[:5]}"
+    missing = await pg.evaluate("[...document.querySelectorAll('svg.gico [fill^=\"url(#\"]')].map(e => e.getAttribute('fill').slice(5, -1)).filter(id => !document.getElementById(id))")
+    assert not missing, f"badge fills point at missing gradients: {missing[:3]}"
+    assert await pg.evaluate("!!document.querySelector('#chalEmo svg') || document.getElementById('chalCard').classList.contains('done')"), "weekly challenge has no badge"
+    label = await pg.get_attribute("#voiceBtn", "aria-label")
+    assert await pg.locator("#voiceBtn svg").count() == 1 and await pg.locator("#homeBtn svg").count() == 1, "top bar icons not drawn"
+    await pg.click("#voiceBtn"); assert await pg.get_attribute("#voiceBtn", "aria-label") != label and await pg.locator("#voiceBtn svg").count() == 1, "voice icon did not switch"
+    await pg.click("#voiceBtn"); assert await pg.get_attribute("#voiceBtn", "aria-label") == label, "voice did not switch back"
+    await pg.evaluate("go('memory', true)")
+    assert await pg.locator("#screenIco svg.gico").count() == 1, "game screen title has no badge"
+    await home(pg)
+    assert await pg.evaluate("document.getElementById('screenIco').innerHTML === ''"), "home title bar kept a game badge"
 
 async def run_mode(browser, mode):
     ctx = await browser.new_context(viewport={"width": 400, "height": 860}, has_touch=True)
