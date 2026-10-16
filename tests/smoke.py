@@ -1050,6 +1050,33 @@ async def movie_night_plays(pg, mode):
     assert await pg.evaluate("window.__ended"), "Movie night moved on without the clip playing to the end"
     await pg.click("#thStop"); await home(pg)
 
+
+@test
+async def painting_movies(pg, mode):
+    # Art Studio paintings can become magic movies too (fake Veo), and join Movie night.
+    if mode != "android": return
+    await pg.evaluate("clipPollMs = 300")
+    pid = await pg.evaluate("""(() => { const cv = document.createElement('canvas'); cv.width = 640; cv.height = 480; const x = cv.getContext('2d');
+        x.fillStyle = '#fff'; x.fillRect(0, 0, 640, 480); x.fillStyle = '#C77DFF'; x.beginPath(); x.arc(320, 240, 120, 0, 7); x.fill();
+        const d = { id: 'pm' + Date.now().toString(36), img: cv.toDataURL('image/jpeg', 0.8), at: Date.now() };
+        drawings = drawings.concat([d]); store('luna_drawings', drawings); return d.id; })()""")
+    await pg.click("[data-go=studio]")
+    btn = pg.locator(f'#stGallery [data-movie="{pid}"]')
+    assert await btn.count() == 1, "no movie button on the painting"
+    await btn.click(); assert await pg.is_visible("#vMake"), "Make it move missing for a painting"
+    n0 = len([x for x in FakeAzure.seen if "predictLongRunning" in x[0]])
+    await pg.click("#vMake")
+    key = await pg.evaluate(f"clipKeyFor(paintingCard(drawings.find(d => d.id === '{pid}')))")
+    assert key.startswith("painting:"), key
+    await pg.wait_for_function(f"clipKeys.has({json.dumps(key)})", timeout=15000)
+    sent = json.loads([x for x in FakeAzure.seen if "predictLongRunning" in x[0]][-1][1])
+    assert len([x for x in FakeAzure.seen if "predictLongRunning" in x[0]]) == n0 + 1 and "painting" in sent["instances"][0]["prompt"], "painting prompt not sent"
+    await pg.click("#vClose")
+    assert key in await pg.evaluate("theaterList().map(clipKeyFor)"), "painting movie not in Movie night"
+    await pg.click(f'#stGallery .bk:has([data-movie="{pid}"]) .del'); await pg.click("#askYes")
+    assert not await pg.evaluate(f"clipKeys.has({json.dumps(key)})"), "removing the painting left its movie behind"
+    await home(pg)
+
 async def run_mode(browser, mode):
     ctx = await browser.new_context(viewport={"width": 400, "height": 860}, has_touch=True)
     await ctx.add_init_script("window.__quietCelebrations = true; window.__noDailyHello = true;" + (FAKE_CLAUDE if mode == "web" else FAKE_ANDROID) + "if(!localStorage.getItem('luna_pets')){" + SEED_PETS + "}")

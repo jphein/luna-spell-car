@@ -247,13 +247,16 @@ def veo_poller():
         try: veo_poll_once()
         except Exception as e: sys.stderr.write(f"veo poller: {e!r}\n")
 
+PAINTING_MOTION = "everything in the child's painting gently sways and twinkles, and the colors shimmer softly"
+
 def do_animate(b):
     card, kind = b.get("card"), b.get("kind")
     if card is not None:
         if card not in CARD_MOTION: raise Fail(400, "unknown card")
         motion = CARD_MOTION[card]
     elif kind in KIND_MOTION: motion = KIND_MOTION[kind]
-    else: raise Fail(400, "need a card or a creature kind")
+    elif b.get("painting") is True: motion = PAINTING_MOTION  # one of her Art Studio paintings
+    else: raise Fail(400, "need a card, a creature kind, or a painting")
     prompt = f"The picture comes to life: {motion}. {VIDEO_STYLE}"
     ref = b.get("ref")
     if ref is not None and not re.fullmatch(r"[\w:,'\- .]{1,120}", str(ref)): raise Fail(400, "bad ref")
