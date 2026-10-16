@@ -975,6 +975,22 @@ async def sticker_sizes(pg, mode):
         assert got[0] == ["big1", 2] and got[1][1] == 1 and got[1][0] != "bad z", f"restore didn't keep/clean sizes and ids: {got}"
     await pg.evaluate("scene.items.meadow = []; scene.bg = 'castle'; saveScene(); xp = __xp0"); await home(pg)
 
+@test
+async def bucket_bridges_gaps(pg, mode):
+    # Kids' drawings rarely close: the 🪣 bucket bridges small gaps in her lines, fills right up to them, and big openings still let paint through.
+    async def ring(gap_deg):
+        return await pg.evaluate("""g => { pWall = null; px.fillStyle = '#fff'; px.fillRect(0, 0, pc.width, pc.height);
+            px.strokeStyle = '#1E1033'; px.lineWidth = 8; px.beginPath(); px.arc(480, 360, 200, (g / 2) * Math.PI / 180, (360 - g / 2) * Math.PI / 180); px.stroke();
+            floodFill(480, 360, '#FF0000'); const at = (x, y) => Array.from(px.getImageData(x, y, 1, 1).data.slice(0, 3));
+            return { outside: at(900, 360), far: at(40, 40), nearLine: at(480 - 193, 360) }; }""", gap_deg)
+    await pg.click("[data-go=studio]"); await pg.click("#stNew")
+    small = await ring(2)  # about 7 px gap at the right edge
+    assert small["outside"] == [255, 255, 255] and small["far"] == [255, 255, 255], f"paint leaked through a small gap: {small}"
+    assert small["nearLine"] == [255, 0, 0], f"pale gap left next to the line: {small}"
+    big = await ring(18)  # about 63 px opening
+    assert big["far"] == [255, 0, 0], f"a big opening should let paint through: {big}"
+    await pg.evaluate("px.clearRect(0, 0, pc.width, pc.height); pUndoStack = []"); await pg.click("#pCancel"); await home(pg)
+
 STACK = None
 
 async def stroke(pg):
