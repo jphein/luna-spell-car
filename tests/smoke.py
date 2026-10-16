@@ -163,6 +163,33 @@ async def coloring_pages(pg, mode):
     await pg.click("#pCancel"); await home(pg)
 
 @test
+async def creature_coloring(pg, mode):
+    # A creature she drew becomes a coloring page: its edges turn into lines the 🪣 fill stops at.
+    await pg.evaluate("""(() => { const c = document.createElement('canvas'); c.width = 480; c.height = 360; const x = c.getContext('2d');
+        x.fillStyle = '#fff'; x.fillRect(0, 0, 480, 360); x.fillStyle = '#7C4DFF'; x.beginPath(); x.arc(240, 180, 120, 0, 7); x.fill();
+        const n = document.createElement('canvas'); n.width = 480; n.height = 360; const nx = n.getContext('2d');
+        for (let i = 0; i < 4000; i++){ nx.fillStyle = `hsl(${i * 37 % 360},80%,${30 + i % 40}%)`; nx.fillRect(i * 13 % 480, i * 7 % 360, 9, 9); }
+        const pet = (id, name, art) => ({ id, kind: pets[0] ? pets[0].kind : KINDS[0].id, color: 'U', p: 1, t: 1, power: '', acc: 'none', name, art });
+        pets = pets.concat([pet('colorme', 'Puffball', c.toDataURL('image/jpeg', 0.72)), pet('busy', 'Confetti', n.toDataURL('image/jpeg', 0.72))]);
+        store('luna_pets', pets); })(); true""")
+    await pg.click("[data-go=studio]"); await pg.click("#stColor")
+    mine = pg.locator("#stPages button[aria-label=Puffball]")
+    assert await mine.count() == 1, "her drawn creature isn't a coloring page"
+    await pg.wait_for_function("document.querySelector('#stPages button[aria-label=Puffball] img').complete && document.querySelector('#stPages button[aria-label=Puffball] img').naturalWidth > 0")
+    await pg.wait_for_function("!document.querySelector('#stPages button[aria-label=Confetti]')")  # too busy to color: left out
+    await mine.click()
+    assert "Puffball" in await pg.inner_text("#pTitle"), "title doesn't name her creature"
+    await pg.wait_for_function("pWall && pWall.some(v => v)")
+    box = await pg.locator("#pCanvas").bounding_box()
+    await pg.mouse.click(box["x"] + box["width"] / 2, box["y"] + box["height"] / 2)
+    px_ = "(x, y) => Array.from(pc.getContext('2d').getImageData(x, y, 1, 1).data)"
+    assert (await pg.evaluate(f"({px_})(480, 360)"))[3] == 255, "fill didn't color inside her creature"
+    assert (await pg.evaluate(f"({px_})(20, 20)"))[3] == 0, "fill leaked past her creature's outline"
+    await pg.click("#pCancel"); await pg.click("#askNo")
+    assert not await pg.is_visible("#paint"), "cancel didn't close the coloring page"
+    await pg.evaluate("pets = pets.filter(p => !['colorme', 'busy'].includes(p.id)); store('luna_pets', pets); true"); await home(pg)
+
+@test
 async def game_night(pg, mode):
     await pg.click("[data-go=night]")
     if await pg.is_visible("#ntStart"): await pg.click("#ntStart")

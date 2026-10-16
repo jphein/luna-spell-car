@@ -13,8 +13,6 @@ Reorder freely; each item should be small enough for one PR, with a clear "done 
       picker so every game can use the second deck's cards. Done when: switching decks changes Window Magic, Count, Who Wins, and Memory; tested.
 - [ ] **Second deck, slice 2: flying & reach in Who Wins.** Flyers can only be blocked by flying/reach; harder questions for older kids.
 - [x] **Cloud voice cache**: keep recent neural-voice clips on the device so repeated phrases work offline in the car.
-- [ ] **Coloring pages, slice 2: from her own creatures.** Trace her drawn (or server-made) creature pictures into
-      outlines with edge detection and add them to the coloring page picker. Never trace the deck's card art (© WotC).
 
 ## Later
 - [ ] Move to a private release key (the debug key is public). Needs a tablet reinstall with Backup/Restore first.

@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- 🖍️ Art Studio → Coloring page now also offers her own drawn creatures (gold border): their crayon lines become
+  coloring-page lines the 🪣 paint bucket stops at. Pictures too busy to color (most server-made ones) are left out.
+  The paint bucket also fills right up under a line's soft edge now, so there's no pale seam.
 - 🐎 The Pegasus joins the Star Shop creatures (15 stars): a running horse with a white feathered wing drawn on its
   picture (there's no pegasus emoji on older tablets), and its accessory sits on its head. The Spell Car server can
   draw and animate it too.
