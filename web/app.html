@@ -2060,6 +2060,26 @@ function setLines(src){
   };
   li.src = src;
 }
+const FILL_GAP = 5;  // the bucket seals gaps up to about twice this many pixels in her lines
+function growMask(m, W, H, r){  // a pixel is "near a wall" if any wall pixel is within r (separable square max filter)
+  const h = new Uint8Array(W * H), out = new Uint8Array(W * H);
+  for (let y = 0; y < H; y++){ let run = 0; const row = y * W;
+    for (let x = -r; x < W; x++){ if (x + r < W && m[row + x + r]) run++; if (x - r - 1 >= 0 && m[row + x - r - 1]) run--; if (x >= 0) h[row + x] = run > 0 ? 1 : 0; } }
+  for (let x = 0; x < W; x++){ let run = 0;
+    for (let y = -r; y < H; y++){ if (y + r < H && h[(y + r) * W + x]) run++; if (y - r - 1 >= 0 && h[(y - r - 1) * W + x]) run--; if (y >= 0) out[y * W + x] = run > 0 ? 1 : 0; } }
+  return out;
+}
+function scanFill(W, H, seed, ok){  // scanline flood fill over pixels where ok(i)
+  const seen = new Uint8Array(W * H), stack = [seed];
+  while (stack.length){
+    const i = stack.pop(); if (seen[i] || !ok(i)) continue;
+    let a = i, b = i; const row = i - (i % W);
+    while (a > row && !seen[a - 1] && ok(a - 1)) a--;
+    while (b < row + W - 1 && !seen[b + 1] && ok(b + 1)) b++;
+    for (let j = a; j <= b; j++){ seen[j] = 1; if (j >= W && !seen[j - W]) stack.push(j - W); if (j < W * (H - 1) && !seen[j + W]) stack.push(j + W); }
+  }
+  return seen;
+}
 function floodFill(sx, sy, hex){
   const W = pc.width, H = pc.height, x0 = Math.max(0, Math.min(W - 1, sx | 0)), y0 = Math.max(0, Math.min(H - 1, sy | 0));
   const img = px.getImageData(0, 0, W, H), d = img.data, seed = (y0 * W + x0) * 4;
@@ -2067,18 +2087,21 @@ function floodFill(sx, sy, hex){
   const n = parseInt(hex.slice(1), 16), col = [n >> 16, (n >> 8) & 255, n & 255, 255], s = [d[seed], d[seed + 1], d[seed + 2], d[seed + 3]];
   if (s.every((v, k) => Math.abs(v - col[k]) < 8)) return false;
   const like = i => !(pWall && pWall[i]) && Math.abs(d[i * 4 + 3] - s[3]) < 48 && (s[3] < 48 || (Math.abs(d[i * 4] - s[0]) < 48 && Math.abs(d[i * 4 + 1] - s[1]) < 48 && Math.abs(d[i * 4 + 2] - s[2]) < 48));
-  const seen = new Uint8Array(W * H), stack = [y0 * W + x0];
-  while (stack.length){
-    const i = stack.pop(); if (seen[i] || !like(i)) continue;
-    let a = i, b = i, row = i - (i % W);
-    while (a > row && !seen[a - 1] && like(a - 1)) a--;
-    while (b < row + W - 1 && !seen[b + 1] && like(b + 1)) b++;
-    for (let j = a; j <= b; j++){
-      seen[j] = 1; d.set(col, j * 4);
-      if (j >= W && !seen[j - W]) stack.push(j - W);
-      if (j < W * (H - 1) && !seen[j + W]) stack.push(j + W);
+  // Kids' lines rarely close. Grow everything the bucket can't paint by FILL_GAP px so small gaps seal, fill inside
+  // that, then let the paint creep back up to the real lines (no pale halo). Big openings still let paint through.
+  const N = W * H, bar = new Uint8Array(N); for (let k = 0; k < N; k++) bar[k] = like(k) ? 0 : 1;
+  const grown = growMask(bar, W, H, FILL_GAP), seed0 = y0 * W + x0, sealed = !grown[seed0];
+  const fill = scanFill(W, H, seed0, sealed ? k => !grown[k] : k => !bar[k]);
+  if (sealed){
+    let edge = []; for (let k = 0; k < N; k++) if (fill[k] && ((k % W && !fill[k - 1]) || (k % W < W - 1 && !fill[k + 1]) || (k >= W && !fill[k - W]) || (k < N - W && !fill[k + W]))) edge.push(k);  // only the fill's border
+    for (let step = 0; step < FILL_GAP && edge.length; step++){
+      const next = [];
+      for (const k of edge){ const x = k % W;
+        for (const m of [x > 0 ? k - 1 : -1, x < W - 1 ? k + 1 : -1, k - W, k + W]) if (m >= 0 && m < N && !fill[m] && !bar[m]){ fill[m] = 1; next.push(m); } }
+      edge = next;
     }
   }
+  for (let k = 0; k < N; k++) if (fill[k]) d.set(col, k * 4);
   px.putImageData(img, 0, 0); return true;
 }
 pc.addEventListener("pointerdown", e => {

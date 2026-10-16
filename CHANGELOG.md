@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- 🪣 The paint bucket bridges small gaps in her lines (up to about 10 px), so a nearly closed shape fills on its own
+  instead of flooding the whole page, and the paint still reaches right up to the line. Big openings still let it through.
 - 🔎 Sticker scene: tap a sticker on the picture to make it bigger (normal → bigger → biggest → back). Sizes are saved,
   printed, and backed up. (A tap instead of a pinch: easier for small hands.) Restored sticker ids are now checked too.
 - 🖨️ Sticker scene → "Print my scene": her decorated picture (background, decorations, and stickers) as a landscape
