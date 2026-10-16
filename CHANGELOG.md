@@ -1,6 +1,11 @@
 # Changelog
 
 ## Unreleased
+- ✨ New look for the home screen: every game has its own drawn badge instead of an emoji (a little Spell Car for
+  Window Magic, a smiling cloud for Magic Fog, a treasure basket, a unicorn…). They're made by the app itself, so they
+  look the same on every tablet, even older ones missing some emoji, and they pop in when she comes home. Tiles take a soft
+  wash of their badge's color, the title is painted blue-to-red like her deck, Rootha's portrait has a rainbow ring, the
+  game's badge shows next to its name at the top of each screen, and celebrations shine with slow golden rays.
 
 ## 1.11.0 (2026-10-15)
 - **Security fixes:** restoring a crafted backup file could run script in the app (bad creature/painting ids or
