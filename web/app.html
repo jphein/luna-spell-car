@@ -846,6 +846,7 @@ body.theme-rainbow{--btn:#B8336F} body.theme-ocean{--btn:#176A9C} body.theme-can
     <div class="sc-stage" id="scStage" data-bg="castle"></div>
     <div class="sc-tray" id="scTray"></div>
     <div class="pnote">Drag a sticker onto the picture, or tap it. Drag a sticker off the picture to take it away.</div>
+    <button class="printbtn hidden" id="scPrint">🖨️ Print my scene</button>
   </section>
 
   <!-- SPELLBOOK -->
@@ -3550,7 +3551,43 @@ function renderScene(){
     b.onpointerdown = ev => scStart(ev, STICKERS[i], null, b); tr.appendChild(b);
   }
   if (!scEarned()) tr.innerHTML = `<div class="empty-note">Earn 10 stars to get your first sticker!</div>`;
+  $("scPrint").classList.toggle("hidden", !(downloadsCap && scItems().length));
 }
+/* "Print my scene": the picture drawn on a landscape page, same backgrounds as the CSS, for the fridge. */
+const SCENE_PAINT = { castle: [[0, "#9FD8FF"], [.64, "#9FD8FF"], [.64, "#7FD37A"], [1, "#7FD37A"]], sky: [[0, "#7FC4FF"], [1, "#FFD1EC"]],
+  meadow: [[0, "#BDE8FF"], [.46, "#BDE8FF"], [.46, "#8EDB6F"], [1, "#8EDB6F"]],
+  beach: [[0, "#A6DEFF"], [.52, "#A6DEFF"], [.52, "#43AEE6"], [.7, "#43AEE6"], [.7, "#F5DC9E"], [1, "#F5DC9E"]],
+  sea: [[0, "#6ED6F2"], [.78, "#1B6FB0"], [.78, "#E9D6A0"], [1, "#E9D6A0"]] };
+function sceneCanvas(){
+  const W_ = 2200, H_ = 1700, cv = document.createElement("canvas"); cv.width = W_; cv.height = H_; const x = cv.getContext("2d"), k = H_ / 520;
+  if (scene.bg === "space"){
+    const g = x.createRadialGradient(W_ * .3, H_ * .2, 0, W_ * .3, H_ * .2, W_ * .8); g.addColorStop(0, "#3B2386"); g.addColorStop(.7, "#0B0A24"); g.addColorStop(1, "#0B0A24");
+    x.fillStyle = g; x.fillRect(0, 0, W_, H_); x.fillStyle = "#fff";
+    let seed = 7; const r = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;  // scattered, but the same every print
+    for (let i = 0; i < 90; i++){ x.globalAlpha = .4 + r() * .6; x.beginPath(); x.arc(r() * W_, r() * H_, 1.5 + r() * 3, 0, 7); x.fill(); }
+    x.globalAlpha = 1;
+  } else {
+    const g = x.createLinearGradient(0, 0, 0, H_); (SCENE_PAINT[scene.bg] || SCENE_PAINT.castle).forEach(([o, c]) => g.addColorStop(o, c));
+    x.fillStyle = g; x.fillRect(0, 0, W_, H_);
+  }
+  x.textAlign = "center"; x.textBaseline = "middle";
+  const EMOJI = "'Apple Color Emoji','Segoe UI Emoji','Noto Color Emoji',sans-serif";
+  SCENES[scene.bg].deco.forEach(([e, l, t, z]) => { x.font = `${Math.round(z * k)}px ${EMOJI}`; x.fillText(e, l / 100 * W_, t / 100 * H_); });
+  x.font = `${Math.round(48 * k)}px ${EMOJI}`; scItems().forEach(it => x.fillText(it.s, it.x * W_, it.y * H_));
+  x.textAlign = "right"; x.fillStyle = "rgba(255,255,255,.9)"; x.font = "600 44px Fredoka, Arial, sans-serif"; x.fillText("✦ Made by Luna", W_ - 50, H_ - 50);
+  return cv;
+}
+$("scPrint").onclick = async () => {
+  if (!downloadsCap || !scItems().length) return;
+  const btn = $("scPrint"); btn.disabled = true; btn.textContent = "Making your picture…";
+  try {
+    await loadScript(window.AndroidBridge ? "vendor/jspdf.umd.min.js" : "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
+    const pdf = new window.jspdf.jsPDF({ unit: "in", format: "letter", orientation: "landscape" });
+    pdf.addImage(sceneCanvas().toDataURL("image/jpeg", 0.9), "JPEG", 0, 0, 11, 8.5);
+    await downloadsCap.save({ filename: "Lunas_Sticker_Scene.pdf", data: pdf.output("blob") }); say("Your picture is ready to print! Put it on the fridge!");
+  } catch (e) { if (!(e && e.code === "declined")) say("The picture didn't save. Ask a grown-up to try again."); }
+  finally { btn.disabled = false; btn.textContent = "🖨️ Print my scene"; }
+};
 function scStart(ev, s, id, el){ ev.preventDefault(); scDrag = { s, id, el, x0: ev.clientX, y0: ev.clientY, moved: false, ghost: null }; }
 function scPlace(s, x, y){
   const items = scItems();

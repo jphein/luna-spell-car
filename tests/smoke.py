@@ -932,6 +932,23 @@ async def more_scenes(pg, mode):
         assert d["scene"]["items"].get("sea"), "backup is missing the sea stickers"
     await pg.evaluate("scene.items.sea = []; scene.bg = 'castle'; saveScene(); xp = __xp0"); await home(pg)
 
+@test
+async def print_scene(pg, mode):
+    # "Print my scene": the sticker picture (background, decorations, her stickers) as a PDF for the fridge.
+    await pg.evaluate("window.__xp0 = xp; xp = Math.max(xp, 40); scene.bg = 'beach'; scene.items.beach = []; saveScene(); go('book', true)")
+    await pg.click("#scOpen")
+    assert not await pg.is_visible("#scPrint"), "Print shown for an empty picture"
+    await pg.click("#scTray button >> nth=0"); await pg.click("#scTray button >> nth=1")
+    assert await pg.is_visible("#scPrint"), "no Print my scene button"
+    plain = await pg.evaluate("(() => { const keep = scene.items.beach; scene.items.beach = []; const a = sceneCanvas().toDataURL(); scene.items.beach = keep; return a; })()")
+    assert plain != await pg.evaluate("sceneCanvas().toDataURL()"), "stickers not drawn in the printed picture"
+    assert await pg.evaluate("(() => { const c = sceneCanvas(); return c.width > c.height; })()"), "print should be landscape"
+    await pg.click("#scPrint"); await pg.wait_for_timeout(2500)
+    if mode == "web": names = [x["filename"] for x in await pg.evaluate("window.__saved")]
+    else: names = [c["saved"] for c in await pg.evaluate("window.__calls") if isinstance(c, dict) and "saved" in c]
+    assert any("Sticker_Scene" in n and n.endswith(".pdf") for n in names), f"scene PDF not saved ({names[-3:]})"
+    await pg.evaluate("scene.items.beach = []; scene.bg = 'castle'; saveScene(); xp = __xp0"); await home(pg)
+
 STACK = None
 
 async def stroke(pg):
