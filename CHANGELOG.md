@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+
+## 1.11.0 (2026-10-15)
+- **Security fixes:** restoring a crafted backup file could run script in the app (bad creature/painting ids or
+  pictures). Please update from 1.10.0 or earlier.
 - 🖍️ Art Studio → Coloring page now also offers her own drawn creatures (gold border): their crayon lines become
   coloring-page lines the 🪣 paint bucket stops at. Pictures too busy to color (most server-made ones) are left out.
   The paint bucket also fills right up under a line's soft edge now, so there's no pale seam.
