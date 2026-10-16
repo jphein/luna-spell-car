@@ -872,6 +872,28 @@ async def pegasus(pg, mode):
     assert await pg.locator('#kindRow [data-k="pegasus"] svg').count() == 1, "picker has no pegasus icon"
     await home(pg)
 
+@test
+async def restore_rejects_html_ids(pg, mode):
+    # A crafted backup file can't inject markup through creature or painting ids (they reach the gallery's HTML).
+    if mode != "web": return
+    await pg.evaluate("go('book', true)"); d = await fresh_backup(pg)
+    bad = '"><img src=x onerror="window.__xss=1">'
+    img = await pg.evaluate("(() => { const c = document.createElement('canvas'); c.width = 8; c.height = 6; return c.toDataURL('image/jpeg', .8); })()")
+    d["drawings"] = [{"id": bad, "img": img, "at": 1}]
+    d["pets"] = [{"id": bad + "p", "kind": "unicorn", "color": "P", "p": 1, "t": 1, "power": "fly", "name": "Safe"}]
+    await pg.set_input_files("#bkFile", files=[{"name": "b.json", "mimeType": "application/json", "buffer": json.dumps(d).encode()}])
+    await pg.wait_for_function("drawings.some(x => x.img.length < 2000) && pets.some(x => x.name === 'Safe')", timeout=5000)
+    await pg.evaluate("cloudCaps = { video: true }; go('studio', true)"); await pg.wait_for_timeout(300)
+    assert not await pg.evaluate("window.__xss"), "markup in a restored id ran script"
+    # and the gallery itself never builds markup from an id (even one that skipped restore's checks)
+    await pg.evaluate("i => { drawings.push({ id: i, img: drawings[0].img, at: 1 }); renderStudio(); }", bad + "2"); await pg.wait_for_timeout(200)
+    assert not await pg.evaluate("window.__xss"), "the gallery built markup from a painting id"
+    await pg.evaluate("i => { drawings = drawings.filter(x => x.id !== i); }", bad + "2")
+    ids = await pg.evaluate("drawings.concat(pets).map(x => x.id)")
+    assert all(__import__("re").fullmatch(r"[A-Za-z0-9_-]{1,40}", i) for i in ids), f"unsafe ids kept: {ids[-3:]}"
+    await pg.evaluate("cloudCaps = null; drawings = drawings.filter(x => x.img.length >= 2000); store('luna_drawings', drawings); pets = pets.filter(x => x.name !== 'Safe'); store('luna_pets', pets)")
+    await home(pg)
+
 STACK = None
 
 async def stroke(pg):

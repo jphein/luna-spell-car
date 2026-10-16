@@ -3131,8 +3131,8 @@ function renderStudio(){
     el.innerHTML = `<img src="${d.img}" alt="Painting"><div class="nm">${new Date(d.at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</div><button class="del" aria-label="Remove painting">✕</button>`;
     const pc_ = paintingCard(d);
     if ((cloudCaps && cloudCaps.video) || clipKeys.has(clipKeyFor(pc_)) || clipJobs[clipKeyFor(pc_)]){
-      el.insertAdjacentHTML("beforeend", `<button class="mvbtn" data-movie="${d.id}" aria-label="Make my painting move">🎬</button>`);
-      el.querySelector(".mvbtn").onclick = ev => { ev.stopPropagation(); openViewer(pc_); };
+      const mb = document.createElement("button"); mb.className = "mvbtn"; mb.dataset.movie = d.id; mb.setAttribute("aria-label", "Make my painting move"); mb.textContent = "🎬";
+      mb.onclick = ev => { ev.stopPropagation(); openViewer(pc_); }; el.appendChild(mb);
     }
     el.querySelector("img").onclick = () => openStudioPaint(d);
     el.querySelector(".del").onclick = ev => { ev.stopPropagation();
@@ -3455,6 +3455,8 @@ document.addEventListener("pointerup", ev => {
 $("scOpen").onclick = () => go("scene");
 
 /* ---------- BACKUP & RESTORE ---------- */
+// Restored ids end up in markup and clip keys: keep only plain ids, give anything else a fresh one.
+const safeId = (v, n) => /^[A-Za-z0-9_-]{1,40}$/.test(String(v ?? "")) ? String(v) : Date.now().toString(36) + "r" + n;
 $("bkSave").onclick = async () => {
   const data = JSON.stringify({ app: "luna-spell-car", v: 4, at: new Date().toISOString(), stars, xp, owned, eggs, theme, stats, treasures, cast, pets, stories, scene, drawings, seen: seenGames, week, badges });
   const name = `luna-spellbook-${new Date().toISOString().slice(0, 10)}.json`;
@@ -3475,7 +3477,7 @@ $("bkFile").onchange = () => {
       && Number.isFinite(p.p) && Number.isFinite(p.t) && (!p.art || (typeof p.art === "string" && /^data:image\/(jpeg|png);base64,/.test(p.art) && p.art.length < 600000));
     const have = new Set(pets.map(p => p.id)); let added = 0;
     const merged = pets.slice();
-    d.pets.filter(ok).forEach(p => { const clean = { id: String(p.id || Date.now().toString(36) + added), kind: p.kind, color: p.color, p: Math.max(0, Math.min(9, p.p | 0)), t: Math.max(1, Math.min(9, p.t | 0)), power: p.power, acc: ACCS.some(a => a.id === p.acc) ? p.acc : "none", name: p.name.slice(0, 28) };
+    d.pets.filter(ok).forEach(p => { const clean = { id: safeId(p.id, added), kind: p.kind, color: p.color, p: Math.max(0, Math.min(9, p.p | 0)), t: Math.max(1, Math.min(9, p.t | 0)), power: p.power, acc: ACCS.some(a => a.id === p.acc) ? p.acc : "none", name: p.name.slice(0, 28) };
       if (p.art) clean.art = p.art; if (bgOf(p)) clean.bg = bgOf(p); if (!have.has(clean.id)){ merged.push(clean); have.add(clean.id); added++; } });
     if (!store("luna_pets", merged)){ say("There isn't enough room for all of those creatures."); return; }
     pets = merged;
@@ -3505,7 +3507,7 @@ $("bkFile").onchange = () => {
     store("luna_eggs", eggs); renderKindRow(); renderAccRow(); renderBrushes(); renderStars();
     if (Array.isArray(d.drawings)){ const have2 = new Set(drawings.map(x => x.id)), merged2 = drawings.slice();
       d.drawings.filter(x => x && typeof x.img === "string" && /^data:image\/(jpeg|png);base64,/.test(x.img) && x.img.length < 800000)
-        .forEach(x => { const id = String(x.id || Date.now().toString(36)); if (!have2.has(id)){ merged2.push({ id, img: x.img, at: +x.at || Date.now() }); have2.add(id); } });
+        .forEach((x, n) => { const id = safeId(x.id, n); if (!have2.has(id)){ merged2.push({ id, img: x.img, at: +x.at || Date.now() }); have2.add(id); } });
       if (store("luna_drawings", merged2)) drawings = merged2; }
     if (d.scene && d.scene.items && typeof d.scene.items === "object") Object.keys(SCENES).forEach(k => {
       const src = d.scene.items[k]; if (!Array.isArray(src)) return;
