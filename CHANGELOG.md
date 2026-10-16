@@ -4,6 +4,13 @@
 - 🖍️ Art Studio → Coloring page now also offers her own drawn creatures (gold border): their crayon lines become
   coloring-page lines the 🪣 paint bucket stops at. Pictures too busy to color (most server-made ones) are left out.
   The paint bucket also fills right up under a line's soft edge now, so there's no pale seam.
+- 🎬 Magic movies for paintings: with a Spell Car server, each Art Studio painting has a 🎬 button that makes it move
+  (everything in it gently sways and twinkles). Painting movies join Movie night, and removing a painting removes its
+  movie too. Repainting makes a fresh movie. (Continues from luna-spell-car-archive #29.)
+- Security: a crafted backup file can no longer inject markup through creature or painting ids. Restore keeps only
+  plain ids, and the painting gallery builds its buttons without HTML strings.
+- Security: pictures in a backup must be complete base64 JPEG/PNG data URLs (the old check only looked at the start),
+  and creature and painting pictures are checked again before they're shown.
 - 🐎 The Pegasus joins the Star Shop creatures (15 stars): a running horse with a white feathered wing drawn on its
   picture (there's no pegasus emoji on older tablets), and its accessory sits on its head. The Spell Car server can
   draw and animate it too.

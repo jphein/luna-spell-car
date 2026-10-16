@@ -43,6 +43,7 @@ const KIND_MOTION = { unicorn: "the unicorn tosses its mane and its horn glows",
   turtle: "the turtle slowly peeks out and smiles", flamingo: "the flamingo stands on one leg and fluffs its pink feathers",
   mermaid: "the mermaid flips her shimmering tail and blows a bubble",
   pegasus: "the pegasus flaps its feathery wings and lifts into the sky" };
+const PAINTING_MOTION = "everything in the child's painting gently sways and twinkles, and the colors shimmer softly";
 const VIDEO_STYLE = "Gentle, magical, happy animation for a young child. Slow, soft movement, twinkling sparkles, a slow camera push-in. " +
   "Keep the same art style and colors as the picture. Nothing scary, no sudden movements, no text. " +
   "Audio: soft magical chimes and sparkles, no speech, no music with words.";
@@ -213,7 +214,8 @@ async function doAnimate(b, env, c) {
   let motion;
   if (card !== undefined && card !== null) { if (!CARD_MOTION[card]) throw new Fail(400, "unknown card"); motion = CARD_MOTION[card]; }
   else if (KIND_MOTION[kind]) motion = KIND_MOTION[kind];
-  else throw new Fail(400, "need a card or a creature kind");
+  else if (b.painting === true) motion = PAINTING_MOTION;  // one of her Art Studio paintings
+  else throw new Fail(400, "need a card, a creature kind, or a painting");
   const prompt = `The picture comes to life: ${motion}. ${VIDEO_STYLE}`;
   const ref = b.ref;
   if (ref !== undefined && ref !== null && !/^[\w:,'\- .]{1,120}$/.test(String(ref))) throw new Fail(400, "bad ref");
