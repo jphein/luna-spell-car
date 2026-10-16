@@ -266,6 +266,7 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .st-pages{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:12px}
 .st-pages button{background:#fff;border-radius:18px;padding:6px;box-shadow:0 4px 0 var(--line)}
 .st-pages img{width:100%;aspect-ratio:4/3;display:block}
+.st-pages button.mine{box-shadow:0 4px 0 var(--line),0 0 0 3px var(--gold) inset}
 .palette .sw{width:46px;height:46px;border-radius:50%;border:3px solid rgba(0,0,0,.15)}
 .palette .sw.on{box-shadow:0 0 0 4px var(--gold)}
 .palette .tool{min-width:52px;height:50px;border-radius:16px;background:var(--surface);font-size:24px;padding:0 10px;box-shadow:0 3px 0 var(--line);display:flex;align-items:center;gap:4px}
@@ -1927,7 +1928,7 @@ function setLines(src){
   li.onload = () => {
     const c = document.createElement("canvas"); c.width = pc.width; c.height = pc.height; const cx = c.getContext("2d"); cx.drawImage(li, 0, 0, c.width, c.height);
     const a = cx.getImageData(0, 0, c.width, c.height).data; pWall = new Uint8Array(c.width * c.height);
-    for (let i = 0; i < pWall.length; i++) pWall[i] = a[i * 4 + 3] > 60;
+    for (let i = 0; i < pWall.length; i++) pWall[i] = a[i * 4 + 3] > 160;
   };
   li.src = src;
 }
@@ -3144,18 +3145,57 @@ const COLOR_PAGES = (() => {
     { id: "butterfly", name: "butterfly", svg: `<ellipse cx="480" cy="380" rx="34" ry="190"/><path d="M465 210C430 140 400 110 370 100M495 210C530 140 560 110 590 100"/><path d="M450 330C300 140 120 160 140 290C150 370 300 390 450 370ZM510 330C660 140 840 160 820 290C810 370 660 390 510 370ZM450 400C320 400 200 470 240 560C280 640 400 560 450 450ZM510 400C640 400 760 470 720 560C680 640 560 560 510 450Z"/><circle cx="260" cy="270" r="40"/><circle cx="700" cy="270" r="40"/><circle cx="300" cy="510" r="28"/><circle cx="660" cy="510" r="28"/>` }
   ].map(p => Object.assign(p, { src: "data:image/svg+xml," + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" fill="none" stroke="#1E1033" stroke-width="12" stroke-linecap="round" stroke-linejoin="round">${p.svg}</svg>`) }));
 })();
+// Her own drawn creatures become coloring pages. Lines = big colour jumps (not JPEG noise), plus every crayon pixel within
+// 6px of white paper, so a thin stroke stays one solid line instead of two edges and a filled blob becomes its outline.
+const outlineCache = {};
+function petOutline(p){
+  const key = p.id + ":" + hashStr(p.art);
+  if (!outlineCache[key]) outlineCache[key] = new Promise(res => {
+    const im = new Image(); im.onerror = () => res(null);
+    im.onload = () => {
+      const W = 480, H = 360, c = document.createElement("canvas"); c.width = W; c.height = H; const cx = c.getContext("2d");
+      cx.fillStyle = "#fff"; cx.fillRect(0, 0, W, H); cx.drawImage(im, 0, 0, W, H);
+      const d = cx.getImageData(0, 0, W, H).data, diff = (i, j) => Math.abs(d[i * 4] - d[j * 4]) + Math.abs(d[i * 4 + 1] - d[j * 4 + 1]) + Math.abs(d[i * 4 + 2] - d[j * 4 + 2]);
+      const edge = new Uint8Array(W * H), paper = new Uint8Array(W * H);
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++){
+        const i = y * W + x; paper[i] = d[i * 4] + d[i * 4 + 1] + d[i * 4 + 2] > 645;
+        if ((x < W - 1 && diff(i, i + 1) > 90) || (y < H - 1 && diff(i, i + W) > 90)) edge[i] = 1;
+      }
+      // Square dilation in two running-window passes: the same cost per pixel at any radius, even for a busy AI picture.
+      const grow = (m, r) => { const t = new Uint8Array(W * H), o = new Uint8Array(W * H);
+        for (let y = 0; y < H; y++){ let n = 0; for (let x = -r; x < W; x++){ if (x + r < W) n += m[y * W + x + r]; if (x - r - 1 >= 0) n -= m[y * W + x - r - 1]; if (x >= 0) t[y * W + x] = n > 0; } }
+        for (let x = 0; x < W; x++){ let n = 0; for (let y = -r; y < H; y++){ if (y + r < H) n += t[(y + r) * W + x]; if (y - r - 1 >= 0) n -= t[(y - r - 1) * W + x]; if (y >= 0) o[y * W + x] = n > 0; } }
+        return o; };
+      const thin = grow(edge, 2), band = grow(paper, 6), out = cx.createImageData(W, H); let lines = 0;
+      for (let i = 0; i < W * H; i++) if (thin[i] || (!paper[i] && band[i])){ out.data.set([30, 16, 51, 255], i * 4); lines++; }
+      if (lines > W * H * 0.3) return res(null);  // too busy to color (a photo-like picture): leave it out
+      cx.putImageData(out, 0, 0);
+      const big = document.createElement("canvas"); big.width = 960; big.height = 720; big.getContext("2d").drawImage(c, 0, 0, 960, 720);
+      res(big.toDataURL("image/png"));
+    };
+    im.src = p.art;
+  });
+  return outlineCache[key];
+}
 function openStudioPaint(d, page){
   paintMode = "studio"; paintEditId = d ? d.id : null;
-  $("pTitle").textContent = d ? "Keep painting!" : page ? `Color the ${page.name}!` : "Paint anything!"; $("pGuideBtn").classList.add("hidden"); $("pGuide").style.display = "none";
+  $("pTitle").textContent = d ? "Keep painting!" : page ? `Color ${page.call || "the " + page.name}!` : "Paint anything!"; $("pGuideBtn").classList.add("hidden"); $("pGuide").style.display = "none";
   px.clearRect(0, 0, pc.width, pc.height); pUndoStack = []; setLines(page ? page.src : null);
   if (d){ const im = new Image(); im.onload = () => px.drawImage(im, 0, 0, pc.width, pc.height); im.src = d.img; }
   if (page) setTool("fill");
-  $("paint").classList.remove("hidden"); say(d ? "Let's keep painting!" : page ? `Color the ${page.name}! Tap a space with the paint bucket, or use a crayon.` : "Paint anything you like!");
+  $("paint").classList.remove("hidden"); say(d ? "Let's keep painting!" : page ? `Color ${page.call || "the " + page.name}! Tap a space with the paint bucket, or use a crayon.` : "Paint anything you like!");
 }
 $("stColor").onclick = () => {
   const g = $("stPages"), open = g.classList.contains("hidden"); g.classList.toggle("hidden", !open); tick(4);
   if (!open) return;
-  g.innerHTML = ""; COLOR_PAGES.forEach(p => { const b = document.createElement("button"); b.innerHTML = `<img src="${p.src}" alt="">`; b.setAttribute("aria-label", p.name); b.onclick = () => { g.classList.add("hidden"); openStudioPaint(null, p); }; g.appendChild(b); });
+  g.innerHTML = "";
+  const add = p => { const b = document.createElement("button"); b.innerHTML = `<img alt="">`; if (p.src) b.firstChild.src = p.src; b.setAttribute("aria-label", p.name);
+    b.onclick = () => { if (!p.src) return tick(1); g.classList.add("hidden"); openStudioPaint(null, p); }; g.appendChild(b); return b; };
+  COLOR_PAGES.forEach(add);
+  pets.filter(p => p.art).slice(-12).reverse().forEach(pet => {
+    const page = { id: "pet:" + pet.id, name: pet.name, call: pet.name, src: null }, b = add(page); b.classList.add("mine");
+    petOutline(pet).then(src => { if (src){ page.src = src; b.firstChild.src = src; } else b.remove(); });
+  });
   say("Pick a coloring page!");
 };
 function finishStudio(){
