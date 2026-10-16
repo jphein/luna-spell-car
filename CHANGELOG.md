@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- 🏖️ Sticker scene: three new pictures to decorate, the Beach, Space, and Under the sea. Each keeps its own stickers
+  (and they're in backups).
 - ✨ New look for the home screen: every game has its own drawn badge instead of an emoji (a little Spell Car for
   Window Magic, a smiling cloud for Magic Fog, a treasure basket, a unicorn…). They're made by the app itself, so they
   look the same on every tablet, even older ones missing some emoji, and they pop in when she comes home. Tiles take a soft

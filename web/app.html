@@ -192,6 +192,9 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .sc-stage{position:relative;height:min(52vh,520px);border-radius:24px;overflow:hidden;margin:10px 0;box-shadow:0 4px 0 var(--line);touch-action:none;background:linear-gradient(#9FD8FF 0 64%,#7FD37A 64%)}
 .sc-stage[data-bg=sky]{background:linear-gradient(#7FC4FF,#FFD1EC)}
 .sc-stage[data-bg=meadow]{background:linear-gradient(#BDE8FF 0 46%,#8EDB6F 46%)}
+.sc-stage[data-bg=beach]{background:linear-gradient(#A6DEFF 0 52%,#43AEE6 52% 70%,#F5DC9E 70%)}
+.sc-stage[data-bg=space]{background:radial-gradient(1.5px 1.5px at 20% 40%,#fff,transparent),radial-gradient(1px 1px at 70% 80%,#fff,transparent),radial-gradient(1.5px 1.5px at 45% 12%,#fff,transparent),radial-gradient(1px 1px at 88% 44%,#fff,transparent),radial-gradient(circle at 30% 20%,#3B2386,#0B0A24 70%)}
+.sc-stage[data-bg=sea]{background:linear-gradient(#6ED6F2,#1B6FB0 78%,#E9D6A0 78%)}
 .sc-deco{position:absolute;line-height:1;translate:-50% -50%;pointer-events:none}
 .sc-st{position:absolute;font-size:48px;line-height:1;translate:-50% -50%;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;filter:drop-shadow(0 3px 2px rgba(0,0,0,.25))}
 .sc-st.wig{animation:wob .35s}
@@ -3515,7 +3518,10 @@ $("ntNew").onclick = () => ask({ emo: "🔄", q: "Start a new game?", spoken: "S
 const SCENES = {
   castle: { label: "🏰 Castle", say: "The castle!", deco: [["🏰", 50, 58, 120], ["☁️", 20, 14, 50], ["☁️", 74, 24, 40], ["🌞", 88, 10, 44]] },
   sky: { label: "☁️ Sky", say: "Up in the sky!", deco: [["🌈", 55, 22, 96], ["☁️", 22, 34, 72], ["☁️", 72, 64, 84], ["☁️", 30, 82, 56]] },
-  meadow: { label: "🌼 Meadow", say: "The meadow!", deco: [["🌳", 16, 38, 96], ["🌞", 84, 12, 44], ["🌼", 34, 84, 34], ["🌷", 68, 78, 34], ["🍄", 86, 68, 38]] }
+  meadow: { label: "🌼 Meadow", say: "The meadow!", deco: [["🌳", 16, 38, 96], ["🌞", 84, 12, 44], ["🌼", 34, 84, 34], ["🌷", 68, 78, 34], ["🍄", 86, 68, 38]] },
+  beach: { label: "🏖️ Beach", say: "The beach!", deco: [["🌴", 14, 46, 96], ["🌞", 86, 12, 46], ["⛵", 62, 52, 46], ["🐚", 30, 88, 34], ["🦀", 74, 86, 38]] },
+  space: { label: "🚀 Space", say: "Outer space!", deco: [["🪐", 22, 20, 70], ["🌙", 82, 14, 48], ["⭐", 54, 30, 26], ["✨", 36, 62, 30], ["🚀", 78, 62, 64], ["⭐", 12, 76, 22]] },
+  sea: { label: "🐠 Under the sea", say: "Under the sea!", deco: [["🐠", 24, 30, 52], ["🐟", 72, 44, 44], ["🐙", 58, 82, 58], ["🐚", 18, 88, 32], ["🌿", 86, 80, 56], ["🦀", 38, 90, 34]] }
 };
 const SC_MAX = 40;
 let scene = load("luna_scene", { bg: "castle", items: {} }), scDrag = null;
