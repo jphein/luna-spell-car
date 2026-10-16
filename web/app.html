@@ -3456,7 +3456,7 @@ $("scOpen").onclick = () => go("scene");
 
 /* ---------- BACKUP & RESTORE ---------- */
 // Restored ids end up in markup and clip keys: keep only plain ids, give anything else a fresh one.
-const safeId = (v, n) => /^[A-Za-z0-9_-]{1,40}$/.test(String(v ?? "")) ? String(v) : Date.now().toString(36) + "r" + n;
+const safeId = (v, n) => /^[A-Za-z0-9_-]{1,40}$/.test(String(v ?? "")) ? String(v) : Date.now().toString(36) + "r" + n + Math.random().toString(36).slice(2, 8);
 $("bkSave").onclick = async () => {
   const data = JSON.stringify({ app: "luna-spell-car", v: 4, at: new Date().toISOString(), stars, xp, owned, eggs, theme, stats, treasures, cast, pets, stories, scene, drawings, seen: seenGames, week, badges });
   const name = `luna-spellbook-${new Date().toISOString().slice(0, 10)}.json`;
