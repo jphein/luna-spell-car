@@ -890,6 +890,8 @@ const rnd = a => a[Math.floor(Math.random() * a.length)];
 
 /* ---------- saved state (this device only) ---------- */
 function load(k, d){ try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } }
+/* A picture we'll put in <img src>: only a complete base64 JPEG/PNG data URL (no quotes, no tricks), under a size cap. */
+const isImgData = (v, max = 800000) => typeof v === "string" && v.length < max && /^data:image\/(jpeg|png);base64,[A-Za-z0-9+\/]+={0,2}$/.test(v);
 function store(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
 let stars = load("luna_stars", 0), voiceOn = load("luna_voice2", true), cast = load("luna_cast", {}), pets = load("luna_pets", []);
 if (typeof stars !== "number") stars = 0;
@@ -1110,7 +1112,7 @@ function petCost(p){
 }
 const imgCache = {}, artCache = {};
 function petImg(p){
-  if (p.art) return p.art;
+  if (p.art && isImgData(p.art)) return p.art;  // anything else falls back to the magic picture
   const key = p.kind + p.color + (p.acc || "none") + bgOf(p);
   if (imgCache[key]) return imgCache[key];
   return (imgCache[key] = petArt(p).toDataURL("image/jpeg", 0.85));
@@ -2110,7 +2112,7 @@ let clipJobs = load("luna_clipjobs", {}), clipPollMs = 15000, clipTimer = null, 
 clipDB.keys().then(ks => { (ks || []).forEach(k => clipKeys.add(k)); if (current === "book") renderBook(); }).catch(() => {});
 function hashStr(str){ let h = 2166136261; for (let i = 0; i < str.length; i += 7) h = Math.imul(h ^ str.charCodeAt(i), 16777619); return (h >>> 0).toString(36); }
 /* An Art Studio painting as a card for the movie viewer; repainting it changes the key, so it gets a fresh movie. */
-const paintingCard = d => ({ name: "My painting", full: "painting", say: "your painting", img: d.img, painting: d.id, p: null });
+const paintingCard = d => ({ name: "My painting", full: "painting", say: "your painting", img: isImgData(d.img) ? d.img : "", painting: d.id, p: null });
 function clipKeyFor(c){
   if (c.painting) return `painting:${c.painting}:${hashStr(c.img)}`;
   if (c.pet){ const p = pets.find(x => x.id === c.id); return p ? `pet:${p.id}:${p.art ? hashStr(p.art) : p.kind + p.color + (p.acc || "none") + bgOf(p)}` : null; }
@@ -3128,7 +3130,7 @@ function renderStudio(){
   const g = $("stGallery"); g.innerHTML = drawings.length ? "" : `<div class="empty-note">🖼️ Your paintings will live here. Tap New painting to make your first one!</div>`;
   drawings.slice().reverse().forEach(d => {
     const el = document.createElement("div"); el.className = "bk";
-    el.innerHTML = `<img src="${d.img}" alt="Painting"><div class="nm">${new Date(d.at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</div><button class="del" aria-label="Remove painting">✕</button>`;
+    el.innerHTML = `<img src="${isImgData(d.img) ? d.img : ""}" alt="Painting"><div class="nm">${new Date(d.at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</div><button class="del" aria-label="Remove painting">✕</button>`;
     const pc_ = paintingCard(d);
     if ((cloudCaps && cloudCaps.video) || clipKeys.has(clipKeyFor(pc_)) || clipJobs[clipKeyFor(pc_)]){
       const mb = document.createElement("button"); mb.className = "mvbtn"; mb.dataset.movie = d.id; mb.setAttribute("aria-label", "Make my painting move"); mb.textContent = "🎬";
@@ -3474,7 +3476,7 @@ $("bkFile").onchange = () => {
     let d; try { d = JSON.parse(fr.result); } catch (e) { say("Hmm, that's not a Spellbook backup."); return; }
     if (!d || d.app !== "luna-spell-car" || !Array.isArray(d.pets)){ say("Hmm, that's not a Spellbook backup."); return; }
     const ok = p => p && typeof p.name === "string" && KINDS.some(k => k.id === p.kind) && COLORS[p.color] && POWERS.some(w => w.id === p.power)
-      && Number.isFinite(p.p) && Number.isFinite(p.t) && (!p.art || (typeof p.art === "string" && /^data:image\/(jpeg|png);base64,/.test(p.art) && p.art.length < 600000));
+      && Number.isFinite(p.p) && Number.isFinite(p.t) && (!p.art || isImgData(p.art, 600000));
     const have = new Set(pets.map(p => p.id)); let added = 0;
     const merged = pets.slice();
     d.pets.filter(ok).forEach(p => { const clean = { id: safeId(p.id, added), kind: p.kind, color: p.color, p: Math.max(0, Math.min(9, p.p | 0)), t: Math.max(1, Math.min(9, p.t | 0)), power: p.power, acc: ACCS.some(a => a.id === p.acc) ? p.acc : "none", name: p.name.slice(0, 28) };
@@ -3506,7 +3508,7 @@ $("bkFile").onchange = () => {
     if (d.week && d.week.w === week.w && d.week.c === week.c && Number.isFinite(d.week.n) && d.week.n > week.n){ week.n = Math.floor(d.week.n); store("luna_week", week); }
     store("luna_eggs", eggs); renderKindRow(); renderAccRow(); renderBrushes(); renderStars();
     if (Array.isArray(d.drawings)){ const have2 = new Set(drawings.map(x => x.id)), merged2 = drawings.slice();
-      d.drawings.filter(x => x && typeof x.img === "string" && /^data:image\/(jpeg|png);base64,/.test(x.img) && x.img.length < 800000)
+      d.drawings.filter(x => x && isImgData(x.img))
         .forEach((x, n) => { const id = safeId(x.id, n); if (!have2.has(id)){ merged2.push({ id, img: x.img, at: +x.at || Date.now() }); have2.add(id); } });
       if (store("luna_drawings", merged2)) drawings = merged2; }
     if (d.scene && d.scene.items && typeof d.scene.items === "object") Object.keys(SCENES).forEach(k => {

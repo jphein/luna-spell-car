@@ -9,6 +9,8 @@
   movie too. Repainting makes a fresh movie. (Continues from luna-spell-car-archive #29.)
 - Security: a crafted backup file can no longer inject markup through creature or painting ids. Restore keeps only
   plain ids, and the painting gallery builds its buttons without HTML strings.
+- Security: pictures in a backup must be complete base64 JPEG/PNG data URLs (the old check only looked at the start),
+  and creature and painting pictures are checked again before they're shown.
 - 🐎 The Pegasus joins the Star Shop creatures (15 stars): a running horse with a white feathered wing drawn on its
   picture (there's no pegasus emoji on older tablets), and its accessory sits on its head. The Spell Car server can
   draw and animate it too.

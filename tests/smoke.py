@@ -894,6 +894,25 @@ async def restore_rejects_html_ids(pg, mode):
     await pg.evaluate("cloudCaps = null; drawings = drawings.filter(x => x.img.length >= 2000); store('luna_drawings', drawings); pets = pets.filter(x => x.name !== 'Safe'); store('luna_pets', pets)")
     await home(pg)
 
+@test
+async def restore_rejects_bad_images(pg, mode):
+    # Images in a backup must be real base64 data URLs: a quote can't break out of an <img src="..."> anywhere.
+    if mode != "web": return
+    await pg.evaluate("go('book', true)"); d = await fresh_backup(pg)
+    bad = 'data:image/png;base64,AA" onerror="window.__xss2=1'
+    d["drawings"] = [{"id": "badimg1", "img": bad, "at": 1}]
+    d["pets"] = [{"id": "badpet1", "kind": "unicorn", "color": "P", "p": 1, "t": 1, "power": "fly", "name": "Sneaky", "art": bad}]
+    await pg.set_input_files("#bkFile", files=[{"name": "b.json", "mimeType": "application/json", "buffer": json.dumps(d).encode()}])
+    await pg.wait_for_timeout(600)
+    assert not await pg.evaluate("drawings.some(x => x.id === 'badimg1') || pets.some(x => x.id === 'badpet1')"), "restore kept a quote-breaking image"
+    # even data that skipped restore's checks never reaches markup as a raw src
+    await pg.evaluate("""b => { drawings.push({ id: 'badimg2', img: b, at: 1 }); pets.push({ id: 'badpet2', kind: 'unicorn', color: 'P', p: 1, t: 1, power: 'fly', name: 'Sneaky2', art: b });
+        cloudCaps = { video: true }; renderBook(); go('studio', true); go('window', true); }""", bad)
+    await pg.wait_for_timeout(300)
+    assert not await pg.evaluate("window.__xss2"), "a bad image src ran script"
+    await pg.evaluate("drawings = drawings.filter(x => x.id !== 'badimg2'); pets = pets.filter(x => x.id !== 'badpet2'); cloudCaps = null")
+    await home(pg)
+
 STACK = None
 
 async def stroke(pg):
