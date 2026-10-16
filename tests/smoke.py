@@ -949,6 +949,32 @@ async def print_scene(pg, mode):
     assert any("Sticker_Scene" in n and n.endswith(".pdf") for n in names), f"scene PDF not saved ({names[-3:]})"
     await pg.evaluate("scene.items.beach = []; scene.bg = 'castle'; saveScene(); xp = __xp0"); await home(pg)
 
+@test
+async def sticker_sizes(pg, mode):
+    # Tap a sticker on the picture to make it bigger (normal → bigger → biggest → normal). Saved, printed, and backed up.
+    await pg.evaluate("window.__xp0 = xp; xp = Math.max(xp, 40); scene.bg = 'meadow'; scene.items.meadow = []; saveScene(); go('book', true)")
+    await pg.click("#scOpen"); await pg.click("#scTray button >> nth=0")
+    st = pg.locator("#scStage .sc-st").first
+    size = lambda: pg.evaluate("parseFloat(getComputedStyle(document.querySelector('#scStage .sc-st')).fontSize)")
+    small = await size(); plain = await pg.evaluate("sceneCanvas().toDataURL()")
+    await st.click(); assert await size() > small * 1.3 and await pg.evaluate("scene.items.meadow[0].z") == 1.5, "tap didn't make it bigger"
+    assert await pg.evaluate("sceneCanvas().toDataURL()") != plain, "the print ignores sticker size"
+    await pg.locator("#scStage .sc-st").first.click(); assert await pg.evaluate("scene.items.meadow[0].z") == 2, "second tap didn't make it biggest"
+    await pg.locator("#scStage .sc-st").first.click(); assert not await pg.evaluate("scene.items.meadow[0].z > 1"), "third tap didn't go back to normal"
+    assert abs(await size() - small) < 1, "size didn't come back"
+    await pg.locator("#scStage .sc-st").first.click()
+    assert await pg.evaluate("load('luna_scene').items.meadow[0].z") == 1.5, "size not saved"
+    if mode == "web":
+        await pg.evaluate("go('book', true)"); d = await fresh_backup(pg)
+        d["scene"]["items"]["meadow"] = [{"id": "big1", "s": d["scene"]["items"]["meadow"][0]["s"], "x": .5, "y": .5, "z": 2},
+                                         {"id": "bad z", "s": d["scene"]["items"]["meadow"][0]["s"], "x": .3, "y": .3, "z": 99}]
+        await pg.evaluate("scene.items.meadow = []; saveScene()")
+        await pg.set_input_files("#bkFile", files=[{"name": "b.json", "mimeType": "application/json", "buffer": json.dumps(d).encode()}])
+        await pg.wait_for_function("scene.items.meadow.length === 2", timeout=5000)
+        got = await pg.evaluate("scene.items.meadow.map(i => [i.id, i.z || 1])")
+        assert got[0] == ["big1", 2] and got[1][1] == 1 and got[1][0] != "bad z", f"restore didn't keep/clean sizes and ids: {got}"
+    await pg.evaluate("scene.items.meadow = []; scene.bg = 'castle'; saveScene(); xp = __xp0"); await home(pg)
+
 STACK = None
 
 async def stroke(pg):

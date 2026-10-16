@@ -32,7 +32,7 @@ Reorder freely; each item should be small enough for one PR, with a clear "done 
 - [x] Pegasus: needs a drawn winged horse (there's no pegasus emoji older tablets can show).
 - [x] Sticker scene, part 2: more pictures (beach, space, under the sea).
 - [x] Sticker scene, part 3a: "print my scene" for the fridge.
-- [ ] Sticker scene, part 3b: bigger/smaller stickers by pinching.
+- [x] Sticker scene, part 3b: bigger stickers (tap to grow; pinch is hard for small hands).
 - [ ] Spanish voice + text toggle.
 
 ## Done
