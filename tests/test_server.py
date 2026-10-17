@@ -15,7 +15,7 @@ fails = []
 IMPL = os.environ.get("SPELLCAR_IMPL", "python")
 def check(ok, msg): print(("  ok   " if ok else "  FAIL ") + f"{IMPL}: " + msg); ok or fails.append(msg)
 
-s = Stack(IMAGES_PER_DAY=4, STORIES_PER_DAY=5, VIDEOS_PER_DAY=3)
+s = Stack(IMAGES_PER_DAY=5, STORIES_PER_DAY=5, VIDEOS_PER_DAY=3, REMIXES_PER_DAY=3)
 try:
     u = s.url
     st, _, _ = call(u, "/health", token="wrong"); check(st == 401, "rejects a bad token")
@@ -34,12 +34,33 @@ try:
     st, _, b = call(u, "/image", {"kind": "fox", "color": "R", "acc": "wand", "power": "zoom"}); check(st == 200, "accepts Star Shop creatures and accessories")
     st, _, _ = call(u, "/image", {"kind": "mermaid", "color": "U", "power": "heart"}); check(st == 200, "accepts the mermaid")
     st, _, _ = call(u, "/image", {"kind": "pegasus", "color": "P", "power": "fly"}); check(st == 200, "accepts the pegasus")
+    st, _, _ = call(u, "/image", {"kind": "bunny", "color": "P", "power": "sparkle", "words": ["fluffy", "rainbow", "sleepy"], "scene": "castle"})
+    gen = json.loads([x for x in FakeAzure.seen if "/images/generations" in x[0]][-1][1])["prompt"]
+    check(st == 200 and "fluffy" in gen and "rainbow" in gen and "castle" in gen, "magic words and scene shape the picture prompt")
+    st, _, _ = call(u, "/image", {"kind": "bunny", "color": "P", "power": "sparkle", "words": ["scary"]}); check(st == 400, "rejects words outside the list")
+    st, _, _ = call(u, "/image", {"kind": "bunny", "color": "P", "power": "sparkle", "words": ["fluffy", "tiny", "silly", "happy"]}); check(st == 400, "allows at most three words")
+    st, _, _ = call(u, "/image", {"kind": "bunny", "color": "P", "power": "sparkle", "scene": "volcano"}); check(st == 400, "rejects unknown scenes")
     st, _, _ = call(u, "/image", {"kind": "kitty", "color": "U", "power": "heart"}); check(st == 429, "enforces the daily picture cap")
     st, h, b = call(u, "/tts", {"text": "Hi Luna! <b>sparkle</b>", "voice": "en-US-AnaNeural", "rate": 0.9})
     check(st == 200 and h["Content-Type"].startswith("audio/") and len(b) > 100, "tts returns audio")
     ssml = [x for x in FakeAzure.seen if "cognitive" in x[0]][-1][1].decode()
     check("<b>" not in ssml and "rate='-10%'" in ssml, "tts escapes text and maps rate")
     st, _, _ = call(u, "/tts", {"text": "hi", "voice": "en-US-SomeoneElse"}); check(st == 400, "rejects voices outside the allowlist")
+    import base64 as _b64
+    from stack import png as _png
+    drawing = "data:image/png;base64," + _b64.b64encode(_png(48, 36, (120, 90, 220))).decode()
+    st, _, b = call(u, "/health"); check(json.loads(b).get("remix") is True, "health reports drawing repaint (remix) when images are on")
+    st, _, b = call(u, "/remix", {"image": drawing, "subject": "creature", "kind": "unicorn", "color": "P", "power": "sparkle", "words": ["glittery"]})
+    edit = [x for x in FakeAzure.seen if "/images/edits" in x[0]][-1][1]
+    check(st == 200 and json.loads(b)["image"].startswith("data:image/png;base64,"), "remix repaints a creature drawing")
+    check(b"child's drawing" in edit and b"glittery" in edit and b"unicorn" in edit, "remix prompt keeps her drawing and uses her choices")
+    st, _, b = call(u, "/remix", {"image": drawing, "subject": "painting"})
+    check(st == 200 and b"child's painting" in [x for x in FakeAzure.seen if "/images/edits" in x[0]][-1][1], "remix repaints an Art Studio painting")
+    st, _, _ = call(u, "/remix", {"image": "https://example.com/x.png", "subject": "painting"}); check(st == 400, "remix needs an image data URL")
+    st, _, _ = call(u, "/remix", {"image": drawing, "subject": "creature", "kind": "kraken", "color": "P", "power": "fly"}); check(st == 400, "remix validates the creature")
+    st, _, _ = call(u, "/remix", {"image": drawing, "subject": "creature", "prompt": "anything I like"}); check(st == 400, "remix rejects free-form prompts")
+    call(u, "/remix", {"image": drawing, "subject": "painting"})
+    st, _, _ = call(u, "/remix", {"image": drawing, "subject": "painting"}); check(st == 429, "enforces the daily repaint cap")
     st, _, _ = call(u, "/story", {"characters": ["a" * 100]}, ); check(st == 400, "validates input")
     import base64, time
     from stack import png
@@ -75,6 +96,18 @@ try:
         for _ in range(3): urllib.request.urlopen(u + "/__scheduled?cron=*+*+*+*+*", timeout=10).read(); time.sleep(0.5)
         st, _, b = call(u, f"/video/{jid}.mp4")
         check(st == 200 and len(b) > 1000, "cron trigger finishes clips with no device polling")
+    FakeAzure.edits_ok = False
+    s2_drawing = "data:image/png;base64," + _b64.b64encode(_png(20, 20, (1, 2, 3))).decode()
 finally:
+    s.close()
+s = Stack(REMIXES_PER_DAY=5)
+try:
+    u = s.url
+    st, _, b = call(u, "/remix", {"image": s2_drawing, "subject": "painting"})
+    check(st == 501, f"an image model that can't edit gives a clear 501 (got {st})")
+    st, _, b = call(u, "/health"); check(json.loads(b).get("remix") is False, "after that, health turns repaint off so the app hides it")
+    st, _, b = call(u, "/image", {"kind": "unicorn", "color": "P", "power": "fly"}); check(st == 200, "normal AI pictures still work")
+finally:
+    FakeAzure.edits_ok = True
     s.close()
 print("\n" + (f"All {IMPL} server tests passed." if not fails else f"{len(fails)} server test(s) failed.")); sys.exit(1 if fails else 0)

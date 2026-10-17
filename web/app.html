@@ -539,6 +539,10 @@ body.theme-rainbow{--btn:#B8336F} body.theme-ocean{--btn:#176A9C} body.theme-can
 .celebrate .box.treasure .bigemo{animation:gemglow 1.6s ease-in-out infinite alternate}
 @keyframes gemglow{from{filter:drop-shadow(0 0 6px #FFD976)}to{filter:drop-shadow(0 0 26px #FFD976) brightness(1.15)}}
 .celebrate .box .tmap{margin:8px 0 2px}
+/* magic words for AI pictures */
+.wordbox{margin-top:12px;background:var(--chip);border-radius:20px;padding:10px 10px 4px}
+.wb-h{font-weight:700;font-size:16px;margin:2px 4px 8px}.wb-h small{font-weight:500;color:var(--muted);font-size:13px;margin-left:6px}
+.mgbtn{position:absolute;left:6px;bottom:30px;width:40px;height:40px;border-radius:50%;background:var(--gold);font-size:20px;box-shadow:0 3px 0 rgba(0,0,0,.2)}
 /* celebration */
 .celebrate{position:fixed;inset:0;background:rgba(20,8,48,.82);display:grid;place-items:center;z-index:20;padding:24px}
 .celebrate .box{background:var(--surface);border-radius:30px;padding:18px;max-width:420px;width:100%;text-align:center;animation:pop .45s cubic-bezier(.2,1.6,.4,1)}
@@ -649,7 +653,9 @@ body.theme-rainbow{--btn:#B8336F} body.theme-ocean{--btn:#176A9C} body.theme-can
       <div class="preview-wrap"><div id="petPreview"></div></div>
       <div class="controls">
         <div class="ctrl"><h3>1. Pick a creature</h3><div class="pickrow" id="kindRow"></div></div>
-        <div class="ctrl"><h3>2. Picture</h3><div class="pickrow"><button class="pick txt" id="artMagic"><span style="font-size:24px">✨</span>Magic picture</button><button class="pick txt" id="artDraw"><span style="font-size:24px">🖍️</span>Draw it myself</button><button class="pick txt hidden" id="artAI"><span style="font-size:24px">🪄</span>AI picture</button></div></div>
+        <div class="ctrl"><h3>2. Picture</h3><div class="pickrow"><button class="pick txt" id="artMagic"><span style="font-size:24px">✨</span>Magic picture</button><button class="pick txt" id="artDraw"><span style="font-size:24px">🖍️</span>Draw it myself</button><button class="pick txt hidden" id="artAI"><span style="font-size:24px">🪄</span>AI picture</button><button class="pick txt hidden" id="artRemix"><span style="font-size:24px">🌟</span>Make my drawing magic</button><button class="pick txt hidden" id="artUndo"><span style="font-size:24px">↩️</span>My drawing</button></div>
+          <div class="wordbox hidden" id="wordBox"><div class="wb-h">✨ Magic words for the AI picture <small>pick up to 3</small></div><div class="pickrow" id="wordRow"></div>
+          <div class="wb-h">🌍 Where is it?</div><div class="pickrow" id="sceneRow"></div></div></div>
         <div class="ctrl"><h3>3. Pick a color</h3><div class="pickrow" id="colorRow"></div></div>
         <div class="ctrl"><h3>4. How strong?</h3>
           <div class="stepper"><div class="lab"><span id="swIco2"></span>Power</div><button data-st="p" data-d="-1" aria-label="Less power">−</button><div class="val" id="pVal">2</div><button data-st="p" data-d="1" aria-label="More power">+</button></div>
@@ -1460,6 +1466,7 @@ function renderMaker(){
   document.querySelectorAll("#bgRow .pick").forEach(b => b.classList.toggle("on", b.dataset.bg === (bgOf(draft) || "sparkle")));
   $("bgCtrl").classList.toggle("hidden", !!draft.art);  // a drawn or AI picture has its own background
   $("artMagic").classList.toggle("on", !draft.art); $("artDraw").classList.toggle("on", !!draft.art && draft.artBy !== "ai"); $("artAI").classList.toggle("on", !!draft.art && draft.artBy === "ai");
+  renderMagicWords();
   $("savePet").textContent = editId ? "Save changes ✨" : "Save to my Spellbook ✨";
   $("cancelEdit").classList.toggle("hidden", !editId);
   $("pVal").textContent = draft.p; $("tVal").textContent = draft.t;
@@ -2176,6 +2183,7 @@ function refreshCloudUI(msg){
     $("cloudStatus").textContent = "✅ Connected: " + (on.join(", ") || "nothing enabled yet"); }
   else if (!cloudBase()) $("cloudStatus").textContent = "Not set up";
   $("artAI").classList.toggle("hidden", !(cloudCaps && cloudCaps.image));
+  if (typeof draft !== "undefined" && draft) renderMagicWords();
   $("clipRow").classList.toggle("hidden", !(cloudCaps && cloudCaps.video));
   $("cloudVoiceRow").classList.toggle("hidden", !(cloudCaps && cloudCaps.tts));
   $("cloudVoiceSel").parentElement.classList.toggle("hidden", !(cloudCaps && cloudCaps.tts));
@@ -2214,12 +2222,83 @@ function toCardArt(src){
     im.onerror = rej; im.src = src;
   });
 }
+const MAGIC_WORDS = [["fluffy", "☁️", "Fluffy"], ["tiny", "🐭", "Tiny"], ["giant", "🏔️", "Giant"], ["glittery", "✨", "Glittery"],
+  ["rainbow", "🌈", "Rainbow wings"], ["polka", "🔴", "Polka dots"], ["stars", "⭐", "Star spots"], ["sleepy", "😴", "Sleepy"],
+  ["silly", "🤪", "Silly"], ["happy", "😊", "Happy"], ["baby", "🍼", "Baby"], ["fancy", "👗", "Fancy"]];
+MAGIC_WORDS.forEach(([id, emo, label]) => {
+  const b = document.createElement("button"); b.className = "pick txt"; b.dataset.w = id; b.innerHTML = `<span style="font-size:22px">${emo}</span>${label}`;
+  b.onclick = () => {
+    const w = draft.words || (draft.words = []), i = w.indexOf(id);
+    if (i >= 0){ w.splice(i, 1); tick(3); say(`No more ${label.toLowerCase()}.`); }
+    else if (w.length >= 3){ boop(); say("Three magic words is the most! Tap one to take it away."); }
+    else { w.push(id); tick(5); say(`${label}!`); }
+    renderMaker();
+  };
+  $("wordRow").appendChild(b);
+});
+BGS.forEach(bg => {
+  const b = document.createElement("button"); b.className = "pick txt"; b.dataset.bg = bg.id; b.innerHTML = `<span style="font-size:22px">${bg.emo}</span>${bg.label}`;
+  b.onclick = () => { draft.bg = bg.id; renderMaker(); tick(5); say(bg.id === "sparkle" ? "Sparkles!" : `In the ${bg.label.toLowerCase()}!`); };
+  $("sceneRow").appendChild(b);
+});
+function renderMagicWords(){
+  const ai = !!(cloudCaps && cloudCaps.image), w = draft.words || [];
+  $("wordBox").classList.toggle("hidden", !ai);
+  document.querySelectorAll("#wordRow .pick").forEach(b => b.classList.toggle("on", w.includes(b.dataset.w)));
+  document.querySelectorAll("#sceneRow .pick").forEach(b => b.classList.toggle("on", b.dataset.bg === (bgOf(draft) || "sparkle")));
+  $("artRemix").classList.toggle("hidden", !(cloudCaps && cloudCaps.remix && draft.art && (draft.artBy === "draw" || !draft.artBy)));
+  $("artUndo").classList.toggle("hidden", !(draft.artOrig && draft.artBy === "remix"));
+}
+function remixError(e){
+  boop();
+  if (e && e.status === 501){ cloudCaps.remix = false; renderMaker(); renderStudio(); say("This magic paintbrush can't repaint drawings. Ask a grown-up!"); }
+  else say(e && e.status === 429 ? "The magic paintbrush needs a rest. Try again tomorrow!" : e && e.status === 422 ? "Let's try a different drawing!" : "The magic paint didn't work this time. Try again!");
+}
+$("artRemix").onclick = async () => {
+  if (aiBusy || !(cloudCaps && cloudCaps.remix) || !draft.art) return;
+  aiBusy = true; const wrap = document.querySelector(".preview-wrap"); wrap.classList.add("painting");
+  say("Rootha is turning your drawing into a magic picture. It takes a little while!");
+  try {
+    const { image } = await (await cloudFetch("/remix", { image: draft.art, subject: "creature", kind: draft.kind, color: draft.color,
+                                                         acc: draft.acc || "none", power: draft.power, words: draft.words || [] })).json();
+    draft.artOrig = draft.art; draft.art = await toCardArt(image); draft.artBy = "remix"; renderMaker(); chime(); burst(24);
+    say("Ta-da! Your drawing is magic now! Tap My drawing to see yours again.");
+  } catch (e) { remixError(e); }
+  finally { aiBusy = false; wrap.classList.remove("painting"); }
+};
+$("artUndo").onclick = () => { if (!draft.artOrig) return; draft.art = draft.artOrig; delete draft.artOrig; draft.artBy = "draw"; renderMaker(); tick(4); say("Here's your drawing!"); };
+function shrinkImage(src, max){
+  return new Promise((res, rej) => {
+    const im = new Image();
+    im.onload = () => { const sc = Math.min(1, max / Math.max(im.width, im.height)), cv = document.createElement("canvas");
+      cv.width = Math.round(im.width * sc); cv.height = Math.round(im.height * sc); const x = cv.getContext("2d");
+      x.fillStyle = "#fff"; x.fillRect(0, 0, cv.width, cv.height); x.drawImage(im, 0, 0, cv.width, cv.height); res(cv.toDataURL("image/jpeg", 0.82)); };
+    im.onerror = rej; im.src = src;
+  });
+}
+let paintMagicBusy = false;
+async function magicPainting(d){
+  if (paintMagicBusy || !(cloudCaps && cloudCaps.remix)) return;
+  paintMagicBusy = true; say("Rootha is making your painting magic. It takes a little while!");
+  const tile = document.querySelector(`[data-magic="${d.id}"]`); if (tile) tile.textContent = "⏳";
+  try {
+    const src = await shrinkImage(d.img, 1024);
+    const { image } = await (await cloudFetch("/remix", { image: src, subject: "painting" })).json();
+    const nd = { id: "p" + Date.now().toString(36), img: await shrinkImage(image, 900), at: Date.now(), magic: d.id };
+    drawings.push(nd);
+    if (!store("luna_drawings", drawings)){ drawings.pop(); boop(); say("Your gallery is too full. Ask a grown-up to remove a painting first."); return; }
+    renderStudio(); burst(30); chime();
+    showCelebrate({ img: nd.img, title: "Your painting is magic!", sub: "Your first painting is still in your gallery too.", spoken: "Ta-da! Your painting is magic! And your first painting is still there too." });
+  } catch (e) { remixError(e); }
+  finally { paintMagicBusy = false; renderStudio(); }
+}
 $("artAI").onclick = async () => {
   if (aiBusy || !(cloudCaps && cloudCaps.image)) return;
   aiBusy = true; const wrap = document.querySelector(".preview-wrap"); wrap.classList.add("painting");
   say("Rootha is painting your creature with magic. This takes a little while!");
   try {
-    const { image } = await (await cloudFetch("/image", { kind: draft.kind, color: draft.color, acc: draft.acc || "none", power: draft.power })).json();
+    const { image } = await (await cloudFetch("/image", { kind: draft.kind, color: draft.color, acc: draft.acc || "none", power: draft.power,
+                                                         words: draft.words || [], scene: bgOf(draft) || "sparkle" })).json();
     draft.art = await toCardArt(image); draft.artBy = "ai"; renderMaker(); chime(); burst(20); say("Ta-da! Do you like it?");
   } catch (e) {
     boop(); say(e && e.status === 429 ? "The magic paintbrush needs a rest. Try again tomorrow!" : e && e.status === 422 ? "Let's try a different creature!" : "The magic paint didn't work this time. Try again!");
@@ -3283,6 +3362,10 @@ function renderStudio(){
     if ((cloudCaps && cloudCaps.video) || clipKeys.has(clipKeyFor(pc_)) || clipJobs[clipKeyFor(pc_)]){
       const mb = document.createElement("button"); mb.className = "mvbtn"; mb.dataset.movie = d.id; mb.setAttribute("aria-label", "Make my painting move"); mb.textContent = "🎬";
       mb.onclick = ev => { ev.stopPropagation(); openViewer(pc_); }; el.appendChild(mb);
+    }
+    if (cloudCaps && cloudCaps.remix && !d.magic){
+      const mg = document.createElement("button"); mg.className = "mgbtn"; mg.dataset.magic = d.id; mg.setAttribute("aria-label", "Make my painting magic"); mg.textContent = "🌟";
+      mg.onclick = ev => { ev.stopPropagation(); magicPainting(d); }; el.appendChild(mg);
     }
     el.querySelector("img").onclick = () => openStudioPaint(d);
     el.querySelector(".del").onclick = ev => { ev.stopPropagation();

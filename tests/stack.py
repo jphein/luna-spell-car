@@ -19,6 +19,7 @@ class FakeAzure(BaseHTTPRequestHandler):
     """Fakes Azure OpenAI, Azure Speech, and Google Veo (Gemini API long-running operations)."""
     seen = []
     polls = {}
+    edits_ok = True
     def log_message(self, *a): pass
     def send(self, code, body, ctype="application/json"):
         data = body if isinstance(body, bytes) else json.dumps(body).encode()
@@ -35,6 +36,13 @@ class FakeAzure(BaseHTTPRequestHandler):
             if self.headers.get("Ocp-Apim-Subscription-Key") != KEY: return self.send(401, {"error": "key"})
             assert b"<voice name=" in body
             return self.send(200, wav(), "audio/wav")
+        if "/images/edits" in self.path:
+            if self.headers.get("api-key") != KEY: return self.send(401, {"error": {"code": "401"}})
+            if not FakeAzure.edits_ok: return self.send(400, {"error": {"code": "OperationNotSupported", "message": "image edits not supported by this model"}})
+            ct = self.headers.get("Content-Type", "")
+            has_img = b"\x89PNG" in body or b"\xff\xd8\xff" in body
+            assert ct.startswith("multipart/form-data") and b'name="prompt"' in body and b'name="image' in body and has_img, "bad multipart"
+            return self.send(200, {"data": [{"b64_json": base64.b64encode(png(12, 8, (240, 180, 90))).decode()}]})
         if self.headers.get("api-key") != KEY: return self.send(401, {"error": {"code": "401"}})
         req = json.loads(body)
         if "/chat/completions" in self.path:
@@ -62,6 +70,7 @@ def free_port():
     s = socket.socket(); s.bind(("127.0.0.1", 0)); p = s.getsockname()[1]; s.close(); return p
 
 class Stack:
+
     """SPELLCAR_IMPL=worker runs the Cloudflare Worker (wrangler dev, local KV/R2) instead of the Python server."""
     def __init__(self, **limits):
         self.az_port, self.port = free_port(), free_port()
