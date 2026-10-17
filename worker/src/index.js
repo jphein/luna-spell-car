@@ -14,6 +14,20 @@ const ACCS = { none: "", crown: "wearing a tiny golden crown", bow: "wearing a p
   star: "holding a glowing star", hat: "wearing a little top hat", glasses: "wearing cool sunglasses", rainbow: "with a rainbow arching behind it",
   heart: "with floating hearts around it", gem: "wearing a sparkly gem", wand: "holding a little magic wand", balloon: "holding a balloon",
   lollipop: "holding a swirly lollipop", teddy: "hugging a tiny teddy bear", moon: "with a glowing crescent moon above it" };
+// Her "magic words" and scenes for AI pictures: a fixed list, so nothing free-form reaches the image model.
+const WORDS = { fluffy: "extra fluffy and soft", tiny: "tiny and adorable", giant: "giant and gentle", glittery: "glittery and shimmering",
+  rainbow: "with rainbow-colored wings", polka: "with polka dots", stars: "with little star-shaped spots", sleepy: "sleepy and cozy",
+  silly: "making a silly face", happy: "smiling a big happy smile", baby: "a baby", fancy: "dressed up fancy" };
+const SCENES = { sparkle: "a pastel purple background full of sparkles", castle: "in front of a sparkly castle", beach: "on a sunny beach",
+  space: "floating in friendly outer space with planets and stars", meadow: "in a flowery meadow" };
+const has = (o, k) => typeof k === "string" && Object.prototype.hasOwnProperty.call(o, k);
+function wordsAndScene(b) {
+  const words = b.words == null ? [] : b.words;
+  if (!Array.isArray(words) || words.length > 3 || words.some(w => !has(WORDS, w))) throw new Fail(400, "words must be up to 3 from the list");
+  const scene = b.scene || "sparkle";
+  if (!has(SCENES, scene)) throw new Fail(400, "unknown scene");
+  return [[...new Set(words)].map(w => WORDS[w]).join(", "), SCENES[scene]];
+}
 const POWERS = { fly: "flying on sparkly wings", sparkle: "surrounded by twinkling sparkles", heart: "with a gentle, kind smile",
   zoom: "zooming along with little speed swooshes", friend: "waving hello like a best friend" };
 const VOICES = new Set(["en-US-AnaNeural", "en-US-JennyNeural", "en-US-AriaNeural", "en-US-AvaNeural", "en-US-GuyNeural", "en-US-EmmaNeural"]);
@@ -57,15 +71,15 @@ function cfg(env) {
     token: env.SPELLCAR_TOKEN || "",
     aoai: (env.AZURE_OPENAI_ENDPOINT || "").replace(/\/+$/, ""), aoaiKey: env.AZURE_OPENAI_KEY || "",
     chatDep: env.AZURE_OPENAI_CHAT_DEPLOYMENT || "", imgDep: env.AZURE_OPENAI_IMAGE_DEPLOYMENT || "",
-    apiVer: env.AZURE_OPENAI_API_VERSION || "2024-10-21", imgApiVer: env.AZURE_OPENAI_IMAGE_API_VERSION || "2024-10-21",
+    apiVer: env.AZURE_OPENAI_API_VERSION || "2024-10-21", imgApiVer: env.AZURE_OPENAI_IMAGE_API_VERSION || "2024-10-21", imgEditApiVer: env.AZURE_OPENAI_IMAGE_EDIT_API_VERSION || "2025-04-01-preview",
     speechKey: env.AZURE_SPEECH_KEY || "",
     speechUrl: env.AZURE_SPEECH_ENDPOINT || (env.AZURE_SPEECH_REGION ? `https://${env.AZURE_SPEECH_REGION}.tts.speech.microsoft.com/cognitiveservices/v1` : ""),
     gemini: env.GEMINI_API_KEY || "", veoModel: env.VEO_MODEL || "veo-3.1-fast-generate-preview",
     veoBase: (env.VEO_BASE || "https://generativelanguage.googleapis.com/v1beta").replace(/\/+$/, ""),
     kid: (env.KID_NAME || "Luna").replace(/[^A-Za-z \-']/g, "").slice(0, 20) || "Luna",
-    limits: { story: +(env.STORIES_PER_DAY || 40), image: +(env.IMAGES_PER_DAY || 20), tts: +(env.TTS_CHARS_PER_DAY || 60000), video: +(env.VIDEOS_PER_DAY || 16) },
+    limits: { remix: +(env.REMIXES_PER_DAY || 20), story: +(env.STORIES_PER_DAY || 40), image: +(env.IMAGES_PER_DAY || 20), tts: +(env.TTS_CHARS_PER_DAY || 60000), video: +(env.VIDEOS_PER_DAY || 16) },
   };
-  c.caps = { story: !!(c.aoai && c.aoaiKey && c.chatDep), image: !!(c.aoai && c.aoaiKey && c.imgDep), tts: !!(c.speechKey && c.speechUrl),
+  c.caps = { remix: !!(c.aoai && c.aoaiKey && c.imgDep && env.STATE), story: !!(c.aoai && c.aoaiKey && c.chatDep), image: !!(c.aoai && c.aoaiKey && c.imgDep), tts: !!(c.speechKey && c.speechUrl),
              video: !!(c.gemini && env.CLIPS && env.STATE) };
   return c;
 }
@@ -143,9 +157,10 @@ async function doStory(b, env, c) {
 async function doImage(b, env, c) {
   const kind = KINDS[b.kind], color = COLORS[b.color], acc = ACCS[b.acc || "none"], power = POWERS[b.power];
   if (!(kind && color && acc !== undefined && power)) throw new Fail(400, "bad creature");
+  const [words, scene] = wordsAndScene(b);
   if (!(await spend(env, c, "image"))) throw new Fail(429, "daily picture limit reached");
-  const prompt = `A cute, friendly ${color} ${kind} ${acc}, ${power}. Children's storybook illustration, soft painterly style, ` +
-    "big kind eyes, magical sparkles, pastel purple background, centered full-body character, cheerful, no text, no letters, no frame.";
+  const prompt = `A cute, friendly ${color} ${kind} ${acc}, ${power}` + (words ? `, ${words}` : "") + `, ${scene}. ` +
+    "Children's storybook illustration, soft painterly style, big kind eyes, magical sparkles, centered full-body character, cheerful, no text, no letters, no frame.";
   const r = await post(`${c.aoai}/openai/deployments/${c.imgDep}/images/generations?api-version=${c.imgApiVer}`,
     { prompt, n: 1, size: "1024x1024" }, { "api-key": c.aoaiKey, "Content-Type": "application/json" });
   const item = (r.data || [{}])[0] || {};
@@ -233,7 +248,50 @@ async function doAnimate(b, env, c) {
   return json(200, { id: key, status: "running" });
 }
 
-const ROUTES = { "/story": ["story", doStory], "/image": ["image", doImage], "/tts": ["tts", doTts], "/animate": ["video", doAnimate] };
+
+// ---------- Repaint her drawing (Azure OpenAI images/edits) ----------
+async function doRemix(b, env, c) {
+  const m = /^data:(image\/(?:jpeg|png));base64,([A-Za-z0-9+/=]+)$/.exec(String(b.image || ""));
+  if (!m || m[2].length > 1_400_000) throw new Fail(400, "image must be a jpeg/png data URL under ~1 MB");
+  let prompt;
+  if (b.subject === "painting") {
+    prompt = "Repaint this child's painting as a soft, magical children's storybook illustration. Keep the child's shapes, layout, " +
+      "and colors so it is still clearly their painting, just polished and glowing with gentle sparkles. Cheerful, nothing scary, no text.";
+  } else if (b.subject === "creature") {
+    const kind = KINDS[b.kind], color = COLORS[b.color], acc = ACCS[b.acc || "none"], power = POWERS[b.power];
+    if (!(kind && color && acc !== undefined && power)) throw new Fail(400, "bad creature");
+    const [words] = wordsAndScene(b);
+    prompt = `Repaint this child's drawing of a cute, friendly ${color} ${kind} ${acc}, ${power}` + (words ? `, ${words}` : "") + ", " +
+      "as a soft children's storybook illustration. Keep the child's shapes, pose, and colors so it is still clearly their drawing, " +
+      "just polished and magical, with big kind eyes and gentle sparkles. Cheerful, nothing scary, no text.";
+  } else throw new Fail(400, "subject must be creature or painting");
+  if (await env.STATE.get("remix:unsupported")) throw new Fail(501, "this image model can't repaint drawings");
+  if (!(await spend(env, c, "remix"))) throw new Fail(429, "daily repaint limit reached");
+  const fd = new FormData();
+  fd.append("prompt", prompt); fd.append("n", "1"); fd.append("size", "1536x1024");
+  fd.append("image", new Blob([b64ToBytes(m[2])], { type: m[1] }), m[1].endsWith("png") ? "drawing.png" : "drawing.jpg");
+  let r;
+  try {
+    r = await fetch(`${c.aoai}/openai/deployments/${c.imgDep}/images/edits?api-version=${c.imgEditApiVer}`,
+                    { method: "POST", headers: { "api-key": c.aoaiKey, "User-Agent": "spellcar/1" }, body: fd });
+  } catch (e) { throw new Fail(504, `azure unreachable: ${e}`); }
+  if (!r.ok) {
+    const detail = (await r.text()).slice(0, 2000);
+    if (detail.includes("content_filter") || detail.includes("ResponsibleAIPolicyViolation")) throw new Fail(422, "filtered");
+    if (detail.includes("OperationNotSupported") || /not supported/i.test(detail)) {
+      await env.STATE.put("remix:unsupported", "1", { expirationTtl: 7 * 86400 });  // health now reports remix off, so the app hides it
+      throw new Fail(501, "this image model can't repaint drawings");
+    }
+    throw new Fail(502, `azure ${r.status}: ${detail.slice(0, 300)}`);
+  }
+  const item = ((await r.json()).data || [{}])[0] || {};
+  if (!item.b64_json) throw new Fail(502, "no image returned");
+  const raw = b64ToBytes(item.b64_json);
+  const mime = raw[0] === 0x89 && raw[1] === 0x50 ? "image/png" : String.fromCharCode(...raw.subarray(8, 12)) === "WEBP" ? "image/webp" : "image/jpeg";
+  return json(200, { image: `data:${mime};base64,${bytesToB64(raw)}` });
+}
+
+const ROUTES = { "/remix": ["remix", doRemix], "/story": ["story", doStory], "/image": ["image", doImage], "/tts": ["tts", doTts], "/animate": ["video", doAnimate] };
 
 export default {
   async fetch(req, env) {
@@ -245,7 +303,7 @@ export default {
         const m = /^\/(animate|video)\/([0-9a-f]{32})(\.mp4)?$/.exec(path);
         if (path !== "/health" && !m) return json(404, { error: "not found" });
         if (!(await authed(req, c))) return json(401, { error: "bad token" });
-        if (path === "/health") return json(200, { ...c.caps, kid: c.kid, voices: [...VOICES].sort() });
+        if (path === "/health") return json(200, { ...c.caps, remix: c.caps.remix && !(await env.STATE.get("remix:unsupported")), kid: c.kid, voices: [...VOICES].sort() });
         if (!c.caps.video) return json(503, { error: "video is not configured on this server" });
         if (m[1] === "animate") {
           let j = await getJob(env, m[2]); if (!j) return json(404, { error: "unknown clip" });
@@ -262,7 +320,7 @@ export default {
       const [cap, fn] = route;
       if (!c.caps[cap]) return json(503, { error: `${cap} is not configured on this server` });
       const len = +(req.headers.get("Content-Length") || 0);
-      if (len > (path === "/animate" ? 1_600_000 : 8192)) return json(413, { error: "request too large" });
+      if (len > (path === "/animate" || path === "/remix" ? 1_600_000 : 8192)) return json(413, { error: "request too large" });
       let body; try { body = await req.json(); } catch { return json(400, { error: "bad json" }); }
       if (!body || typeof body !== "object" || Array.isArray(body)) return json(400, { error: "bad json" });
       return await fn(body, env, c);

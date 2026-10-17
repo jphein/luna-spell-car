@@ -36,10 +36,10 @@ nested = re.findall(r"\.([\w-]+)[^{},]*?\s\.([\w-]+)\b[^{]*\{", css)
 ALLOWED = {("grownup", "summary"), ("pbar", "i")}
 clash = sorted({f".{par} .{child}" for par, child in nested if child in standalone and child != par
                 and not re.search(r"\.%s\.%s|\.%s\b" % (par, child, child + "-"), css) and (par, child) not in ALLOWED})
-NESTED_OK = {".celebrate .box", ".pmodal .box", ".mana-btn .count", ".mini .cost", ".petcard .bar", ".petcard .cost", ".shopitem .emo",
+NESTED_OK = {".wordbox .pick",".celebrate .box", ".pmodal .box", ".mana-btn .count", ".mini .cost", ".petcard .bar", ".petcard .cost", ".shopitem .emo",
              ".shop-head .big", ".bk .nm", ".stage h2", ".mcard .f", ".mcard .b", ".game-btn .ico", ".hole .popwho", ".celebrate .bigemo",
              # deliberate size/spacing tweaks of the same component inside a container:
-             ".pmodal .petcard", ".pmodal .rowbtns", ".slot .sym", ".voiceset .rowbtns", ".yesno .ans"}
+             ".wordbox .pick", ".pmodal .petcard", ".pmodal .rowbtns", ".slot .sym", ".voiceset .rowbtns", ".yesno .ans"}
 clash = [x for x in clash if x not in NESTED_OK]
 # compound selectors like .tile.next pick up every rule of a standalone .next (e.g. white text on a white tile)
 compound = re.findall(r"\.([\w-]+)\.([\w-]+)", css)

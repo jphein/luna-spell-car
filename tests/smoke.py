@@ -1088,6 +1088,46 @@ async def cloud_ai_picture(pg, mode):
     await home(pg)
 
 @test
+async def cloud_magic_words(pg, mode):
+    if mode != "android": return
+    await pg.click("[data-go=maker]"); await pg.evaluate("draft = newDraft(); renderMaker()")
+    assert await pg.is_visible("#wordBox"), "magic words missing when AI pictures are on"
+    for w in ["fluffy", "rainbow", "sleepy", "silly"]: await pg.click(f'#wordRow [data-w="{w}"]')
+    assert await pg.evaluate("draft.words.join(',')") == "fluffy,rainbow,sleepy", "should keep at most three magic words"
+    await pg.click('#wordRow [data-w="sleepy"]'); assert await pg.evaluate("draft.words.length") == 2, "tapping a word again should remove it"
+    await pg.click('#sceneRow [data-bg="space"]')
+    await pg.click("#artAI"); await pg.wait_for_function("draft.artBy === 'ai'", timeout=8000)
+    from stack import FakeAzure
+    gen = json.loads([b for p, b in FakeAzure.seen if "/images/generations" in p][-1])["prompt"]
+    assert "fluffy" in gen and "rainbow" in gen and "outer space" in gen and "sleepy" not in gen, f"prompt missed her words: {gen[:160]}"
+    await home(pg)
+
+@test
+async def cloud_drawing_magic(pg, mode):
+    if mode != "android": return
+    await pg.click("[data-go=maker]"); await pg.evaluate("draft = newDraft(); renderMaker()")
+    assert not await pg.is_visible("#artRemix"), "repaint shown before there is a drawing"
+    await pg.evaluate("draft.art = document.createElement('canvas').toDataURL('image/jpeg', .8); draft.artBy = 'draw'; renderMaker()")
+    assert await pg.is_visible("#artRemix"), "Make my drawing magic missing"
+    mine = await pg.evaluate("draft.art")
+    await pg.click("#artRemix"); await pg.wait_for_function("draft.artBy === 'remix'", timeout=8000)
+    assert await pg.is_visible("#artUndo"), "no way back to her own drawing"
+    await pg.click("#artUndo"); assert await pg.evaluate("draft.art") == mine and await pg.evaluate("draft.artBy") == "draw", "undo didn't restore her drawing"
+    await home(pg)
+
+@test
+async def cloud_painting_magic(pg, mode):
+    if mode != "android": return
+    await pg.evaluate("drawings.push({ id: 'p-test', img: document.createElement('canvas').toDataURL('image/jpeg', .8), at: Date.now() }); store('luna_drawings', drawings)")
+    n = await pg.evaluate("drawings.length")
+    await pg.evaluate("go('studio', true)")
+    await pg.click('[data-magic="p-test"]')
+    await pg.wait_for_function(f"drawings.length === {n + 1}", timeout=8000)
+    assert await pg.evaluate("drawings[drawings.length - 1].magic === 'p-test'"), "magic painting not linked to the original"
+    assert await pg.evaluate("drawings.some(d => d.id === 'p-test')"), "the original painting must be kept"
+    await dismiss(pg); await home(pg)
+
+@test
 async def cloud_voice(pg, mode):
     if mode != "android": return
     n0 = len([x for x in FakeAzure.seen if "cognitive" in x[0]])
@@ -1138,7 +1178,7 @@ async def magic_movies(pg, mode):
     await pg.evaluate("openViewer(CARDS.find(c => c.name === 'Goldspan Dragon'))")
     assert await pg.is_visible("#vMake"), "Make it move button missing"
     await pg.click("#vMake")
-    await pg.wait_for_function("clipKeys.has('card:Goldspan Dragon')", timeout=15000)
+    await pg.wait_for_function("clipKeys.has('card:Goldspan Dragon')", timeout=40000)  # the fake Veo job can lag under load
     sent = json.loads([x for x in FakeAzure.seen if "predictLongRunning" in x[0]][-1][1])
     assert sent["instances"][0]["image"]["inlineData"]["mimeType"] == "image/jpeg", "frame not sent as JPEG"
     await pg.wait_for_selector("#vMedia video", timeout=5000)
@@ -1248,7 +1288,9 @@ async def main():
     STACK = Stack()
     async with async_playwright() as p:
         b = await p.chromium.launch()
-        fails = await run_mode(b, "web") + await run_mode(b, "android")
+        modes = [m for m in os.environ.get("SMOKE_MODES", "web,android").split(",") if m]  # e.g. SMOKE_MODES=android
+        fails = 0
+        for m in modes: fails += await run_mode(b, m)
         await b.close()
     STACK.close()
     print("\n" + ("All smoke tests passed." if not fails else f"{fails} smoke test(s) failed. Screenshots in build/test-shots/"))

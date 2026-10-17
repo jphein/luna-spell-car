@@ -13,6 +13,8 @@ and speech. Standard library only. Configure with environment variables (or serv
   AZURE_OPENAI_API_VERSION         default 2024-10-21
   AZURE_OPENAI_IMAGE_DEPLOYMENT    e.g. dall-e-3 / gpt-image-1 (enables AI pictures)
   AZURE_OPENAI_IMAGE_API_VERSION   default 2024-10-21 (gpt-image-1 needs 2025-04-01-preview)
+  AZURE_OPENAI_IMAGE_EDIT_API_VERSION  for repainting her drawings (images/edits), default 2025-04-01-preview.
+                                   Needs an image model that can edit (gpt-image-1); otherwise repaint turns itself off.
   AZURE_SPEECH_KEY + AZURE_SPEECH_REGION (e.g. westus2)      (enables neural voices)
   AZURE_SPEECH_ENDPOINT            optional full override of the TTS URL
   GEMINI_API_KEY                   enables "Make it move" (Google Veo image-to-video)
@@ -46,9 +48,10 @@ VEO_MODEL = E("VEO_MODEL", "veo-3.1-fast-generate-preview")
 VEO_BASE = E("VEO_BASE", "https://generativelanguage.googleapis.com/v1beta").rstrip("/")
 VIDEO_DIR = E("VIDEO_DIR", os.path.join(HERE, "videos"))
 KID = re.sub(r"[^A-Za-z \-']", "", E("KID_NAME", "Luna"))[:20] or "Luna"
-LIMITS = {"story": int(E("STORIES_PER_DAY", "40")), "image": int(E("IMAGES_PER_DAY", "20")), "tts": int(E("TTS_CHARS_PER_DAY", "60000")),
+IMG_EDIT_API_VER = E("AZURE_OPENAI_IMAGE_EDIT_API_VERSION", "2025-04-01-preview")
+LIMITS = {"remix": int(E("REMIXES_PER_DAY", "20")), "story": int(E("STORIES_PER_DAY", "40")), "image": int(E("IMAGES_PER_DAY", "20")), "tts": int(E("TTS_CHARS_PER_DAY", "60000")),
           "video": int(E("VIDEOS_PER_DAY", "16"))}
-CAPS = {"story": bool(AOAI[0] and AOAI[1] and CHAT_DEP), "image": bool(AOAI[0] and AOAI[1] and IMG_DEP), "tts": bool(SPEECH_KEY and SPEECH_URL),
+CAPS = {"remix": bool(AOAI[0] and AOAI[1] and IMG_DEP), "story": bool(AOAI[0] and AOAI[1] and CHAT_DEP), "image": bool(AOAI[0] and AOAI[1] and IMG_DEP), "tts": bool(SPEECH_KEY and SPEECH_URL),
         "video": bool(GEMINI_KEY)}
 
 PLACES = {
@@ -65,6 +68,18 @@ ACCS = {"none": "", "crown": "wearing a tiny golden crown", "bow": "wearing a pi
         "rainbow": "with a rainbow arching behind it", "heart": "with floating hearts around it",
         "gem": "wearing a sparkly gem", "wand": "holding a little magic wand", "balloon": "holding a balloon", "lollipop": "holding a swirly lollipop",
         "teddy": "hugging a tiny teddy bear", "moon": "with a glowing crescent moon above it"}
+# Her "magic words" and scenes for AI pictures: a fixed list, so nothing free-form reaches the image model.
+WORDS = {"fluffy": "extra fluffy and soft", "tiny": "tiny and adorable", "giant": "giant and gentle", "glittery": "glittery and shimmering",
+         "rainbow": "with rainbow-colored wings", "polka": "with polka dots", "stars": "with little star-shaped spots", "sleepy": "sleepy and cozy",
+         "silly": "making a silly face", "happy": "smiling a big happy smile", "baby": "a baby", "fancy": "dressed up fancy"}
+SCENES = {"sparkle": "a pastel purple background full of sparkles", "castle": "in front of a sparkly castle", "beach": "on a sunny beach",
+          "space": "floating in friendly outer space with planets and stars", "meadow": "in a flowery meadow"}
+def words_and_scene(b):
+    words = b.get("words") or []
+    if not isinstance(words, list) or len(words) > 3 or any(w not in WORDS for w in words): raise Fail(400, "words must be up to 3 from the list")
+    scene = b.get("scene") or "sparkle"
+    if scene not in SCENES: raise Fail(400, "unknown scene")
+    return ", ".join(WORDS[w] for w in dict.fromkeys(words)), SCENES[scene]
 POWERS = {"fly": "flying on sparkly wings", "sparkle": "surrounded by twinkling sparkles", "heart": "with a gentle, kind smile",
           "zoom": "zooming along with little speed swooshes", "friend": "waving hello like a best friend"}
 VOICES = {"en-US-AnaNeural", "en-US-JennyNeural", "en-US-AriaNeural", "en-US-AvaNeural", "en-US-GuyNeural", "en-US-EmmaNeural"}
@@ -136,9 +151,11 @@ def do_image(b):
     kind, color = KINDS.get(b.get("kind")), COLORS.get(b.get("color"))
     acc, power = ACCS.get(b.get("acc") or "none"), POWERS.get(b.get("power"))
     if not (kind and color and acc is not None and power): raise Fail(400, "bad creature")
+    words, scene = words_and_scene(b)
     if not spend("image"): raise Fail(429, "daily picture limit reached")
-    prompt = (f"A cute, friendly {color} {kind} {acc}, {power}. Children's storybook illustration, soft painterly style, "
-              "big kind eyes, magical sparkles, pastel purple background, centered full-body character, cheerful, no text, no letters, no frame.")
+    prompt = (f"A cute, friendly {color} {kind} {acc}, {power}" + (f", {words}" if words else "") + f", {scene}. "
+              "Children's storybook illustration, soft painterly style, big kind eyes, magical sparkles, centered full-body character, "
+              "cheerful, no text, no letters, no frame.")
     url = f"{AOAI[0]}/openai/deployments/{IMG_DEP}/images/generations?api-version={IMG_API_VER}"
     r = post(url, {"prompt": prompt, "n": 1, "size": "1024x1024"}, {"api-key": AOAI[1], "Content-Type": "application/json"}, timeout=150)
     item = (r.get("data") or [{}])[0]
@@ -282,7 +299,53 @@ def animate_status(key):
     if not j: raise Fail(404, "unknown clip")
     return {"id": key, "status": j["status"], **({"error": j.get("error")} if j["status"] == "failed" else {})}
 
-ROUTES = {"/animate": ("video", do_animate), "/story": ("story", do_story), "/image": ("image", do_image), "/tts": ("tts", do_tts)}
+# ---------- Repaint her drawing (Azure OpenAI images/edits) ----------
+remix_supported = {"ok": True}
+def multipart(fields, files):
+    boundary = "spellcar" + base64.b16encode(os.urandom(8)).decode().lower()
+    out = b""
+    for k, v in fields.items():
+        out += f'--{boundary}\r\nContent-Disposition: form-data; name="{k}"\r\n\r\n{v}\r\n'.encode()
+    for k, (fname, ctype, data) in files.items():
+        out += f'--{boundary}\r\nContent-Disposition: form-data; name="{k}"; filename="{fname}"\r\nContent-Type: {ctype}\r\n\r\n'.encode() + data + b"\r\n"
+    return out + f"--{boundary}--\r\n".encode(), f"multipart/form-data; boundary={boundary}"
+
+def do_remix(b):
+    m = re.match(r"^data:(image/(?:jpeg|png));base64,([A-Za-z0-9+/=]+)$", str(b.get("image", "")))
+    if not m or len(m.group(2)) > 1_400_000: raise Fail(400, "image must be a jpeg/png data URL under ~1 MB")
+    subject = b.get("subject")
+    if subject == "painting":
+        prompt = ("Repaint this child's painting as a soft, magical children's storybook illustration. Keep the child's shapes, layout, "
+                  "and colors so it is still clearly their painting, just polished and glowing with gentle sparkles. Cheerful, nothing scary, no text.")
+    elif subject == "creature":
+        kind, color = KINDS.get(b.get("kind")), COLORS.get(b.get("color"))
+        acc, power = ACCS.get(b.get("acc") or "none"), POWERS.get(b.get("power"))
+        if not (kind and color and acc is not None and power): raise Fail(400, "bad creature")
+        words, _ = words_and_scene(b)
+        prompt = (f"Repaint this child's drawing of a cute, friendly {color} {kind} {acc}, {power}" + (f", {words}" if words else "") + ", "
+                  "as a soft children's storybook illustration. Keep the child's shapes, pose, and colors so it is still clearly their drawing, "
+                  "just polished and magical, with big kind eyes and gentle sparkles. Cheerful, nothing scary, no text.")
+    else: raise Fail(400, "subject must be creature or painting")
+    if not remix_supported["ok"]: raise Fail(501, "this image model can't repaint drawings")
+    if not spend("remix"): raise Fail(429, "daily repaint limit reached")
+    mime = m.group(1); raw = base64.b64decode(m.group(2))
+    body, ctype = multipart({"prompt": prompt, "n": "1", "size": "1536x1024"}, {"image": ("drawing." + ("png" if mime.endswith("png") else "jpg"), mime, raw)})
+    url = f"{AOAI[0]}/openai/deployments/{IMG_DEP}/images/edits?api-version={IMG_EDIT_API_VER}"
+    try:
+        r = post(url, body, {"api-key": AOAI[1], "Content-Type": ctype}, timeout=180)
+    except Fail as f:
+        msg = str(f)
+        if f.status == 502 and ("OperationNotSupported" in msg or "not supported" in msg.lower()):
+            remix_supported["ok"] = False; CAPS["remix"] = False   # health now reports remix off, so the app hides it
+            raise Fail(501, "this image model can't repaint drawings")
+        raise
+    item = (r.get("data") or [{}])[0]
+    if not item.get("b64_json"): raise Fail(502, "no image returned")
+    out = base64.b64decode(item["b64_json"])
+    omime = "image/png" if out[:4] == b"\x89PNG" else "image/webp" if out[8:12] == b"WEBP" else "image/jpeg"
+    return {"image": f"data:{omime};base64," + base64.b64encode(out).decode()}
+
+ROUTES = {"/remix": ("remix", do_remix), "/animate": ("video", do_animate), "/story": ("story", do_story), "/image": ("image", do_image), "/tts": ("tts", do_tts)}
 
 class Handler(BaseHTTPRequestHandler):
     server_version = "SpellCar/1"
@@ -321,7 +384,7 @@ class Handler(BaseHTTPRequestHandler):
         cap, fn = route
         if not CAPS[cap]: return self.reply(503, {"error": f"{cap} is not configured on this server"})
         n = int(self.headers.get("Content-Length") or 0)
-        if n > (1_600_000 if self.path == "/animate" else 8192): return self.reply(413, {"error": "request too large"})
+        if n > (1_600_000 if self.path in ("/animate", "/remix") else 8192): return self.reply(413, {"error": "request too large"})
         try: body = json.loads(self.rfile.read(n) or b"{}")
         except ValueError: return self.reply(400, {"error": "bad json"})
         if not isinstance(body, dict): return self.reply(400, {"error": "bad json"})
