@@ -798,6 +798,8 @@ body.theme-rainbow{--btn:#B8336F} body.theme-ocean{--btn:#176A9C} body.theme-can
   <section id="stars" class="hidden">
     <div class="skybox"><div class="cap" id="skyCap"></div><div id="skySvg"></div></div>
     <div class="tgrid" id="tGrid"></div>
+    <h3 class="sec-h">🏆 Game trophies</h3>
+    <div class="tgrid" id="gGrid"></div>
   </section>
 
   <!-- STAR SHOP -->
@@ -1046,7 +1048,24 @@ function renderStars(){
   $("lvlBar").style.width = next ? Math.round(100 * (xp - LEVELS[lv][0]) / (next[0] - LEVELS[lv][0])) + "%" : "100%";
   if ($("shopStars")) $("shopStars").textContent = stars;
 }
+// Each mini game levels up from the stars earned while playing it: 1 (🌱) to 5 (🏆). Higher levels make some games trickier.
+const GAME_NAMES = { window: "Window Magic", bubbles: "Mana Bubbles", memory: "Memory Match", count: "Count the Mana", battle: "Who Wins?",
+                     says: "Rootha Says", echo: "Spell Echo", pop: "Faerie Pop", fog: "Magic Fog", catch: "Treasure Catch" };
+const GAME_LV = [0, 10, 25, 50, 100], MEDALS = ["🌱", "🥉", "🥈", "🥇", "🏆"];
+function gameXP(g){ return ((typeof stats !== "undefined" && stats.gxp) || {})[g] || 0; }
+function gameLevel(g){ let l = 1; GAME_LV.forEach((t, i) => { if (gameXP(g) >= t) l = i + 1; }); return l; }
+function bumpGame(g, n){
+  if (!GAME_NAMES[g] || typeof stats === "undefined") return;
+  const l0 = gameLevel(g); stats.gxp = stats.gxp || {}; stats.gxp[g] = (stats.gxp[g] || 0) + n; store("luna_stats", stats);
+  const l1 = gameLevel(g);
+  if (l1 > l0){
+    stars += 3; store("luna_stars", stars);
+    queueCelebrate({ emo: MEDALS[l1 - 1], title: `${GAME_NAMES[g]}: level ${l1}!`, sub: l1 === 5 ? "Top level! A golden trophy. +3 stars" : "It gets a little trickier now. +3 bonus stars",
+                     spoken: l1 === 5 ? `${GAME_NAMES[g]} level five! You won the golden trophy!` : `${GAME_NAMES[g]} level ${l1}! It gets a little trickier now. Three bonus stars!` });
+  }
+}
 function addStar(n = 1){
+  bumpGame(current, n);
   const lv0 = levelFor(xp);
   for (let i = 0; i < n; i++){
     stars++; xp++;
@@ -2639,7 +2658,7 @@ function echoLight(k, ms){
 }
 function echoPlay(){
   echo.busy = true; echo.pos = 0; $("echoHint").textContent = "Watch and listen…";
-  echo.speed = Math.max(380, 650 - (echo.seq.length - 1) * 25);
+  echo.speed = Math.max(330, 650 - (echo.seq.length - 1) * 25 - (gameLevel("echo") - 1) * 40);
   let i = 0;
   const step = () => {
     if (!echo.on) return;
@@ -2653,6 +2672,7 @@ function echoNext(){ if (!echo.on) return; echo.seq.push(rnd(["U", "R", "P", "G"
 function echoStop(){ echo.on = false; echo.busy = false; }
 $("echoGo").onclick = () => {
   echo.on = true; echo.seq = []; echo.startBest = echo.best; $("echoGo").classList.add("hidden"); renderEchoTop();
+  const lv = gameLevel("echo"); for (let i = 0; i < (lv >= 5 ? 2 : lv >= 3 ? 1 : 0); i++) echo.seq.push(rnd(["U", "R", "P", "G"]));  // higher levels start longer
   say("Watch the magic colors, then copy them!"); setTimeout(echoNext, 1500);
 };
 function echoEnd(){
@@ -2702,10 +2722,10 @@ function popShow(){
   const free = [...Array(9).keys()].filter(i => !pop.up[i]); if (!free.length) return;
   const i = rnd(free), who = rnd(POP_WHO), h = $("popGrid").children[i];
   h.querySelector(".popwho").textContent = who[0]; h.classList.remove("got"); h.classList.add("up");
-  const showMs = Math.max(700, 1450 - pop.score * 22);
+  const showMs = Math.max(560, (1450 - pop.score * 22) * (1 - 0.08 * (gameLevel("pop") - 1)));
   pop.up[i] = { who, t: setTimeout(() => popHide(i), showMs) };
 }
-function popLoop(){ if (!pop.on) return; popShow(); pop.timer = setTimeout(popLoop, Math.max(430, 900 - pop.score * 14)); }
+function popLoop(){ if (!pop.on) return; popShow(); pop.timer = setTimeout(popLoop, Math.max(380, (900 - pop.score * 14) * (1 - 0.07 * (gameLevel("pop") - 1)))); }
 function popHit(i){
   const u = pop.up[i]; if (!pop.on || !u) return;
   clearTimeout(u.t); const h = $("popGrid").children[i];
@@ -2746,7 +2766,7 @@ function setFog(){ $("fogImg").style.filter = FOG_STEPS[fog.level] ? `blur(${FOG
 function newFog(){
   clearInterval(fog.timer); fog.done = false; fog.level = 0; fog.missed = false;
   const pool_ = allCards(); do { fog.card = rnd(pool_); } while (fog.card === fog.last && pool_.length > 1); fog.last = fog.card;
-  const others = pool_.filter(c => c !== fog.card).sort(() => Math.random() - 0.5).slice(0, 2);
+  const others = pool_.filter(c => c !== fog.card).sort(() => Math.random() - 0.5).slice(0, gameLevel("fog") >= 3 ? 3 : 2);
   const opts = [fog.card, ...others].sort(() => Math.random() - 0.5);
   $("fogImg").style.transition = "none"; setFog(); $("fogImg").src = fog.card.img; void $("fogImg").offsetWidth; $("fogImg").style.transition = "";
   const box = $("fogOpts"); box.innerHTML = "";
@@ -2755,7 +2775,7 @@ function newFog(){
     b.innerHTML = `<img src="${c.img}" alt="">`; b.onclick = () => fogPick(b, c); box.appendChild(b);
   });
   $("fogExplain").textContent = ""; $("fogNext").classList.add("hidden");
-  fog.timer = setInterval(() => { if (fog.level < FOG_STEPS.length - 1){ fog.level++; setFog(); } else clearInterval(fog.timer); }, 2000);
+  fog.timer = setInterval(() => { if (fog.level < FOG_STEPS.length - 1){ fog.level++; setFog(); } else clearInterval(fog.timer); }, gameLevel("fog") >= 4 ? 2700 : 2000);
   say("Who's hiding in the magic fog? Tap the picture that matches!");
 }
 function fogPick(b, c){
@@ -2961,7 +2981,18 @@ function checkTreasures(){
     if (all){ owned["theme:starlight"] = Date.now(); store("luna_owned", owned); }
   });
 }
+function renderTrophies(){
+  const G = $("gGrid"); G.innerHTML = "";
+  Object.entries(GAME_NAMES).forEach(([g, name]) => {
+    const l = gameLevel(g), next = GAME_LV[l];
+    const d = document.createElement("button"); d.className = "tcard" + (l > 1 ? " got" : ""); d.dataset.game = g;
+    d.innerHTML = `<span class="ge">${MEDALS[l - 1]}</span><span><b>${name}</b><small>Level ${l}${next ? ` · ${gameXP(g)} of ${next} stars` : " · top level!"}</small></span>`;
+    d.onclick = () => say(next ? `${name} is level ${l}. Earn ${next - gameXP(g)} more stars in ${name} for level ${l + 1}!` : `${name} is level five. Golden trophy!`);
+    G.appendChild(d);
+  });
+}
 function renderStarMap(){
+  renderTrophies();
   const n = Object.keys(treasures).length;
   $("skyCap").textContent = n === TREASURES.length ? "✨ Galazeth's constellation is complete! ✨" : `${n} of ${TREASURES.length} stars found`;
   $("skySvg").innerHTML = skySVG(-1);
@@ -3114,6 +3145,28 @@ const LESSONS = [
    { t: "quiz", q: "The Drake hits you for 2. You had 20 life. How much now?", opts: [{ e: "1️⃣8️⃣", l: "18", ok: 1 }, { e: "2️⃣0️⃣", l: "20" }, { e: "2️⃣2️⃣", l: "22" }] },
    { t: "quiz", v: `<span class="big">💰</span>`, q: "Your turn again! Goldspan Dragon is still out. How much mana does your Treasure make?", opts: [{ e: "2️⃣", l: "Two", ok: 1 }, { e: "1️⃣", l: "One" }], why: "Goldspan Dragon makes every Treasure worth two mana!" },
    { t: "info", v: `<span class="big">🐲✨</span>`, text: "You planned a <b>dragon turn</b> and kept track of blockers. That's real wizard thinking!" },
+ ]},
+ { id: "instants", emo: "⚡", title: "Instant Magic", bonus: true, pages: [
+   { t: "info", v: ART("Prismari Command"), text: "Most spells wait for <b>your</b> turn. <b>Instants</b> are different: you can cast them on <b>anyone's</b> turn, even while Dad is attacking!" },
+   { t: "info", v: ART("Faerie Mastermind"), text: "Faerie Mastermind has <b>flash</b>. Flash means you can cast this creature any time you could cast an instant." },
+   { t: "quiz", v: ART("Prismari Command"), q: "It's Dad's turn. He attacks with a 2/2. You have Prismari Command and 3 untapped lands. What can you do?",
+     opts: [{ e: "⚡", l: "Cast it: 2 damage to his attacker", ok: 1 }, { e: "⏳", l: "Nothing until my turn" }], why: "Prismari Command is an instant, so you can zap that 2/2 right now!" },
+   { t: "quiz", q: "Can you cast a sorcery on Dad's turn?", opts: [{ e: "🙅", l: "No, only on my turn", ok: 1 }, { e: "👍", l: "Yes" }], why: "Sorceries wait for your own turn. Instants and flash cards don't!" },
+   { t: "quiz", v: ART("Faerie Mastermind"), q: "When can you cast Faerie Mastermind?", opts: [{ e: "⚡", l: "Any time, like an instant", ok: 1 }, { e: "📅", l: "Only on my turn" }] },
+ ]},
+ { id: "practice4", emo: "🐲", title: "Practice Turn 4: Dragon Day", bonus: true, pages: [
+   { t: "info", v: `<div class="mini-board">${fig("Rootha, Mastering the Moment")}${fig("Goldspan Dragon")}</div>`,
+     text: "Your turn! Rootha is on the battlefield. You have <b>4 lands</b> and <b>1 Treasure</b>. In your hand: <b>Goldspan Dragon</b> and <b>Prismari Command</b>. Dad has <b>20 life</b> and no flyers." },
+   { t: "quiz", v: ART("Goldspan Dragon"), q: "Goldspan Dragon costs 5. You have 4 lands and 1 Treasure. Can you cast it?", opts: [{ e: "👍", l: "Yes, that's 5", ok: 1 }, { e: "👎", l: "No" }], why: "4 lands plus 1 Treasure makes 5 mana. Dragon time!" },
+   { t: "quiz", q: "Goldspan Dragon has haste. Can it attack this turn?", opts: [{ e: "⚔️", l: "Yes!", ok: 1 }, { e: "⏳", l: "Not yet" }] },
+   { t: "quiz", q: "Goldspan Dragon is a creature, not an instant or sorcery. Does Rootha make an Elemental this turn?", opts: [{ e: "🚫", l: "No", ok: 1 }, { e: "✅", l: "Yes" }],
+     why: "Rootha's trick needs an instant or sorcery. A creature spell doesn't count!" },
+   { t: "quiz", q: "When Goldspan attacks, you get a Treasure. With Goldspan out, how much mana does that Treasure make?", opts: [{ e: "2️⃣", l: "Two", ok: 1 }, { e: "1️⃣", l: "One" }] },
+   { t: "quiz", v: `<div class="mini-board">${fig("Goldspan Dragon")}</div>`, q: "Goldspan Dragon is 4/4 and flying. Dad can't block it. He had 20 life. How much now?",
+     opts: [{ e: "1️⃣6️⃣", l: "16", ok: 1 }, { e: "1️⃣8️⃣", l: "18" }, { e: "2️⃣0️⃣", l: "20" }] },
+   { t: "quiz", v: ART("Prismari Command"), q: "Your lands are all tapped. Your new Treasure makes two mana of one color. Prismari Command costs 3: one blue, one red, and one more. Can you cast it?",
+     opts: [{ e: "🙅", l: "No, not enough", ok: 1 }, { e: "👍", l: "Yes" }], why: "Two mana isn't three, and it needs both blue and red. Save it for next turn!" },
+   { t: "info", v: `<span class="big">🐲✨</span>`, text: "Big dragon turn! Next turn, cast Prismari Command <b>before combat</b>, and Rootha's trick makes an Elemental too." },
  ]},
  { id: "practice3", emo: "🛡️", title: "Practice Turn 3", bonus: true, pages: [
    { t: "info", v: `<div class="mini-board">${fig("Rootha, Mastering the Moment")}${fig("Galazeth Prismari")}${fig("Stormcatch Mentor")}</div>`,

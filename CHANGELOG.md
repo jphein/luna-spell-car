@@ -1,6 +1,16 @@
 # Changelog
 
 ## Unreleased
+- AI pictures: 12 magic words (pick up to 3) and 5 scenes shape the picture; still a fixed list, never free text.
+- 🌟 Make my drawing magic: the AI repaints her own drawing in storybook style, with ↩️ to get hers back; 🌟 on Art Studio
+  paintings makes a magic copy and keeps the original. New `/remix` endpoint in both servers with its own daily cap
+  (`REMIXES_PER_DAY`, default 20); if the image model can't edit, the server turns repaint off and the app hides it.
+- Game levels: every mini game levels 1 to 5 from the stars earned while playing it, with a medal, a celebration, and
+  +3 stars. Spell Echo starts longer and plays faster, Faerie Pop speeds up, Magic Fog adds a 4th choice and slower fog.
+- 🏆 Game trophies on the Star Map.
+- Bonus lessons: Instant Magic (instants and flash on anyone's turn) and Practice Turn 4: Dragon Day (Treasure math,
+  haste, why a creature spell doesn't trigger Rootha).
+- Tests: `SMOKE_MODES=web` / `android` runs one half of the smoke suite; the movie test waits longer under load.
 
 ## 1.12.0 (2026-10-15)
 - 🪣 The paint bucket bridges small gaps in her lines (up to about 10 px), so a nearly closed shape fills on its own
