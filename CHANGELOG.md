@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+
+## 1.13.2 (2026-10-17)
 - ✨ A creature keeps its magic words when it's saved, so editing it to make a new AI picture still has her picks
   (and they're in backups).
 
