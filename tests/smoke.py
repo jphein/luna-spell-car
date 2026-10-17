@@ -815,6 +815,21 @@ async def parent_stats(pg, mode):
     await pg.evaluate("document.querySelector('.grownup').open = false")
 
 @test
+async def parent_stats_game_levels(pg, mode):
+    # For grown-ups: each mini game's level (1 to 5), so a parent can see which games have got trickier. Unplayed games stay out.
+    keep = await pg.evaluate("JSON.stringify(stats.gxp || {})")
+    try:
+        await pg.evaluate("stats.gxp = { echo: 30, pop: 12, fog: 0 }; store('luna_stats', stats)")
+        await pg.evaluate("document.querySelector('.grownup').open = true"); await pg.wait_for_timeout(100)
+        line = await pg.evaluate("[...document.querySelectorAll('#parentStats div')].map(d => d.textContent).find(t => t.startsWith('Game levels')) || ''")
+        assert line == "Game levels (1 to 5): Spell Echo 3, Faerie Pop 2", f"game levels line wrong: {line!r}"
+        await pg.evaluate("document.querySelector('.grownup').open = false; stats.gxp = {}; store('luna_stats', stats)")
+        await pg.evaluate("document.querySelector('.grownup').open = true"); await pg.wait_for_timeout(100)
+        assert "Game levels (1 to 5): none yet" in await pg.inner_text("#parentStats"), "no-games case missing"
+    finally:
+        await pg.evaluate("stats.gxp = JSON.parse(%s); store('luna_stats', stats); document.querySelector('.grownup').open = false" % json.dumps(keep))
+
+@test
 async def movie_night(pg, mode):
     # My Spellbook → Movie night: every magic movie she has, back to back, then "The end".
     keep = await pg.evaluate("[...clipKeys]")
