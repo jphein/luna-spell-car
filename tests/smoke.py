@@ -1341,7 +1341,7 @@ async def rootha_movies_shelf(pg, mode):
         return await home(pg)
     await pg.evaluate("go('book', true); syncShorts()")
     await pg.wait_for_function("document.querySelectorAll('#shortRow .short').length === 2", timeout=15000)
-    names = await pg.evaluate("[...document.querySelectorAll('#shortRow .short')].map(b => b.textContent.trim())")
+    names = await pg.evaluate("[...document.querySelectorAll('#shortRow .short > span')].map(t => t.firstChild.textContent.trim())")  # the title, not its NEW tag
     assert names == ["Rootha's big movie", "Hello  b from /b  Rootha"], f"shelf shows the wrong movies: {names}"
     box = await pg.locator("#shortRow .short").first.bounding_box(); assert box["height"] >= 52 and box["width"] >= 120, f"movie tile too small: {box}"
     await pg.evaluate("""window.__ended = false; const iv = setInterval(() => { const v = document.querySelector('#thMedia video');
@@ -1359,6 +1359,28 @@ async def rootha_movies_shelf(pg, mode):
     assert not await pg.is_visible("#shortsSec"), "renderShorts didn't reset"
     await pg.evaluate("loadShorts()"); await pg.wait_for_function("document.querySelectorAll('#shortRow .short').length === 2", timeout=5000)
     await pg.evaluate("cloud.url = window.__url; cloudConnect(true)"); await home(pg)
+
+@test
+async def new_movie_badge(pg, mode):
+    # A gold 🎬 NEW on My Spellbook (and on the movie) until she watches it; watched ones are kept in backups.
+    if mode == "web":
+        await pg.evaluate("go('book', true)"); d = await fresh_backup(pg)
+        d["seen"] = {"short:film": 1, "short:../x": 1, "short:<b>": 1}
+        await pg.set_input_files("#bkFile", files=[{"name": "b.json", "mimeType": "application/json", "buffer": json.dumps(d).encode()}])
+        await pg.wait_for_function("!!seenGames['short:film']", timeout=5000)
+        assert not await pg.evaluate("Object.keys(seenGames).some(k => k.startsWith('short:') && k !== 'short:film')"), "restore kept a bad movie id"
+        await pg.evaluate("delete seenGames['short:film']; store('luna_seen', seenGames)"); return await home(pg)
+    await pg.evaluate("Object.keys(seenGames).filter(k => k.startsWith('short:')).forEach(k => delete seenGames[k]); store('luna_seen', seenGames); syncShorts()")
+    await pg.wait_for_function("document.querySelectorAll('#shortRow .short').length === 2 && !shortsBusy", timeout=15000)
+    await home(pg); assert await pg.is_visible("#movieTag"), "no NEW on My Spellbook for new movies"
+    await pg.evaluate("go('book', true)")
+    assert await pg.locator('#shortRow [data-short="hello"] .newtag').count() == 1, "an unwatched movie has no NEW"
+    await pg.click('#shortRow [data-short="hello"]'); await pg.click("#thStop")
+    assert await pg.locator('#shortRow [data-short="hello"] .newtag').count() == 0, "NEW stayed on a watched movie"
+    await home(pg); assert await pg.is_visible("#movieTag"), "NEW on My Spellbook went away with a movie still unwatched"
+    await pg.evaluate("go('book', true)"); await pg.click('#shortRow [data-short="film"]'); await pg.click("#thStop")
+    await home(pg); assert not await pg.is_visible("#movieTag"), "NEW stayed on My Spellbook after every movie was watched"
+    assert await pg.evaluate("!!load('luna_seen', {})['short:film']"), "watched movies weren't saved"
 
 @test
 async def painting_movies(pg, mode):

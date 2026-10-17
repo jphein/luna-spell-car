@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- 🎬 A gold "🎬 NEW" on My Spellbook (and on the movie) when Rootha has a movie she hasn't watched yet; it goes away once
+  she watches it. Watched movies are kept in backups.
 
 ## 1.14.0 (2026-10-17)
 - 🎬 Rootha's movies: the family's own Rootha shorts (and one big movie of them all) at the top of My Spellbook. They come

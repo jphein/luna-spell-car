@@ -79,7 +79,7 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .game-btn.wide .ico{width:68px;height:68px}
 .game-btn.solo{grid-column:1/-1}
 @media (min-width:1000px){.app.homeview{max-width:1100px}.games{grid-template-columns:repeat(3,1fr)}}
-.game-btn .newtag{font-size:11px;background:var(--gold);color:#2B1650;padding:2px 8px;border-radius:99px;font-weight:700;vertical-align:middle;margin-left:4px}
+.game-btn .newtag,.game-btn .movietag,.short .newtag{font-size:11px;background:var(--gold);color:#2B1650;padding:2px 8px;border-radius:99px;font-weight:700;vertical-align:middle;margin-left:4px}
 .grownup{margin-top:auto;padding-top:22px;color:var(--muted);font-size:13px;line-height:1.45}
 .grownup summary{cursor:pointer;font-size:15px;font-weight:600}
 
@@ -606,7 +606,7 @@ body.theme-rainbow{--btn:#B8336F} body.theme-ocean{--btn:#176A9C} body.theme-can
       <button class="game-btn wide" data-go="stars"><div class="ico" data-ico="stars"></div><div><b>Star Map <span class="newtag">NEW</span></b><span>Twelve hidden treasures to find in the sky</span></div></button>
       <button class="game-btn wide" data-go="shop"><div class="ico" data-ico="shop"></div><div><b>Star Shop</b><span>Spend your stars on creatures, colors, and brushes</span></div></button>
       <button class="game-btn wide" data-go="night"><div class="ico" data-ico="night"></div><div><b>Game Night</b><span>Life counter and dice for real games at the table</span></div></button>
-      <button class="game-btn wide" data-go="book"><div class="ico" data-ico="book"></div><div><b>My Spellbook</b><span>Stickers, creatures, and cards you've cast</span></div></button>
+      <button class="game-btn wide" data-go="book"><div class="ico" data-ico="book"></div><div><b>My Spellbook <span class="movietag hidden" id="movieTag">🎬 NEW</span></b><span>Stickers, creatures, and cards you've cast</span></div></button>
     </div>
     <details class="grownup">
       <summary>For grown-ups</summary>
@@ -2556,14 +2556,17 @@ async function shortPic(id){
 function renderShorts(){
   const row = $("shortRow"), vis = shortsIndex.filter(s => shortHave.has("v:" + s.id));
   $("shortsSec").classList.toggle("hidden", !vis.length); row.innerHTML = "";
+  $("movieTag").classList.toggle("hidden", !vis.some(s => !seenGames["short:" + s.id]));  // a new movie she hasn't watched yet
   vis.forEach((s, i) => {
     const b = document.createElement("button"); b.className = "short" + (i === 0 && vis.length > 2 ? " big" : ""); b.dataset.short = s.id; b.setAttribute("aria-label", s.title);
     const im = document.createElement("img"); im.alt = ""; const t = document.createElement("span"); t.textContent = s.title; b.append(im, t);
+    if (!seenGames["short:" + s.id]){ const n = document.createElement("span"); n.className = "newtag"; n.textContent = "NEW"; t.append(" ", n); }
     shortPic(s.id).then(u => { if (u) im.src = u; else im.remove(); });
     b.onclick = () => playShort(s); row.appendChild(b);
   });
 }
 async function playShort(s){
+  seenGames["short:" + s.id] = Date.now(); store("luna_seen", seenGames); renderShorts();
   theater.list = [{ name: s.title, say: s.title, short: s.id, img: await shortPic(s.id) }];
   $("theater").classList.remove("hidden"); tick(4); theaterAt(0);
 }
@@ -3901,7 +3904,7 @@ $("bkFile").onchange = () => {
     if (d.owned && typeof d.owned === "object") Object.keys(d.owned).forEach(k => { if (SHOP.some(i => i.id === k)) owned[k] = owned[k] || Date.now(); });
     store("luna_owned", owned);
     if (d.eggs && typeof d.eggs === "object") Object.keys(d.eggs).forEach(k => { if (EGGS.some(e => e.id === k)) eggs[k] = eggs[k] || Date.now(); });
-    if (d.seen && typeof d.seen === "object") Object.keys(d.seen).forEach(k => { if (screens[k] !== undefined) seenGames[k] = seenGames[k] || Date.now(); });
+    if (d.seen && typeof d.seen === "object") Object.keys(d.seen).forEach(k => { if (screens[k] !== undefined || /^short:[a-z0-9-]{1,32}$/.test(k)) seenGames[k] = seenGames[k] || Date.now(); });
     store("luna_seen", seenGames); renderNewTags();
     if (d.badges && typeof d.badges === "object") Object.entries(d.badges).forEach(([k, b]) => { const c = b && CHALLENGES.find(x => x.id === b.c);
       if (/^\d+$/.test(k) && c && b.s === c.sticker && !badges[k]) badges[k] = { c: c.id, s: c.sticker }; });
