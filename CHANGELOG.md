@@ -8,6 +8,12 @@
 - Game levels: every mini game levels 1 to 5 from the stars earned while playing it, with a medal, a celebration, and
   +3 stars. Spell Echo starts longer and plays faster, Faerie Pop speeds up, Magic Fog adds a 4th choice and slower fog.
 - 🏆 Game trophies on the Star Map.
+- Every game now gets trickier with its level: Memory Match 8 pairs and Count the Mana hides the running total (level 3),
+  Mana Bubbles has fewer helpful bubbles, Rootha Says more tricks and a quicker pace, Treasure Catch faster treasure.
+  Who Wins? adds a real-rules twist from level 3: Prismari Command hits the blocker for 2 first, and damage adds up.
+- Magic movies default to Veo 3.1 Lite (about $0.40 per clip instead of $0.80); `VEO_MODEL` still switches back to Fast.
+- Story prompt asks for simple, correct mana counting ("one blue mana, one red mana, that makes two mana").
+- The nightly iterate prompt checks open GitHub issues before ROADMAP.md.
 - Bonus lessons: Instant Magic (instants and flash on anyone's turn) and Practice Turn 4: Dragon Day (Treasure math,
   haste, why a creature spell doesn't trigger Rootha).
 - Tests: `SMOKE_MODES=web` / `android` runs one half of the smoke suite; the movie test waits longer under load.

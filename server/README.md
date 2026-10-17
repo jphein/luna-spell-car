@@ -46,7 +46,7 @@ Pick "Cloud voice for stories" (stories and Rootha Says) or "everywhere," and a 
 ## Magic movies (Google Veo)
 
 Set `GEMINI_API_KEY` (from Google AI Studio, on a paid tier: Veo isn't on the free tier) and optionally `VEO_MODEL`
-(default `veo-3.1-fast-generate-preview`). Each clip is 8 seconds of 720p video; the app plays it at 0.8× so it lasts
+(default `veo-3.1-lite-generate-preview`; set `veo-3.1-fast-generate-preview` for a bit more polish at twice the price). Each clip is 8 seconds of 720p video; the app plays it at 0.8× so it lasts
 10 seconds. Veo takes from about 11 seconds to a few minutes per clip, so clips are made ahead of time, never live:
 
 - The app sends a 16:9 frame of the card art plus *which* card or creature kind it is. The motion prompt comes from
@@ -55,8 +55,8 @@ Set `GEMINI_API_KEY` (from Google AI Studio, on a paid tier: Veo isn't on the fr
   every device. Asking twice never pays twice; a second device downloads the existing clip (`peek`) without a new job.
 - A background thread polls Veo, so a clip finishes even if the tablet goes offline. Veo deletes generated videos
   after 2 days, so the server downloads them right away. Devices keep their own copies (IndexedDB) for offline play.
-- `VIDEOS_PER_DAY` (default 16) caps spend. At Veo 3.1 Fast's listed price ($0.10/second at 720p when this was
-  written) a clip costs about $0.80, so all 14 deck cards are about $11 once. Check current pricing on Google's page.
+- `VIDEOS_PER_DAY` (default 16) caps spend. At Veo 3.1 Lite's listed price ($0.05/second at 720p when this was
+  written) a clip costs about $0.40, so all 14 deck cards are about $5.60 once. Check current pricing on Google's page.
 
 In the app: **For grown-ups → 🎬 Make all deck cards move**, or tap any card in My Spellbook (or 🎬 Magic movie on
 one of her creatures) → **Make it move**. Finished clips play whenever she casts that card.

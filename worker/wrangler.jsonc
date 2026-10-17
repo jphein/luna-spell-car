@@ -11,7 +11,7 @@
     "KID_NAME": "Luna",
     "AZURE_OPENAI_API_VERSION": "2024-10-21",
     "AZURE_OPENAI_IMAGE_API_VERSION": "2025-04-01-preview",
-    "VEO_MODEL": "veo-3.1-fast-generate-preview",
+    "VEO_MODEL": "veo-3.1-lite-generate-preview",
     "STORIES_PER_DAY": "40", "IMAGES_PER_DAY": "20", "TTS_CHARS_PER_DAY": "60000", "VIDEOS_PER_DAY": "16"
   },
   "observability": { "enabled": true }

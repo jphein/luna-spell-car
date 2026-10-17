@@ -1017,6 +1017,23 @@ async def game_levels_and_trophies(pg, mode):
     await pg.evaluate("stats.gxp = {}; go('fog', true)"); assert await pg.locator("#fogOpts button").count() == 3, "Magic Fog level 1 should offer 3 choices"
     await home(pg)
 
+@test
+async def game_difficulty(pg, mode):
+    await pg.evaluate("stats.gxp = { memory: 25, count: 25, battle: 25 }")
+    await pg.click("[data-go=memory]"); assert await pg.locator("#memGrid .mcard").count() == 16, "Memory level 3 should have 8 pairs"
+    await pg.evaluate("stats.gxp = {}; go('memory', true)"); assert await pg.locator("#memGrid .mcard").count() == 12, "Memory level 1 should have 6 pairs"
+    await pg.evaluate("stats.gxp = { count: 25 }; go('count', true)")
+    await pg.click("#cCost button >> nth=0"); assert await pg.inner_text("#cRun") == "?", "Count level 3 should hide the running total"
+    # Who Wins twist: Prismari Command's 2 damage adds to the attacker's power
+    await pg.evaluate("stats.gxp = { battle: 25 }; go('battle', true)")
+    ok = await pg.evaluate("""(() => { for (let i = 0; i < 60; i++){ newBattle(); if (bTwist) break; }
+      if (!bTwist) return 'no twist in 60 tries';
+      const want = bAtk.p + 2 >= bDef.t;
+      document.querySelector(`#battle .yesno .ans[data-yes="${want ? 1 : 0}"]`).click();
+      return document.getElementById('bNext').classList.contains('hidden') ? 'right answer rejected' : (document.getElementById('bExplain').textContent.includes('2 + ') ? 'ok' : 'no sum shown'); })()""")
+    assert ok == "ok", f"battle twist: {ok}"
+    await pg.evaluate("stats.gxp = {}"); await home(pg)
+
 STACK = None
 
 async def stroke(pg):

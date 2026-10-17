@@ -2,7 +2,7 @@
 """Check a deployed Spell Car server end to end with real Azure / Google calls. Never prints secrets.
 
   python3 tools/live_check.py --url https://spellcar.<you>.workers.dev            # token read from worker/.secrets
-  python3 tools/live_check.py --url ... --video                                    # also makes ONE real Veo clip (~$0.80)
+  python3 tools/live_check.py --url ... --video                                    # also makes ONE real Veo clip (~$0.40)
 
 Outputs go to build/live/ (story.txt, picture.*, voice.mp3, clip.mp4) so a human can look and listen.
 """
@@ -70,6 +70,6 @@ if caps.get("video") and a.video:
             if ok: open(os.path.join(OUT, "clip.mp4"), "wb").write(b)
             report("magic movie (Google Veo)", ok, f"saved build/live/clip.mp4 ({len(b)//1024} KB); the app will reuse it" if ok else f"HTTP {st}")
         else: report("magic movie (Google Veo)", False, f"status {job['status']} {job.get('error', '')}")
-elif caps.get("video"): print("  skip  magic movie (pass --video to make one real clip, about $0.80)")
+elif caps.get("video"): print("  skip  magic movie (pass --video to make one real clip, about $0.40)")
 
 print("\nAll live checks passed." if all(results) else "\nSome live checks FAILED (details above)."); sys.exit(0 if all(results) else 1)

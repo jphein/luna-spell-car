@@ -16,3 +16,5 @@ Each run ships exactly ONE small, finished, tested improvement as a pull request
 Never: merge PRs, bump VERSION, tag, run `make release`, edit the keystore, add secrets/API keys/new external hosts,
 add ads, analytics, external links, chat, or data collection, or add anything scary, sad, or unkind.
 If nothing is safe and worthwhile to do, open no PR and explain why in your final message.
+
+Before picking from ROADMAP.md, check open GitHub issues (`gh issue list --state open`). An issue labeled `enhancement` or `bug` that fits one session comes first; reference it in the PR (`Fixes #N`).

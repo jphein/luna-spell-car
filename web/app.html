@@ -1573,7 +1573,7 @@ function newCount(){
     const b = document.createElement("button"); b.innerHTML = sym(k, n, true); b.setAttribute("aria-label", k === "N" ? `${n} any color` : k === "U" ? "blue" : "red");
     b.onclick = () => {
       if (b.classList.contains("counted")) return;
-      b.classList.add("counted"); cRun += n; $("cRun").textContent = cRun; tick(cRun);
+      b.classList.add("counted"); cRun += n; $("cRun").textContent = gameLevel("count") >= 3 ? "?" : cRun; tick(cRun);
       say(k === "N" && n > 1 ? `${numWords[n]} any color! ${numWords[cRun] || cRun}!` : `${numWords[cRun] || cRun}!`);
     };
     row.appendChild(b);
@@ -1616,26 +1616,33 @@ function newBattle(){
     bDef = rnd(cr); key = bAtk.name + bDef.name; tries++;
   } while ((bAtk === bDef || bAtk.p === 0 || key === bLastKey) && tries < 50);
   bLastKey = key;
+  bTwist = gameLevel("battle") >= 3 && bDef.t > 2 && Math.random() < 0.4;
   $("bA").src = bAtk.img; $("bB").src = bDef.img; $("bAn").textContent = bAtk.name; $("bBn").textContent = bDef.name;
   $("bAp").textContent = bAtk.p; $("bBt").textContent = bDef.t;
   $("bAd").innerHTML = dots(bAtk.p, "var(--red)"); $("bBd").innerHTML = dots(bDef.t, "var(--violet)");
-  $("bQ").textContent = `${bAtk.name} attacks! Is ${bDef.name} defeated?`;
+  $("bQ").textContent = bTwist ? `⚡ First, Prismari Command hit ${bDef.name} for 2! Now ${bAtk.name} attacks. Is ${bDef.name} defeated?`
+                               : `${bAtk.name} attacks! Is ${bDef.name} defeated?`;
   $("bExplain").textContent = ""; $("bNext").classList.add("hidden");
   document.querySelectorAll("#battle .yesno .ans").forEach(b => b.classList.remove("right", "wrong"));
   sayBattle();
 }
-function sayBattle(){ say(`${bAtk.say} attacks with ${bAtk.p} power! ${bDef.say} has ${bDef.t} toughness. Is ${bDef.say} defeated?`); }
+let bTwist = false;
+function sayBattle(){
+  say(bTwist ? `First, Prismari Command deals 2 damage to ${bDef.say}. Then ${bAtk.say} attacks with ${bAtk.p} power! ${bDef.say} has ${bDef.t} toughness. Damage adds up! Is ${bDef.say} defeated?`
+             : `${bAtk.say} attacks with ${bAtk.p} power! ${bDef.say} has ${bDef.t} toughness. Is ${bDef.say} defeated?`);
+}
 $("bQ").onclick = sayBattle;
 document.querySelectorAll("#battle .yesno .ans").forEach(b => b.onclick = () => {
   if (!$("bNext").classList.contains("hidden")) return;
-  const truth = bAtk.p >= bDef.t, pick = b.dataset.yes === "1";
+  const dmg = bAtk.p + (bTwist ? 2 : 0), truth = dmg >= bDef.t, pick = b.dataset.yes === "1";
   if (!bMissed){ bumpStat("battleTries"); if (pick === truth) bumpStat("battleFirst"); }
   if (pick === truth){
     if (!bMissed) bumpStat("battleStreak"); bMissed = true;
     b.classList.add("right"); addStar(); burst(); chime();
-    $("bExplain").textContent = truth ? `${bAtk.p} is as big as ${bDef.t} or bigger, so ${bDef.name} is defeated!` : `${bAtk.p} is less than ${bDef.t}, so ${bDef.name} is safe!`;
+    const sum = bTwist ? `2 + ${bAtk.p} = ${dmg} damage. ` : "";
+    $("bExplain").textContent = sum + (truth ? `${dmg} is as big as ${bDef.t} or bigger, so ${bDef.name} is defeated!` : `${dmg} is less than ${bDef.t}, so ${bDef.name} is safe!`);
     $("bNext").classList.remove("hidden");
-    say(truth ? `Yes! ${bAtk.p} damage is enough. ${bDef.say} is defeated!` : `Right! ${bAtk.p} damage is not enough. ${bDef.say} is safe!`);
+    say((bTwist ? `Two plus ${bAtk.p} is ${dmg}. ` : "") + (truth ? `Yes! ${dmg} damage is enough. ${bDef.say} is defeated!` : `Right! ${dmg} damage is not enough. ${bDef.say} is safe!`));
   } else { bMissed = true; setStat("battleStreak", 0); b.classList.remove("wrong"); void b.offsetWidth; b.classList.add("wrong"); boop(); say("Try again! Compare the red dots and the purple dots."); }
 });
 $("bNext").onclick = newBattle;
@@ -1658,13 +1665,13 @@ function stopSays(){ saysOn = false; clearTimeout(saysTimer); $("saysPlay").text
 function saysRound(){
   if (!saysOn) return;
   let m; do { m = rnd(MOVES); } while (m === lastMove); lastMove = m;
-  const real = Math.random() < 0.7;
+  const real = Math.random() < 0.7 - 0.05 * (gameLevel("says") - 1);
   $("saysGotcha").textContent = "";
   $("saysCmd").innerHTML = `<span class="emo">${m[0]}</span><span>${real ? `Rootha says ${m[1]}!` : m[2]}</span>`;
   const f = $("saysFace"); f.classList.remove("talk"); void f.offsetWidth; f.classList.add("talk");
   say(real ? `Rootha says, ${m[1]}!` : m[2], () => {
     if (!saysOn) return;
-    const wait = pace === "slow" ? 3200 : 1900;
+    const wait = (pace === "slow" ? 3200 : 1900) * (1 - 0.06 * (gameLevel("says") - 1));
     saysTimer = setTimeout(() => {
       if (!saysOn) return;
       if (!real){ $("saysGotcha").textContent = "😜 Rootha didn't say it!"; boop(); say("Gotcha! Rootha didn't say it! Did you move?", () => { if (saysOn) saysTimer = setTimeout(saysRound, 1600); }); }
@@ -1908,7 +1915,8 @@ Format: the first line is only the title (no quotes, no "Title:"). Then the stor
 let mem = [], memOpen = [], memLock = false, memTries = 0, memMisses = 0;
 function newMemory(){
   const all = allCards(), petsIn = all.filter(c => c.pet).sort(() => Math.random() - 0.5).slice(0, 2);
-  const rest = all.filter(c => !c.pet).sort(() => Math.random() - 0.5).slice(0, 6 - petsIn.length);
+  const pairs = gameLevel("memory") >= 3 ? 8 : 6;
+  const rest = all.filter(c => !c.pet).sort(() => Math.random() - 0.5).slice(0, pairs - petsIn.length);
   const picks = petsIn.concat(rest);
   mem = picks.concat(picks).map((c, i) => ({ c, k: c.name, done: false, id: i })).sort(() => Math.random() - 0.5);
   memOpen = []; memLock = false; memTries = 0; memMisses = 0; $("memAgain").classList.add("hidden"); renderMemory();
@@ -2806,7 +2814,7 @@ function catchSpawn(){
   const f = $("catchField").getBoundingClientRect(), d = $("catchDragon").getBoundingClientRect(), gem = Math.random() < 0.15;
   const el = document.createElement("div"); el.className = "tcoin"; el.textContent = gem ? "💎" : "💰"; $("catchField").appendChild(el);
   const x = f.width ? Math.max(0.08, Math.min(0.92, (d.left + d.width / 2 - f.left) / f.width)) : 0.5;
-  tc.items.push({ el, x, y: 0.12, v: 0.24 + Math.random() * 0.08 + Math.min(0.2, tc.score * 0.004), pts: gem ? 3 : 1 });
+  tc.items.push({ el, x, y: 0.12, v: 0.24 + Math.random() * 0.08 + Math.min(0.2, tc.score * 0.004) + 0.03 * (gameLevel("catch") - 1), pts: gem ? 3 : 1 });
 }
 function catchGot(it){
   tc.score += it.pts; it.el.remove(); renderCatchTop(); plink(it.pts > 1 ? "R" : "U");
@@ -3544,7 +3552,7 @@ function spawnBubble(){
   const f = $("bubField"), H_ = f.clientHeight, W_ = f.clientWidth;
   if (f.children.length > 9) return;
   const needCol = bb.slots.filter(s => !s.full && s.k !== "N").map(s => s.k);
-  const k = needCol.length && Math.random() < 0.55 ? rnd(needCol) : rnd(["U", "R"]);
+  const k = needCol.length && Math.random() < Math.max(0.35, 0.55 - 0.05 * (gameLevel("bubbles") - 1)) ? rnd(needCol) : rnd(["U", "R"]);
   const b = document.createElement("button"); b.className = "bub " + k; b.innerHTML = BUB_SVG[k];
   b.setAttribute("aria-label", k === "U" ? "Blue bubble" : "Red bubble");
   b.style.left = Math.round(8 + Math.random() * Math.max(10, W_ - 128)) + "px";

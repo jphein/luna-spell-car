@@ -49,6 +49,8 @@ try:
     import base64 as _b64
     from stack import png as _png
     drawing = "data:image/png;base64," + _b64.b64encode(_png(48, 36, (120, 90, 220))).decode()
+    sp = json.loads([x for x in FakeAzure.seen if "/chat/completions" in x[0]][-1][1])["messages"][1]["content"]
+    check("that makes two mana" in sp and "numbers right" in sp, "story prompt asks for simple, correct mana counting")
     st, _, b = call(u, "/health"); check(json.loads(b).get("remix") is True, "health reports drawing repaint (remix) when images are on")
     st, _, b = call(u, "/remix", {"image": drawing, "subject": "creature", "kind": "unicorn", "color": "P", "power": "sparkle", "words": ["glittery"]})
     edit = [x for x in FakeAzure.seen if "/images/edits" in x[0]][-1][1]
@@ -70,6 +72,8 @@ try:
     sent = json.loads([x for x in FakeAzure.seen if "predictLongRunning" in x[0]][-1][1])
     check("gold coins" in sent["instances"][0]["prompt"] and sent["parameters"]["durationSeconds"] == 8, "Veo prompt comes from the card's motion template")
     st2, _, b2 = call(u, "/animate", {"image": img, "card": "Goldspan Dragon"})
+    vp = [x[0] for x in FakeAzure.seen if ":predictLongRunning" in x[0]]
+    check(bool(vp) and all("veo-3.1-lite-generate-preview" in x for x in vp), "magic movies default to Veo 3.1 Lite")
     check(json.loads(b2)["id"] == job["id"] and len([x for x in FakeAzure.seen if "predictLongRunning" in x[0]]) == 1, "the same picture never starts a second paid job")
     for _ in range(40):
         st, _, b = call(u, f"/animate/{job['id']}")
