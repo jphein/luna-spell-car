@@ -189,11 +189,12 @@ async function doTts(b, env, c) {
 async function shortsList(env) {
   const idx = env.CLIPS && await env.CLIPS.get("shorts/index.json"); if (!idx) return [];
   let items; try { items = await idx.json(); } catch { return []; }
-  const out = [];
+  const have = new Set(), out = [];  // one list call instead of two heads per movie
+  let page; do { page = await env.CLIPS.list({ prefix: "shorts/", cursor: page && page.cursor }); page.objects.forEach(o => have.add(o.key)); } while (page.truncated);
   for (const it of Array.isArray(items) ? items : []) {
     const id = it && it.id;
-    if (typeof id !== "string" || !/^[a-z0-9-]{1,32}$/.test(id) || !(await env.CLIPS.head(`shorts/${id}.mp4`))) continue;
-    out.push({ id, title: clean(it.title || "", 40), poster: !!(await env.CLIPS.head(`shorts/${id}.jpg`)) });
+    if (typeof id !== "string" || !/^[a-z0-9-]{1,32}$/.test(id) || !have.has(`shorts/${id}.mp4`)) continue;
+    out.push({ id, title: clean(it.title || "", 40), poster: have.has(`shorts/${id}.jpg`) });
   }
   return out;
 }
