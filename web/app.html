@@ -1551,6 +1551,7 @@ $("savePet").onclick = () => {
   if (draft.art){ p.art = draft.art; if (draft.artBy) p.artBy = draft.artBy; }
   if (draft.artBy === "remix" && draft.artOrig) p.artOrig = draft.artOrig;  // her own drawing, so ↩️ still works when she edits it
   if (bgOf(draft)) p.bg = bgOf(draft);
+  if (draft.words && draft.words.length) p.words = draft.words.slice(0, 3);  // her magic words, for repainting later
   const before = pets;
   if (wasEdit){ pets = pets.map(x => x.id === editId ? p : x); } else { pets = pets.concat([p]); if (pets.length > 60) pets = pets.slice(-60); }
   if (!store("luna_pets", pets)){ pets = before; boop(); say("Your Spellbook is too full! Ask a grown-up to remove a creature first."); return; }
@@ -3820,7 +3821,9 @@ $("bkFile").onchange = () => {
     d.pets.filter(ok).forEach(p => { const clean = { id: safeId(p.id, added), kind: p.kind, color: p.color, p: Math.max(0, Math.min(9, p.p | 0)), t: Math.max(1, Math.min(9, p.t | 0)), power: p.power, acc: ACCS.some(a => a.id === p.acc) ? p.acc : "none", name: p.name.slice(0, 28) };
       if (p.art){ clean.art = p.art; if (["draw", "ai", "remix"].includes(p.artBy)) clean.artBy = p.artBy; }
       if (clean.artBy === "remix"){ if (isImgData(p.artOrig, 600000)) clean.artOrig = p.artOrig; else delete clean.artBy; }
-      if (bgOf(p)) clean.bg = bgOf(p); if (!have.has(clean.id)){ merged.push(clean); have.add(clean.id); added++; } });
+      if (bgOf(p)) clean.bg = bgOf(p);
+      const words = Array.isArray(p.words) ? [...new Set(p.words)].filter(w => MAGIC_WORDS.some(m => m[0] === w)).slice(0, 3) : [];
+      if (words.length) clean.words = words; if (!have.has(clean.id)){ merged.push(clean); have.add(clean.id); added++; } });
     if (!store("luna_pets", merged)){ say("There isn't enough room for all of those creatures."); return; }
     pets = merged;
     if (Number.isFinite(d.stars) && d.stars > stars){ stars = Math.floor(d.stars); store("luna_stars", stars); $("starCount").textContent = stars; }

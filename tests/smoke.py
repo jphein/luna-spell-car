@@ -1217,6 +1217,28 @@ async def remixed_creature_keeps_her_drawing(pg, mode):
         await pg.evaluate("pets = pets.filter(p => !p.id.startsWith('rmx')); store('luna_pets', pets)"); await home(pg)
 
 @test
+async def creature_keeps_magic_words(pg, mode):
+    # Her magic words are saved with the creature (and checked on restore), so editing it to repaint keeps them.
+    if mode == "android":
+        await pg.click("[data-go=maker]"); await pg.evaluate("draft = newDraft(); draft.name = 'Word Test'; renderMaker()")
+        for w in ["fluffy", "sleepy"]: await pg.click(f'#wordRow [data-w="{w}"]')
+        await pg.click("#savePet"); await dismiss(pg)
+        await pg.evaluate("modalPet = pets.find(p => p.name === 'Word Test'); $('pmEdit').click()")
+        on = await pg.evaluate("[...document.querySelectorAll('#wordRow .pick.on')].map(b => b.dataset.w).join()")
+        assert on == "fluffy,sleepy", f"her magic words were lost on save: {on!r}"
+        await pg.evaluate("editId = null; pets = pets.filter(p => p.name !== 'Word Test'); store('luna_pets', pets)"); await home(pg)
+    if mode == "web":
+        await pg.evaluate("go('book', true)"); d = await fresh_backup(pg)
+        d["pets"] = [{"id": "wrd1", "kind": "unicorn", "color": "P", "p": 1, "t": 1, "power": "fly", "name": "Wordy",
+                      "words": ["fluffy", "<b>", "fluffy", "tiny", "giant", "happy"]},
+                     {"id": "wrd2", "kind": "unicorn", "color": "P", "p": 1, "t": 1, "power": "fly", "name": "Wordless", "words": "fluffy"}]
+        await pg.set_input_files("#bkFile", files=[{"name": "b.json", "mimeType": "application/json", "buffer": json.dumps(d).encode()}])
+        await pg.wait_for_function("pets.some(p => p.name === 'Wordless')", timeout=5000)
+        got = await pg.evaluate("Object.fromEntries(pets.filter(p => p.id.startsWith('wrd')).map(p => [p.name, (p.words || []).join()]))")
+        assert got == {"Wordy": "fluffy,tiny,giant", "Wordless": ""}, f"restore kept bad magic words: {got}"
+        await pg.evaluate("pets = pets.filter(p => !p.id.startsWith('wrd')); store('luna_pets', pets)"); await home(pg)
+
+@test
 async def cloud_painting_magic(pg, mode):
     if mode != "android": return
     await pg.evaluate("drawings.push({ id: 'p-test', img: document.createElement('canvas').toDataURL('image/jpeg', .8), at: Date.now() }); store('luna_drawings', drawings)")

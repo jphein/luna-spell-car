@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- ✨ A creature keeps its magic words when it's saved, so editing it to make a new AI picture still has her picks
+  (and they're in backups).
 
 ## 1.13.1 (2026-10-17)
 - 🎉 A level-up or sticker earned in the middle of Spell Echo or Rootha Says now waits until the game is over, so the
