@@ -1548,7 +1548,8 @@ $("savePet").onclick = () => {
   if (!draft.name.trim()) draft.name = makeName(draft.kind);
   const p = { id: editId || Date.now().toString(36), kind: draft.kind, color: draft.color, p: draft.p, t: draft.t, power: draft.power, acc: draft.acc || "none", name: draft.name.trim() };
   const wasEdit = !!editId;
-  if (draft.art) p.art = draft.art;
+  if (draft.art){ p.art = draft.art; if (draft.artBy) p.artBy = draft.artBy; }
+  if (draft.artBy === "remix" && draft.artOrig) p.artOrig = draft.artOrig;  // her own drawing, so ↩️ still works when she edits it
   if (bgOf(draft)) p.bg = bgOf(draft);
   const before = pets;
   if (wasEdit){ pets = pets.map(x => x.id === editId ? p : x); } else { pets = pets.concat([p]); if (pets.length > 60) pets = pets.slice(-60); }
@@ -3817,7 +3818,9 @@ $("bkFile").onchange = () => {
     const have = new Set(pets.map(p => p.id)); let added = 0;
     const merged = pets.slice();
     d.pets.filter(ok).forEach(p => { const clean = { id: safeId(p.id, added), kind: p.kind, color: p.color, p: Math.max(0, Math.min(9, p.p | 0)), t: Math.max(1, Math.min(9, p.t | 0)), power: p.power, acc: ACCS.some(a => a.id === p.acc) ? p.acc : "none", name: p.name.slice(0, 28) };
-      if (p.art) clean.art = p.art; if (bgOf(p)) clean.bg = bgOf(p); if (!have.has(clean.id)){ merged.push(clean); have.add(clean.id); added++; } });
+      if (p.art){ clean.art = p.art; if (["draw", "ai", "remix"].includes(p.artBy)) clean.artBy = p.artBy; }
+      if (clean.artBy === "remix"){ if (isImgData(p.artOrig, 600000)) clean.artOrig = p.artOrig; else delete clean.artBy; }
+      if (bgOf(p)) clean.bg = bgOf(p); if (!have.has(clean.id)){ merged.push(clean); have.add(clean.id); added++; } });
     if (!store("luna_pets", merged)){ say("There isn't enough room for all of those creatures."); return; }
     pets = merged;
     if (Number.isFinite(d.stars) && d.stars > stars){ stars = Math.floor(d.stars); store("luna_stars", stars); $("starCount").textContent = stars; }

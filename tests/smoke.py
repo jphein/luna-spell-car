@@ -1187,6 +1187,36 @@ async def cloud_drawing_magic(pg, mode):
     await home(pg)
 
 @test
+async def remixed_creature_keeps_her_drawing(pg, mode):
+    # After saving a "made magic" creature, editing it still offers ↩️ My drawing; restore checks the kept drawing.
+    if mode == "android":
+        await pg.click("[data-go=maker]")
+        await pg.evaluate("draft = newDraft(); draft.name = 'Remix Test'; draft.art = document.createElement('canvas').toDataURL('image/jpeg', .8); draft.artBy = 'draw'; renderMaker()")
+        mine = await pg.evaluate("draft.art")
+        await pg.click("#artRemix"); await pg.wait_for_function("draft.artBy === 'remix'", timeout=8000)
+        await pg.click("#savePet"); await dismiss(pg)
+        await pg.evaluate("modalPet = pets.find(p => p.name === 'Remix Test'); $('pmEdit').click()")
+        assert await pg.is_visible("#artUndo"), "her drawing is gone after saving the magic version"
+        await pg.click("#artUndo"); assert await pg.evaluate("draft.art") == mine, "↩️ didn't bring back her own drawing"
+        # an AI picture stays an AI picture after saving: no "make my drawing magic" on it
+        await pg.evaluate("draft.artBy = 'ai'; delete draft.artOrig; $('savePet').click()"); await dismiss(pg)
+        await pg.evaluate("modalPet = pets.find(p => p.name === 'Remix Test'); $('pmEdit').click()")
+        assert not await pg.is_visible("#artRemix"), "an AI picture was offered as her drawing to repaint"
+        await pg.evaluate("editId = null; pets = pets.filter(p => p.name !== 'Remix Test'); store('luna_pets', pets)"); await home(pg)
+    if mode == "web":
+        await pg.evaluate("go('book', true)"); d = await fresh_backup(pg)
+        img = await pg.evaluate("document.createElement('canvas').toDataURL('image/jpeg', .8)")
+        base = {"kind": "unicorn", "color": "P", "p": 1, "t": 1, "power": "fly"}
+        d["pets"] = [dict(base, id="rmx1", name="Kept", art=img, artBy="remix", artOrig=img),
+                     dict(base, id="rmx2", name="Odd", art=img, artBy="remix", artOrig='data:image/png;base64,AA" onerror="x', ),
+                     dict(base, id="rmx3", name="Weird", art=img, artBy="<b>")]
+        await pg.set_input_files("#bkFile", files=[{"name": "b.json", "mimeType": "application/json", "buffer": json.dumps(d).encode()}])
+        await pg.wait_for_function("pets.some(p => p.name === 'Weird')", timeout=5000)
+        got = await pg.evaluate("Object.fromEntries(pets.filter(p => p.id.startsWith('rmx')).map(p => [p.name, [p.artBy || '', !!p.artOrig]]))")
+        assert got == {"Kept": ["remix", True], "Odd": ["", False], "Weird": ["", False]}, f"restore kept bad art fields: {got}"
+        await pg.evaluate("pets = pets.filter(p => !p.id.startsWith('rmx')); store('luna_pets', pets)"); await home(pg)
+
+@test
 async def cloud_painting_magic(pg, mode):
     if mode != "android": return
     await pg.evaluate("drawings.push({ id: 'p-test', img: document.createElement('canvas').toDataURL('image/jpeg', .8), at: Date.now() }); store('luna_drawings', drawings)")
