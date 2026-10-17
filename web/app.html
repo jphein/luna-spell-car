@@ -2976,6 +2976,7 @@ function renderParentStats(){
     `Favorite games: ${plays.length ? plays.slice(0, 5).map(([n, c]) => `${n} (${c})`).join(", ") : "none yet"}`,
     `Count the Mana: ${pct(stats.countFirst || 0, stats.countTries || 0)}`,
     `Who Wins: ${pct(stats.battleFirst || 0, stats.battleTries || 0)}`,
+    `Game levels (1 to 5): ${Object.keys(GAME_NAMES).filter(g => gameXP(g) > 0).sort((x, y) => gameXP(y) - gameXP(x)).map(g => `${GAME_NAMES[g]} ${gameLevel(g)}`).join(", ") || "none yet"}`,
     `Magic School: ${CORE.filter(l => stats.lessons[l.id]).length} of ${CORE.length} lessons` + (LESSONS.some(l => l.bonus && stats.lessons[l.id]) ? ", plus bonus lessons" : ""),
     `Stars earned in all: ${xp} (level ${levelFor(xp) + 1})`,
   ];
