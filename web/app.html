@@ -1037,8 +1037,11 @@ const LEVELS = [[0, "Apprentice"], [15, "Spark Student"], [35, "Mana Mixer"], [6
 function levelFor(x){ let l = 0; LEVELS.forEach((t, i) => { if (x >= t[0]) l = i; }); return l; }
 const celebQueue = [];
 function queueCelebrate(o){ if (window.__quietCelebrations) return; celebQueue.push(o); setTimeout(flushCelebrate, 900); }
+// A star earned mid-round (Spell Echo, Rootha Says) waits until the round is over, so it never covers the next pattern.
+const roundLive = () => echo.on || saysOn || pop.on || tc.on || bb.on;
 function flushCelebrate(){
   if (!celebQueue.length || !$("celebrate").classList.contains("hidden") || !$("viewer").classList.contains("hidden") || !$("paint").classList.contains("hidden")) return;
+  if (roundLive()){ setTimeout(flushCelebrate, 700); return; }
   showCelebrate(celebQueue.shift());
 }
 function renderStars(){

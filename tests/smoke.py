@@ -1018,6 +1018,34 @@ async def game_levels_and_trophies(pg, mode):
     await home(pg)
 
 @test
+async def celebrations_wait_for_the_round(pg, mode):
+    # A level-up earned mid-round must not cover Spell Echo's next pattern or talk over Rootha Says.
+    shown = "!document.getElementById('celebrate').classList.contains('hidden')"
+    await pg.evaluate("window.__quietCelebrations = false; celebQueue.length = 0; stats.gxp = { echo: 9 }; echo.best = 99")
+    await pg.click("[data-go=echo]"); await pg.click("#echoGo")
+    for n in (1, 2, 3):
+        await pg.wait_for_function(f"echo.on && !echo.busy && echo.seq.length === {n}", timeout=12000)
+        for k in await pg.evaluate("echo.seq"): await pg.click(f'[data-pad="{k}"]')
+    assert await pg.evaluate("gameLevel('echo')") == 2, "round 3's star didn't reach Spell Echo level 2"
+    await pg.wait_for_timeout(1600)  # the queue used to open the overlay after 900 ms, over round 4's pattern
+    assert await pg.evaluate("echo.on") and not await pg.evaluate(shown), "a celebration covered Spell Echo mid-game"
+    await pg.wait_for_function("!echo.busy", timeout=12000)
+    for _ in range(2):
+        wrong = await pg.evaluate("['U','R','P','G'].find(k => k !== echo.seq[echo.pos])")
+        await pg.click(f'[data-pad="{wrong}"]'); await pg.wait_for_timeout(200)
+        if await pg.evaluate("echo.on"): await pg.wait_for_function("!echo.busy", timeout=12000)
+    await pg.wait_for_function(shown, timeout=4000)
+    assert "Spell Echo: level 2" in await pg.inner_text("#celTitle"), "the level-up never came after the game"
+    await pg.click("#celOk")
+    await pg.evaluate("stats.gxp = { says: 9 }; go('says', true)"); await pg.click("#saysPlay")
+    await pg.evaluate("addStar(1)")  # a star for a right move, mid-game
+    await pg.wait_for_timeout(1600)
+    assert await pg.evaluate("saysOn") and not await pg.evaluate(shown), "a celebration interrupted Rootha Says"
+    await pg.click("#saysPlay"); await pg.wait_for_function(shown, timeout=4000)
+    assert "Rootha Says: level 2" in await pg.inner_text("#celTitle"), "Rootha Says level-up lost"
+    await pg.evaluate("window.__quietCelebrations = true; stats.gxp = {}; echo.best = load('luna_echo_best', 0)"); await dismiss(pg); await home(pg)
+
+@test
 async def game_difficulty(pg, mode):
     await pg.evaluate("stats.gxp = { memory: 25, count: 25, battle: 25 }")
     await pg.click("[data-go=memory]"); assert await pg.locator("#memGrid .mcard").count() == 16, "Memory level 3 should have 8 pairs"
