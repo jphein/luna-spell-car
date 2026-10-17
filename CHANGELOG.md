@@ -3,6 +3,8 @@
 ## Unreleased
 - 🎉 A level-up or sticker earned in the middle of Spell Echo or Rootha Says now waits until the game is over, so the
   celebration never covers the next color pattern or talks over Rootha.
+- ↩️ A creature she made magic keeps her own drawing after it's saved, so editing it still offers "My drawing" (and it's
+  in backups). An AI picture stays an AI picture when edited, instead of being offered as her drawing to repaint.
 
 ## 1.13.0 (2026-10-17)
 - AI pictures: 12 magic words (pick up to 3) and 5 scenes shape the picture; still a fixed list, never free text.
