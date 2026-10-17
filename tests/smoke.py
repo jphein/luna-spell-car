@@ -991,6 +991,32 @@ async def bucket_bridges_gaps(pg, mode):
     assert big["far"] == [255, 0, 0], f"a big opening should let paint through: {big}"
     await pg.evaluate("px.clearRect(0, 0, pc.width, pc.height); pUndoStack = []"); await pg.click("#pCancel"); await home(pg)
 
+@test
+async def bonus_lessons(pg, mode):
+    for lid in await pg.evaluate("LESSONS.filter(l => l.bonus).map(l => l.id)"):
+        await pg.evaluate("go('school', true)"); await pg.click(f'[data-lesson="{lid}"]', force=True)
+        for _ in range(await pg.evaluate("lsn.l.pages.length")): await solve_page(pg)
+        await dismiss(pg)
+        assert await pg.evaluate(f"!!stats.lessons['{lid}']"), f"bonus lesson {lid} not recorded"
+    assert await pg.evaluate("LESSONS.some(l => l.id === 'practice4') && LESSONS.some(l => l.id === 'instants')"), "new bonus lessons missing"
+    await home(pg)
+
+@test
+async def game_levels_and_trophies(pg, mode):
+    await pg.evaluate("window.__quietCelebrations = false; stats.gxp = { pop: 9 }; go('pop', true); stars = 0; addStar(1)")
+    await pg.wait_for_function("!document.getElementById('celebrate').classList.contains('hidden')", timeout=4000)
+    assert "Faerie Pop: level 2" in await pg.inner_text("#celTitle"), "no game level-up celebration"
+    assert await pg.evaluate("gameLevel('pop')") == 2 and await pg.evaluate("stars") == 4, "game level or bonus stars wrong"
+    await pg.evaluate("window.__quietCelebrations = true"); await dismiss(pg)
+    await pg.evaluate("go('lesson', true); addStar(1)")  # lessons don't count toward any game
+    assert await pg.evaluate("Object.keys(stats.gxp).join()") == "pop", "stars outside games leaked into a game level"
+    await pg.evaluate("stats.gxp = { fog: 30, echo: 100 }; go('stars', true)")
+    txt = await pg.inner_text("#gGrid")
+    assert "Spell Echo" in txt and "top level" in txt and "Level 3" in txt, "trophy grid wrong"
+    await pg.evaluate("go('fog', true)"); assert await pg.locator("#fogOpts button").count() == 4, "Magic Fog level 3 should offer 4 choices"
+    await pg.evaluate("stats.gxp = {}; go('fog', true)"); assert await pg.locator("#fogOpts button").count() == 3, "Magic Fog level 1 should offer 3 choices"
+    await home(pg)
+
 STACK = None
 
 async def stroke(pg):
