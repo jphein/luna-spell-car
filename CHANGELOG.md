@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+
+## 1.13.0 (2026-10-17)
 - AI pictures: 12 magic words (pick up to 3) and 5 scenes shape the picture; still a fixed list, never free text.
 - 🌟 Make my drawing magic: the AI repaints her own drawing in storybook style, with ↩️ to get hers back; 🌟 on Art Studio
   paintings makes a magic copy and keeps the original. New `/remix` endpoint in both servers with its own daily cap
