@@ -21,6 +21,7 @@ and speech. Standard library only. Configure with environment variables (or serv
   VEO_MODEL                        default veo-3.1-lite-generate-preview
   VEO_BASE                         default https://generativelanguage.googleapis.com/v1beta
   VIDEO_DIR                        where finished clips are kept (default server/videos)
+  SHORTS_DIR                       Rootha's private movies: index.json [{id, title}] + <id>.mp4 (+ <id>.jpg) (default server/shorts)
   KID_NAME                         default Luna
   STORIES_PER_DAY / IMAGES_PER_DAY / TTS_CHARS_PER_DAY / VIDEOS_PER_DAY   daily caps (40 / 20 / 60000 / 16)
   PORT                             default 8787
@@ -47,6 +48,7 @@ GEMINI_KEY = E("GEMINI_API_KEY", "")
 VEO_MODEL = E("VEO_MODEL", "veo-3.1-lite-generate-preview")
 VEO_BASE = E("VEO_BASE", "https://generativelanguage.googleapis.com/v1beta").rstrip("/")
 VIDEO_DIR = E("VIDEO_DIR", os.path.join(HERE, "videos"))
+SHORTS_DIR = E("SHORTS_DIR", os.path.join(HERE, "shorts"))  # Rootha's private movies: index.json + <id>.mp4 (+ <id>.jpg)
 KID = re.sub(r"[^A-Za-z \-']", "", E("KID_NAME", "Luna"))[:20] or "Luna"
 IMG_EDIT_API_VER = E("AZURE_OPENAI_IMAGE_EDIT_API_VERSION", "2025-04-01-preview")
 LIMITS = {"remix": int(E("REMIXES_PER_DAY", "20")), "story": int(E("STORIES_PER_DAY", "40")), "image": int(E("IMAGES_PER_DAY", "20")), "tts": int(E("TTS_CHARS_PER_DAY", "60000")),
@@ -109,6 +111,17 @@ def post(url, payload, headers, timeout=90, raw=False):
         raise Fail(504, f"azure unreachable: {e}")
 
 def clean(s, n): return re.sub(r"[\x00-\x1f<>{}\[\]`]", " ", str(s))[:n].strip()
+def shorts_list():
+    """The movies listed in SHORTS_DIR/index.json that really exist; ids are checked, so a path never leaves the folder."""
+    try:
+        with open(os.path.join(SHORTS_DIR, "index.json")) as f: items = json.load(f)
+    except (OSError, ValueError): return []
+    out = []
+    for it in items if isinstance(items, list) else []:
+        sid = it.get("id") if isinstance(it, dict) else None
+        if not (isinstance(sid, str) and re.fullmatch(r"[a-z0-9-]{1,32}", sid)) or not os.path.isfile(os.path.join(SHORTS_DIR, sid + ".mp4")): continue
+        out.append({"id": sid, "title": clean(it.get("title", ""), 40), "poster": os.path.isfile(os.path.join(SHORTS_DIR, sid + ".jpg"))})
+    return out
 
 def chat(system, user):
     url = f"{AOAI[0]}/openai/deployments/{CHAT_DEP}/chat/completions?api-version={API_VER}"
@@ -365,9 +378,17 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(204); self.cors(); self.send_header("Content-Length", "0"); self.end_headers()
     def do_GET(self):
         m = re.match(r"^/(animate|video)/([0-9a-f]{32})(\.mp4)?$", self.path)
-        if self.path != "/health" and not m: return self.reply(404, {"error": "not found"})
+        sm = re.match(r"^/shorts(?:/([a-z0-9-]{1,32})\.(mp4|jpg))?$", self.path)
+        if self.path != "/health" and not m and not sm: return self.reply(404, {"error": "not found"})
         if not self.authed(): return self.reply(401, {"error": "bad token"})
-        if self.path == "/health": return self.reply(200, {**CAPS, "kid": KID, "voices": sorted(VOICES)})
+        if self.path == "/health": return self.reply(200, {**CAPS, "shorts": bool(shorts_list()), "kid": KID, "voices": sorted(VOICES)})
+        if sm:
+            if not sm.group(1): return self.reply(200, {"shorts": shorts_list()})
+            it = next((x for x in shorts_list() if x["id"] == sm.group(1)), None)
+            if not it or (sm.group(2) == "jpg" and not it["poster"]): return self.reply(404, {"error": "not found"})
+            with open(os.path.join(SHORTS_DIR, f"{it['id']}.{sm.group(2)}"), "rb") as f: data = f.read()
+            ctype = ("image/png" if data[:4] == b"\x89PNG" else "image/jpeg") if sm.group(2) == "jpg" else ("video/webm" if data[:4] == b"\x1aE\xdf\xa3" else "video/mp4")
+            return self.reply(200, data, ctype)
         try:
             if m.group(1) == "animate": return self.reply(200, animate_status(m.group(2)))
             path = os.path.join(VIDEO_DIR, m.group(2) + ".mp4")

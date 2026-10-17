@@ -185,6 +185,19 @@ async function doTts(b, env, c) {
 }
 
 // ---------- Magic movies (Google Veo). Jobs in KV, clips in R2. ----------
+// ---------- Rootha's shorts: private movies uploaded to R2 under shorts/ (index.json + <id>.mp4 + <id>.jpg), never in the app ----------
+async function shortsList(env) {
+  const idx = env.CLIPS && await env.CLIPS.get("shorts/index.json"); if (!idx) return [];
+  let items; try { items = await idx.json(); } catch { return []; }
+  const have = new Set(), out = [];  // one list call instead of two heads per movie
+  let page; do { page = await env.CLIPS.list({ prefix: "shorts/", cursor: page && page.cursor }); page.objects.forEach(o => have.add(o.key)); } while (page.truncated);
+  for (const it of Array.isArray(items) ? items : []) {
+    const id = it && it.id;
+    if (typeof id !== "string" || !/^[a-z0-9-]{1,32}$/.test(id) || !have.has(`shorts/${id}.mp4`)) continue;
+    out.push({ id, title: clean(it.title || "", 40), poster: have.has(`shorts/${id}.jpg`) });
+  }
+  return out;
+}
 const getJob = async (env, key) => JSON.parse(await env.STATE.get(`job:${key}`) || "null");
 const putJob = (env, key, j) => env.STATE.put(`job:${key}`, JSON.stringify(j));
 
@@ -300,10 +313,19 @@ export default {
     if (c.token.length < 16) return json(503, { error: "server not configured: set the SPELLCAR_TOKEN secret" });
     try {
       if (req.method === "GET") {
-        const m = /^\/(animate|video)\/([0-9a-f]{32})(\.mp4)?$/.exec(path);
-        if (path !== "/health" && !m) return json(404, { error: "not found" });
+        const m = /^\/(animate|video)\/([0-9a-f]{32})(\.mp4)?$/.exec(path), sm = /^\/shorts(?:\/([a-z0-9-]{1,32})\.(mp4|jpg))?$/.exec(path);
+        if (path !== "/health" && !m && !sm) return json(404, { error: "not found" });
         if (!(await authed(req, c))) return json(401, { error: "bad token" });
-        if (path === "/health") return json(200, { ...c.caps, remix: c.caps.remix && !(await env.STATE.get("remix:unsupported")), kid: c.kid, voices: [...VOICES].sort() });
+        if (path === "/health") return json(200, { ...c.caps, remix: c.caps.remix && !(await env.STATE.get("remix:unsupported")),
+                                                    shorts: !!(env.CLIPS && await env.CLIPS.head("shorts/index.json")), kid: c.kid, voices: [...VOICES].sort() });
+        if (sm) {
+          if (!sm[1]) return json(200, { shorts: await shortsList(env) });
+          const it = (await shortsList(env)).find(x => x.id === sm[1]);
+          const obj = it && (sm[2] === "mp4" || it.poster) && await env.CLIPS.get(`shorts/${it.id}.${sm[2]}`);
+          if (!obj) return json(404, { error: "not found" });
+          return new Response(obj.body, { headers: { ...CORS, "Content-Type": (obj.httpMetadata || {}).contentType || (sm[2] === "jpg" ? "image/jpeg" : "video/mp4"),
+                                                     "Cache-Control": "private, max-age=86400" } });
+        }
         if (!c.caps.video) return json(503, { error: "video is not configured on this server" });
         if (m[1] === "animate") {
           let j = await getJob(env, m[2]); if (!j) return json(404, { error: "unknown clip" });
