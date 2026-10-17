@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+
+## 1.13.1 (2026-10-17)
 - 🎉 A level-up or sticker earned in the middle of Spell Echo or Rootha Says now waits until the game is over, so the
   celebration never covers the next color pattern or talks over Rootha.
 - ↩️ A creature she made magic keeps her own drawing after it's saved, so editing it still offers "My drawing" (and it's
