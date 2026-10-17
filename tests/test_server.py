@@ -100,6 +100,17 @@ try:
         for _ in range(3): urllib.request.urlopen(u + "/__scheduled?cron=*+*+*+*+*", timeout=10).read(); time.sleep(0.5)
         st, _, b = call(u, f"/video/{jid}.mp4")
         check(st == 200 and len(b) > 1000, "cron trigger finishes clips with no device polling")
+    # Rootha's shorts: private movies kept on the server (never in the app), listed and streamed behind the token
+    st, _, b = call(u, "/health"); check(json.loads(b).get("shorts") is True, "health reports Rootha's shorts when there's a list")
+    st, _, _ = call(u, "/shorts", token="wrong"); check(st == 401, "the shorts list needs the app token")
+    st, _, _ = call(u, "/shorts/film.mp4", token="wrong"); check(st == 401, "a short needs the app token")
+    st, h, b = call(u, "/shorts"); lst = json.loads(b).get("shorts") if st == 200 else None
+    check(lst == [{"id": "film", "title": "Rootha's big movie", "poster": True}, {"id": "hello", "title": "Hello  b from /b  Rootha", "poster": False}],
+          f"shorts list drops bad ids and missing movies, and cleans titles (got {st} {b[:200]!r})")
+    st, h, b = call(u, "/shorts/film.mp4"); check(st == 200 and h["Content-Type"].startswith("video/") and len(b) > 1000, "a short streams")
+    st, h, b = call(u, "/shorts/film.jpg"); check(st == 200 and h["Content-Type"].startswith("image/") and len(b) > 20, "a short's poster streams")
+    for bad in ("/shorts/gone.mp4", "/shorts/..%2Fbad.mp4", "/shorts/index.json", "/shorts/film.exe", "/shorts/hello.jpg"):
+        st, _, _ = call(u, bad); check(st == 404, f"no file outside the list: {bad} (got {st})")
     FakeAzure.edits_ok = False
     s2_drawing = "data:image/png;base64," + _b64.b64encode(_png(20, 20, (1, 2, 3))).decode()
 finally:

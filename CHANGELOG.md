@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- Server: `GET /shorts` lists Rootha's shorts (private family movies kept only on the server, behind the app token)
+  and `GET /shorts/<id>.mp4|.jpg` streams them, on both the Python server and the Worker.
 
 ## 1.13.2 (2026-10-17)
 - ✨ A creature keeps its magic words when it's saved, so editing it to make a new AI picture still has her picks

@@ -61,6 +61,13 @@ Set `GEMINI_API_KEY` (from Google AI Studio, on a paid tier: Veo isn't on the fr
 In the app: **For grown-ups → 🎬 Make all deck cards move**, or tap any card in My Spellbook (or 🎬 Magic movie on
 one of her creatures) → **Make it move**. Finished clips play whenever she casts that card.
 
+## Rootha's shorts (private family movies)
+Movies the family made themselves (they may show the child) live only on the server, never in the app or the public repo.
+Put an `index.json` like `[{"id": "film", "title": "Rootha's big movie"}]` in `SHORTS_DIR` (default `server/shorts/`,
+gitignored) next to `<id>.mp4` and an optional `<id>.jpg` poster. Ids are `a-z`, `0-9` and `-`. `GET /shorts` lists the
+ones that exist; `GET /shorts/<id>.mp4` / `.jpg` stream them. Both need the app token. On the Worker the same files go in
+the R2 bucket under `shorts/` (`npx wrangler r2 object put spellcar-clips/shorts/<file> --file <file> --remote`).
+
 ## Reaching it from the car
 
 The tablet needs to reach the server over the internet (phone hotspot in the car). Two good options:

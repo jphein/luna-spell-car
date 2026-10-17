@@ -81,13 +81,25 @@ class Stack:
                "AZURE_OPENAI_CHAT_DEPLOYMENT": "chat", "AZURE_OPENAI_IMAGE_DEPLOYMENT": "img", "AZURE_SPEECH_KEY": KEY,
                "AZURE_SPEECH_ENDPOINT": az + "/cognitiveservices/v1", "PORT": str(self.port),
                "GEMINI_API_KEY": KEY, "VEO_BASE": az + "/v1beta", "VEO_POLL_SECONDS": "0.3", "VIDEO_DIR": tempfile.mkdtemp(prefix="spellcar-videos-"), **{k: str(v) for k, v in limits.items()}}
+        # Rootha's shorts: a real list with one bad id and one entry whose movie is missing (both must be dropped).
+        shorts = env["SHORTS_DIR"] = tempfile.mkdtemp(prefix="spellcar-shorts-")
+        json.dump([{"id": "film", "title": "Rootha's big movie"}, {"id": "hello", "title": "Hello <b>from</b> Rootha"},
+                   {"id": "../bad", "title": "Sneaky"}, {"id": "gone", "title": "Missing movie"}], open(os.path.join(shorts, "index.json"), "w"))
+        for name, data in (("film.mp4", CLIP), ("film.jpg", png(32, 18)), ("hello.mp4", CLIP)):
+            with open(os.path.join(shorts, name), "wb") as f: f.write(data)
         self.impl = os.environ.get("SPELLCAR_IMPL", "python")
         if self.impl == "worker":
-            wd = os.path.join(ROOT, "worker"); skip = {"PORT", "VIDEO_DIR", "VEO_POLL_SECONDS"}
+            wd = os.path.join(ROOT, "worker"); skip = {"PORT", "VIDEO_DIR", "SHORTS_DIR", "VEO_POLL_SECONDS"}
+            persist = tempfile.mkdtemp(prefix="spellcar-wrangler-")
+            for name in sorted(os.listdir(shorts)):  # the same shorts, in the worker's local R2
+                ctype = {"json": "application/json", "jpg": "image/jpeg"}.get(name.rsplit(".", 1)[1], "video/webm")
+                subprocess.run(["npx", "wrangler", "r2", "object", "put", f"spellcar-clips/shorts/{name}", "--local", "--persist-to", persist,
+                                "--file", os.path.join(shorts, name), "--content-type", ctype], cwd=wd, check=True,
+                               env={**os.environ, "WRANGLER_SEND_METRICS": "false", "CI": "1"}, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             keys = [k for k in env if k.startswith(("SPELLCAR_", "AZURE_", "GEMINI_", "VEO_")) or k.endswith("_PER_DAY")]
             args = sum((["--var", f"{k}:{env[k]}"] for k in keys if k not in skip), [])
             self.proc = subprocess.Popen(["npx", "wrangler", "dev", "--test-scheduled", "--ip", "127.0.0.1", "--port", str(self.port),
-                                          "--persist-to", tempfile.mkdtemp(prefix="spellcar-wrangler-"), *args],
+                                          "--persist-to", persist, *args],
                                          cwd=wd, env={**os.environ, "WRANGLER_SEND_METRICS": "false", "CI": "1"},
                                          stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             tries = 300
