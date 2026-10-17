@@ -32,7 +32,7 @@ account, then checking it live. Read `worker/README.md` and `CLAUDE.md` for back
 6. Run `./deploy.sh` again. It deploys and uploads the secrets. Note the `https://spellcar.<subdomain>.workers.dev` URL.
 7. Live check, from the repo root: `python3 tools/live_check.py --url <worker URL>`.
    If story, picture, and voice pass and the video capability is enabled, run it once more with `--video`
-   (makes ONE real Veo clip, about $0.80). It reads the app token from `worker/.secrets` and prints no secrets.
+   (makes ONE real Veo clip, about $0.40). It reads the app token from `worker/.secrets` and prints no secrets.
    Fixes for common failures: Azure 404 means the deployment name is wrong; Azure 400 on images usually means the image
    API version (see step 5); Veo 403 or 429 usually means billing isn't enabled on the Gemini key's Google Cloud project.
 8. Optional, only if the Android SDK (platform 34, build-tools 34.0.0) and JDK 17 are installed:

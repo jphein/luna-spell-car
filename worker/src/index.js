@@ -74,7 +74,7 @@ function cfg(env) {
     apiVer: env.AZURE_OPENAI_API_VERSION || "2024-10-21", imgApiVer: env.AZURE_OPENAI_IMAGE_API_VERSION || "2024-10-21", imgEditApiVer: env.AZURE_OPENAI_IMAGE_EDIT_API_VERSION || "2025-04-01-preview",
     speechKey: env.AZURE_SPEECH_KEY || "",
     speechUrl: env.AZURE_SPEECH_ENDPOINT || (env.AZURE_SPEECH_REGION ? `https://${env.AZURE_SPEECH_REGION}.tts.speech.microsoft.com/cognitiveservices/v1` : ""),
-    gemini: env.GEMINI_API_KEY || "", veoModel: env.VEO_MODEL || "veo-3.1-fast-generate-preview",
+    gemini: env.GEMINI_API_KEY || "", veoModel: env.VEO_MODEL || "veo-3.1-lite-generate-preview",
     veoBase: (env.VEO_BASE || "https://generativelanguage.googleapis.com/v1beta").replace(/\/+$/, ""),
     kid: (env.KID_NAME || "Luna").replace(/[^A-Za-z \-']/g, "").slice(0, 20) || "Luna",
     limits: { remix: +(env.REMIXES_PER_DAY || 20), story: +(env.STORIES_PER_DAY || 40), image: +(env.IMAGES_PER_DAY || 20), tts: +(env.TTS_CHARS_PER_DAY || 60000), video: +(env.VIDEOS_PER_DAY || 16) },
@@ -148,7 +148,7 @@ async function doStory(b, env, c) {
     `It will be read aloud to her in the car.\nCharacters: ${chars.join("; and ")}. ${K} is in the story too, as a young apprentice wizard.\n` +
     `Setting: ${place}.\nRules: 140 to 190 words. Simple words and short sentences a young child understands. Gentle, happy, and a little funny. ` +
     "Nothing scary or sad, and no villains; any problem is small and solved with kindness and teamwork. " +
-    `Include one small moment where ${K} counts her blue mana and red mana out loud to cast a sparkly spell. End warmly.\n` +
+    `Include one small moment where ${K} casts a sparkly spell by counting her mana out loud correctly, one at a time, for example: one blue mana, one red mana, that makes two mana. Keep the counting simple and the numbers right. End warmly.\n` +
     "Format: the first line is only the title (no quotes, no \"Title:\"). Then the story in 3 to 5 short paragraphs separated by blank lines. " +
     "Plain text only, no markdown, no emoji.";
   return json(200, { text: await chat(c, SYSTEM, prompt) });

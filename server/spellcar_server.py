@@ -18,7 +18,7 @@ and speech. Standard library only. Configure with environment variables (or serv
   AZURE_SPEECH_KEY + AZURE_SPEECH_REGION (e.g. westus2)      (enables neural voices)
   AZURE_SPEECH_ENDPOINT            optional full override of the TTS URL
   GEMINI_API_KEY                   enables "Make it move" (Google Veo image-to-video)
-  VEO_MODEL                        default veo-3.1-fast-generate-preview
+  VEO_MODEL                        default veo-3.1-lite-generate-preview
   VEO_BASE                         default https://generativelanguage.googleapis.com/v1beta
   VIDEO_DIR                        where finished clips are kept (default server/videos)
   KID_NAME                         default Luna
@@ -44,7 +44,7 @@ API_VER, IMG_API_VER = E("AZURE_OPENAI_API_VERSION", "2024-10-21"), E("AZURE_OPE
 SPEECH_KEY, SPEECH_REGION = E("AZURE_SPEECH_KEY", ""), E("AZURE_SPEECH_REGION", "")
 SPEECH_URL = E("AZURE_SPEECH_ENDPOINT", "") or (f"https://{SPEECH_REGION}.tts.speech.microsoft.com/cognitiveservices/v1" if SPEECH_REGION else "")
 GEMINI_KEY = E("GEMINI_API_KEY", "")
-VEO_MODEL = E("VEO_MODEL", "veo-3.1-fast-generate-preview")
+VEO_MODEL = E("VEO_MODEL", "veo-3.1-lite-generate-preview")
 VEO_BASE = E("VEO_BASE", "https://generativelanguage.googleapis.com/v1beta").rstrip("/")
 VIDEO_DIR = E("VIDEO_DIR", os.path.join(HERE, "videos"))
 KID = re.sub(r"[^A-Za-z \-']", "", E("KID_NAME", "Luna"))[:20] or "Luna"
@@ -142,7 +142,7 @@ def do_story(b):
               f"It will be read aloud to her in the car.\nCharacters: {'; and '.join(chars)}. {KID} is in the story too, as a young apprentice wizard.\n"
               f"Setting: {place}.\nRules: 140 to 190 words. Simple words and short sentences a young child understands. Gentle, happy, and a little funny. "
               "Nothing scary or sad, and no villains; any problem is small and solved with kindness and teamwork. "
-              f"Include one small moment where {KID} counts her blue mana and red mana out loud to cast a sparkly spell. End warmly.\n"
+              f"Include one small moment where {KID} casts a sparkly spell by counting her mana out loud correctly, one at a time, for example: one blue mana, one red mana, that makes two mana. Keep the counting simple and the numbers right. End warmly.\n"
               "Format: the first line is only the title (no quotes, no \"Title:\"). Then the story in 3 to 5 short paragraphs separated by blank lines. "
               "Plain text only, no markdown, no emoji.")
     return {"text": chat(SYSTEM, prompt)}
