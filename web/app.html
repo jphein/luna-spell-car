@@ -257,6 +257,11 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .pmodal .petcard{width:min(300px,76vw)}
 .pmodal .rowbtns{justify-content:center}
 .pmodal .rowbtns .danger{color:var(--red)}
+/* Rootha's movies (the family's own shorts, from the server) */
+.shorts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.short{border-radius:20px;background:var(--surface);box-shadow:0 4px 0 var(--line);padding:8px 8px 10px;font-weight:600;font-size:16px;color:var(--ink);text-align:center}
+.short img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:14px;display:block;margin-bottom:6px;background:var(--bg2)}
+.short.big{grid-column:1/-1}.short.big img{max-height:260px}
 .printbtn{display:flex;align-items:center;gap:8px;margin:12px 0 0;padding:12px 18px;border-radius:99px;background:var(--chip);font-size:17px;font-weight:600}
 .pnote{color:var(--muted);font-size:14px;margin:6px 4px 0}
 /* kid-friendly question (instead of browser dialogs a young child can't read) */
@@ -859,6 +864,7 @@ body.theme-rainbow{--btn:#B8336F} body.theme-ocean{--btn:#176A9C} body.theme-can
 
   <!-- SPELLBOOK -->
   <section id="book" class="hidden">
+    <div id="shortsSec" class="hidden"><h3 class="sec-h" id="shortsH">🎬 Rootha's movies</h3><div class="shorts" id="shortRow"></div></div>
     <h3 class="sec-h">My stickers</h3>
     <div class="stickers" id="stickers"></div>
     <div class="progress"><span id="stkNote"></span><div class="pbar"><i id="stkBar"></i></div></div>
@@ -2227,7 +2233,7 @@ async function cloudConnect(quiet){
   cloudCaps = null;
   if (!cloudBase()){ refreshCloudUI(); return; }
   if (!quiet) refreshCloudUI("Connecting…");
-  try { cloudCaps = await (await cloudFetch("/health")).json(); refreshCloudUI(); if (!quiet) say("Connected to the Spell Car server!"); syncClips(); }
+  try { cloudCaps = await (await cloudFetch("/health")).json(); refreshCloudUI(); if (!quiet) say("Connected to the Spell Car server!"); syncClips(); syncShorts(); }
   catch (e) { refreshCloudUI(e && e.status === 401 ? "❌ The token doesn't match the server." : "❌ Can't reach the server. Check the address and that the tablet is online."); }
 }
 if (!window.claude){
@@ -2373,6 +2379,7 @@ function hashStr(str){ let h = 2166136261; for (let i = 0; i < str.length; i += 
 /* An Art Studio painting as a card for the movie viewer; repainting it changes the key, so it gets a fresh movie. */
 const paintingCard = d => ({ name: "My painting", full: "painting", say: "your painting", img: isImgData(d.img) ? d.img : "", painting: d.id, p: null });
 function clipKeyFor(c){
+  if (c.short) return "short:" + c.short;
   if (c.painting) return `painting:${c.painting}:${hashStr(c.img)}`;
   if (c.pet){ const p = pets.find(x => x.id === c.id); return p ? `pet:${p.id}:${p.art ? hashStr(p.art) : p.kind + p.color + (p.acc || "none") + bgOf(p)}` : null; }
   return "card:" + c.full;
@@ -2397,18 +2404,20 @@ function frame16x9(src){
 }
 async function clipURL(key){
   if (clipURLs.has(key)) return clipURLs.get(key);
-  const blob = await clipDB.get(key); if (!blob) return null;
+  const blob = key.startsWith("short:") ? await shortsDB.get("v:" + key.slice(6)) : await clipDB.get(key); if (!blob) return null;
   const u = URL.createObjectURL(blob); clipURLs.set(key, u); return u;
 }
 async function playClipIn(box, key, poster){
   const url = await clipURL(key); if (!url) return false;
+  // Rootha's shorts talk, so they play with sound at normal speed; magic movies are slowed a little and start quiet.
+  const talk = key.startsWith("short:"), rate = talk ? 1 : 0.8; let on = talk || clipSound;
   box.innerHTML = ""; const v = document.createElement("video");
-  v.src = url; v.muted = !clipSound; v.playsInline = true; v.setAttribute("playsinline", ""); v.autoplay = true; if (poster) v.poster = poster;
-  v.addEventListener("loadedmetadata", () => { v.playbackRate = 0.8; });
-  v.addEventListener("play", () => { v.playbackRate = 0.8; });
+  v.src = url; v.muted = !on; v.playsInline = true; v.setAttribute("playsinline", ""); v.autoplay = true; if (poster) v.poster = poster;
+  v.addEventListener("loadedmetadata", () => { v.playbackRate = rate; });
+  v.addEventListener("play", () => { v.playbackRate = rate; });
   v.onclick = () => { v.currentTime = 0; v.play().catch(() => {}); };
-  const snd = document.createElement("button"); snd.className = "snd"; snd.textContent = clipSound ? "🔊" : "🔈"; snd.setAttribute("aria-label", "Movie sound");
-  snd.onclick = e => { e.stopPropagation(); clipSound = !clipSound; v.muted = !clipSound; snd.textContent = clipSound ? "🔊" : "🔈"; store("luna_clipsound", clipSound); };
+  const snd = document.createElement("button"); snd.className = "snd"; snd.textContent = on ? "🔊" : "🔈"; snd.setAttribute("aria-label", "Movie sound");
+  snd.onclick = e => { e.stopPropagation(); on = !on; v.muted = !on; snd.textContent = on ? "🔊" : "🔈"; if (!talk){ clipSound = on; store("luna_clipsound", clipSound); } };
   box.appendChild(v); box.appendChild(snd);
   v.play().catch(() => {});
   return true;
@@ -2495,9 +2504,10 @@ function theaterAt(i){
     box.innerHTML = `<div class="brew">🍿</div>`; $("thName").textContent = "The end! 🍿"; $("thNext").classList.add("hidden");
     burst(20); chime(); say("The end! What a great movie night!"); return;
   }
-  const c = theater.list[i]; $("thName").textContent = c.name; $("thNext").classList.remove("hidden"); say(`${c.say}!`);
+  const c = theater.list[i]; $("thName").textContent = c.name; $("thNext").classList.remove("hidden");
   const next = () => { if (gen === theater.gen) setTimeout(() => { if (gen === theater.gen) theaterAt(i + 1); }, 700); };
-  playClipIn(box, clipKeyFor(c), c.img).then(ok => {
+  (c.short ? new Promise(r => say(`${c.say}!`, r)) : (say(`${c.say}!`), Promise.resolve()))
+  .then(() => gen === theater.gen ? playClipIn(box, clipKeyFor(c), c.img) : false).then(ok => {
     if (gen !== theater.gen) return;
     const v = box.querySelector("video"); if (!ok || !v) return next();
     v.addEventListener("ended", next, { once: true }); v.addEventListener("error", next, { once: true });  // a broken clip never gets stuck
@@ -2528,6 +2538,54 @@ $("clipAll").onclick = async () => {
   }
   refreshCloudUI(`🎬 Making ${n} movies. They'll appear in My Spellbook over the next few minutes.`);
 };
+
+/* ---------- ROOTHA'S MOVIES: the family's own shorts, kept on the Spell Car server (never in the app) ---------- */
+// Each one downloads once and stays on this device, so it plays offline in the car. They can always be fetched again
+// from the server, so (like voice clips) they stay out of backups.
+const shortsDB = idbStore("spellcar-shorts", "shorts"), shortHave = new Set(), shortPics = new Map();
+let shortsIndex = [], shortsBusy = false;
+async function loadShorts(){
+  try { const [l, ks] = await Promise.all([shortsDB.get("index"), shortsDB.keys()]); shortsIndex = Array.isArray(l) ? l : []; (ks || []).forEach(k => { if (/^[vp]:/.test(k)) shortHave.add(k); }); }  // movies and posters, never the "index" itself
+  catch (e) {}
+  renderShorts();
+}
+async function shortPic(id){
+  if (shortPics.has(id)) return shortPics.get(id);
+  const b = await shortsDB.get("p:" + id).catch(() => null), u = b ? URL.createObjectURL(b) : ""; shortPics.set(id, u); return u;
+}
+function renderShorts(){
+  const row = $("shortRow"), vis = shortsIndex.filter(s => shortHave.has("v:" + s.id));
+  $("shortsSec").classList.toggle("hidden", !vis.length); row.innerHTML = "";
+  vis.forEach((s, i) => {
+    const b = document.createElement("button"); b.className = "short" + (i === 0 && vis.length > 2 ? " big" : ""); b.dataset.short = s.id; b.setAttribute("aria-label", s.title);
+    const im = document.createElement("img"); im.alt = ""; const t = document.createElement("span"); t.textContent = s.title; b.append(im, t);
+    shortPic(s.id).then(u => { if (u) im.src = u; else im.remove(); });
+    b.onclick = () => playShort(s); row.appendChild(b);
+  });
+}
+async function playShort(s){
+  theater.list = [{ name: s.title, say: s.title, short: s.id, img: await shortPic(s.id) }];
+  $("theater").classList.remove("hidden"); tick(4); theaterAt(0);
+}
+$("shortsH").onclick = () => say("Rootha's movies! Rootha made these just for you. Tap one to watch!");
+async function syncShorts(){
+  if (shortsBusy || !(cloudCaps && cloudCaps.shorts)) return; shortsBusy = true;
+  try {
+    const { shorts: list } = await (await cloudFetch("/shorts")).json();
+    const idx = (Array.isArray(list) ? list : []).filter(s => s && /^[a-z0-9-]{1,32}$/.test(s.id))
+      .map(s => ({ id: s.id, title: String(s.title || "").slice(0, 40), poster: !!s.poster }));
+    await shortsDB.put("index", idx); shortsIndex = idx; renderShorts();
+    for (const s of idx){
+      if (s.poster && !shortHave.has("p:" + s.id)){ await shortsDB.put("p:" + s.id, await (await cloudFetch(`/shorts/${s.id}.jpg`)).blob()); shortHave.add("p:" + s.id); shortPics.delete(s.id); }
+      if (!shortHave.has("v:" + s.id)){ await shortsDB.put("v:" + s.id, await (await cloudFetch(`/shorts/${s.id}.mp4`)).blob()); shortHave.add("v:" + s.id); }
+      renderShorts();  // each movie appears as soon as it's on the device
+    }
+    for (const k of [...shortHave]) if (!idx.some(s => k === "v:" + s.id || k === "p:" + s.id)){ await shortsDB.del(k); shortHave.delete(k); }  // gone from the server
+    renderShorts();
+  } catch (e) {}  // offline or no server: the movies already here still play
+  finally { shortsBusy = false; }
+}
+loadShorts();
 
 /* ---------- SECRETS (Easter eggs) ---------- */
 const EGGS = [

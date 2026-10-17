@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- 🎬 Rootha's movies: the family's own Rootha shorts (and one big movie of them all) at the top of My Spellbook. They come
+  from the Spell Car server, download once, and then play offline in the car, with Rootha's voice at normal speed. Tap
+  the heading to hear what they are. Nothing shows without a server, and the movies are never part of the app itself.
 - Server: `GET /shorts` lists Rootha's shorts (private family movies kept only on the server, behind the app token)
   and `GET /shorts/<id>.mp4|.jpg` streams them, on both the Python server and the Worker.
 

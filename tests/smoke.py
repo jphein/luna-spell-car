@@ -1334,6 +1334,33 @@ async def movie_night_plays(pg, mode):
 
 
 @test
+async def rootha_movies_shelf(pg, mode):
+    # Rootha's shorts: the family's own movies come from the server, stay on the device, and play with sound at normal speed.
+    if mode == "web":
+        await pg.evaluate("go('book', true)"); assert not await pg.is_visible("#shortsSec"), "Rootha's movies shown with no server"
+        return await home(pg)
+    await pg.evaluate("go('book', true); syncShorts()")
+    await pg.wait_for_function("document.querySelectorAll('#shortRow .short').length === 2", timeout=15000)
+    names = await pg.evaluate("[...document.querySelectorAll('#shortRow .short')].map(b => b.textContent.trim())")
+    assert names == ["Rootha's big movie", "Hello  b from /b  Rootha"], f"shelf shows the wrong movies: {names}"
+    box = await pg.locator("#shortRow .short").first.bounding_box(); assert box["height"] >= 52 and box["width"] >= 120, f"movie tile too small: {box}"
+    await pg.evaluate("""window.__ended = false; const iv = setInterval(() => { const v = document.querySelector('#thMedia video');
+        if (v){ window.__vid = { muted: v.muted, rate: v.playbackRate }; v.addEventListener('ended', () => { window.__ended = true; }); clearInterval(iv); } }, 20);""")
+    await pg.click('#shortRow [data-short="film"]'); assert await pg.is_visible("#theater"), "tapping a movie didn't open the theater"
+    await pg.wait_for_function("document.getElementById('thName').textContent.includes('The end')", timeout=15000)
+    vid = await pg.evaluate("window.__vid")
+    assert vid and vid["muted"] is False and vid["rate"] == 1, f"Rootha's voice must play with sound at normal speed: {vid}"
+    assert await pg.evaluate("window.__ended"), "the movie didn't play to the end"
+    await pg.click("#thStop")
+    # a restart, then a sync with the server, then offline after another restart: the movies are still on the device
+    await pg.evaluate("shortsIndex = []; shortHave.clear(); loadShorts().then(syncShorts)")
+    await pg.wait_for_function("!shortsBusy && document.querySelectorAll('#shortRow .short').length === 2", timeout=15000); await pg.wait_for_timeout(300)
+    await pg.evaluate("window.__url = cloud.url; cloud.url = 'http://127.0.0.1:9'; cloudCaps = null; shortsIndex = []; shortHave.clear(); renderShorts()")
+    assert not await pg.is_visible("#shortsSec"), "renderShorts didn't reset"
+    await pg.evaluate("loadShorts()"); await pg.wait_for_function("document.querySelectorAll('#shortRow .short').length === 2", timeout=5000)
+    await pg.evaluate("cloud.url = window.__url; cloudConnect(true)"); await home(pg)
+
+@test
 async def painting_movies(pg, mode):
     # Art Studio paintings can become magic movies too (fake Veo), and join Movie night.
     if mode != "android": return
