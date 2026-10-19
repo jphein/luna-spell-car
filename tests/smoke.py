@@ -698,6 +698,39 @@ async def daily_hello(pg, mode):
     await dismiss(pg); await home(pg)
 
 @test
+async def todays_pick(pg, mode):
+    # "Rootha's pick": one gentle suggestion on home, the game she plays least, fixed for the day. The first star she
+    # earns in it today brings two bonus stars; nothing is lost if she ignores it (no streaks).
+    games = await pg.evaluate("Object.keys(GAME_NAMES)")
+    keep = await pg.evaluate("JSON.stringify({ xp, stars, plays: Object.fromEntries(Object.keys(GAME_NAMES).map(g => [g, stats['play_' + g]])) })")
+    plays = "; ".join(f"stats.play_{g} = {0 if g == 'memory' else 5}" for g in games)
+    await pg.evaluate(f"{plays}; stats.pickDay = 0; stats.pickDone = 0; store('luna_stats', stats); go('home', true)")
+    assert await pg.evaluate("todayPick()") == "memory", "the pick isn't the least-played game"
+    assert await pg.is_visible('[data-go="memory"] .picktag'), "no Rootha's pick tag on the least-played game"
+    assert await pg.locator(".picktag:visible").count() == 1, "more than one pick on home"
+    await pg.evaluate("window.__said = []; window.__say = say; say = (t, f) => { __said.push(t); __say(t, f); }; go('home')")
+    assert "Memory Match" in " ".join(await pg.evaluate("__said")), "home doesn't say today's pick out loud"
+    await pg.evaluate("stats.play_memory = 50; go('home', true)")
+    assert await pg.evaluate("todayPick()") == "memory", "the pick changed during the day"
+    await pg.evaluate("window.__quietCelebrations = false; celebQueue.length = 0")
+    try:
+        await pg.evaluate("go('count', true)"); s0 = await pg.evaluate("stars"); await pg.evaluate("addStar(1)")
+        assert await pg.evaluate("stars") == s0 + 1, "a star in another game paid the pick bonus"
+        await pg.evaluate("go('memory', true)"); s0 = await pg.evaluate("stars"); await pg.evaluate("addStar(1)")
+        assert await pg.evaluate("stars") == s0 + 3, "no pick bonus for the first star in today's pick"
+        await pg.wait_for_selector("#celebrate:not(.hidden)", timeout=4000)
+        assert "pick" in (await pg.inner_text("#celTitle")).lower(), "the pick bonus wasn't celebrated"
+        await dismiss(pg); s0 = await pg.evaluate("stars"); await pg.evaluate("addStar(1)")
+        assert await pg.evaluate("stars") == s0 + 1, "pick bonus paid twice in one day"
+    finally:
+        # put back the stars and play counts, so later tests' sticker and level-up timing doesn't shift
+        await pg.evaluate(f"say = __say; window.__quietCelebrations = true; const k = {keep}; xp = k.xp; stars = k.stars; "
+                          "Object.entries(k.plays).forEach(([g, n]) => { if (n == null) delete stats['play_' + g]; else stats['play_' + g] = n; }); "
+                          "store('luna_xp', xp); store('luna_stars', stars); store('luna_stats', stats); renderStars()")
+    await home(pg)
+    assert not await pg.is_visible('[data-go="memory"] .picktag'), "the pick tag stays after she played it"
+
+@test
 async def weekly_challenge(pg, mode):
     # One goal per week (rotating) with a special sticker; progress shows on home and is read aloud.
     await pg.evaluate("window.__chalIdx = CHALLENGES.findIndex(c => c.id === 'casts'); store('luna_week', null); week = loadWeek(); delete badges[weekNo()]; store('luna_badges', badges); go('home', true)")

@@ -80,6 +80,8 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .game-btn.solo{grid-column:1/-1}
 @media (min-width:1000px){.app.homeview{max-width:1100px}.games{grid-template-columns:repeat(3,1fr)}}
 .game-btn .newtag,.game-btn .movietag,.short .newtag{font-size:11px;background:var(--gold);color:#2B1650;padding:2px 8px;border-radius:99px;font-weight:700;vertical-align:middle;margin-left:4px}
+.game-btn.picked{position:relative;outline:3px solid var(--gold);outline-offset:2px}
+.game-btn .picktag{position:absolute;margin:0;line-height:1.3;top:-11px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:12px;font-weight:700;background:var(--gold);color:#2B1650;padding:3px 10px;border-radius:99px;box-shadow:0 3px 8px var(--shadow)}
 .grownup{margin-top:auto;padding-top:22px;color:var(--muted);font-size:13px;line-height:1.45}
 .grownup summary{cursor:pointer;font-size:15px;font-weight:600}
 
@@ -1074,7 +1076,7 @@ function bumpGame(g, n){
   }
 }
 function addStar(n = 1){
-  bumpGame(current, n);
+  bumpGame(current, n); pickBonus();
   const lv0 = levelFor(xp);
   for (let i = 0; i < n; i++){
     stars++; xp++;
@@ -1399,7 +1401,7 @@ function go(id, quiet){
   current = id; markSeen(id);
   Object.keys(screens).forEach(k => $(k).classList.toggle("hidden", k !== id));
   $("homeBtn").classList.toggle("hidden", id === "home"); $("screenTitle").textContent = screens[id]; $("screenIco").innerHTML = ICONS[id] && id !== "home" ? gemIcon(id, "-top") : "";
-  document.querySelector(".app").classList.toggle("homeview", id === "home"); if (id === "home"){ updateHomeGrid(); renderChal(); }
+  document.querySelector(".app").classList.toggle("homeview", id === "home"); if (id === "home"){ updateHomeGrid(); renderChal(); renderPick(); }
   scrollTo(0, 0);
   if (id === "window"){ renderShelf(); say("Window magic! Look outside. Tap blue when you see something blue, red for red, and purple for purple!"); }
   if (id === "maker"){ startMaker(quiet); }
@@ -1420,7 +1422,7 @@ function go(id, quiet){
   if (id === "shop"){ renderShop(); say(`Star Shop! You have ${stars} stars to spend.`); }
   if (id === "studio"){ renderStudio(); say("Art studio! Tap new painting, or tap a painting to keep working on it."); }
   if (id === "night") openNight();
-  if (id === "home" && !quiet) say("Pick a magic game!");
+  if (id === "home" && !quiet) say("Pick a magic game!" + (pickOpen() ? ` Rootha's pick for today is ${GAME_NAMES[todayPick()]}.` : ""));
 }
 document.querySelectorAll("[data-go]").forEach(b => b.onclick = () => { bumpStat("play_" + b.dataset.go); go(b.dataset.go); });
 /* An odd game out spans its whole row instead of sitting alone in half of it (tile count changes with Story Time). */
@@ -3005,6 +3007,31 @@ function dailyHello(){
   const g = helloFor(new Date().getHours());
   queueCelebrate({ emo: g.emo, title: g.title, sub: "A daily gift from Rootha: +2 stars!", spoken: `${g.title} Rootha has a little gift for you. Two stars!` });
   addStar(2);  // after the hello, so a sticker or level-up it earns is celebrated second
+}
+
+/* Rootha's pick: one gentle suggestion on home, the mini game she has played least, fixed for the day (ties broken by
+   the date). The first star she earns in it today brings two bonus stars; ignoring it costs nothing, and there's no streak.
+   Stored as numbers in stats (day * 100 + game index), so Restore's keep-the-larger merge keeps day and game together. */
+const PICK_GAMES = Object.keys(GAME_NAMES);
+function todayPick(){
+  const t = todayNum();
+  if (Math.floor((stats.pickDay || 0) / 100) !== t){
+    const n = g => stats["play_" + g] || 0, low = Math.min(...PICK_GAMES.map(n)), least = PICK_GAMES.filter(g => n(g) === low);
+    setStat("pickDay", t * 100 + PICK_GAMES.indexOf(least[Math.floor(seeded("pick" + t)() * least.length)]));
+  }
+  return PICK_GAMES[stats.pickDay % 100];
+}
+const pickOpen = () => (stats.pickDone || 0) < todayNum();
+function renderPick(){
+  document.querySelectorAll(".game-btn.picked").forEach(b => { b.classList.remove("picked"); b.querySelector(".picktag")?.remove(); });
+  const b = pickOpen() && document.querySelector(`.game-btn[data-go="${todayPick()}"]`);
+  if (b){ b.classList.add("picked"); b.insertAdjacentHTML("afterbegin", `<span class="picktag">✨ Rootha's pick</span>`); }
+}
+function pickBonus(){
+  if (!GAME_NAMES[current] || current !== todayPick() || !pickOpen()) return;
+  setStat("pickDone", todayNum()); stars += 2;
+  queueCelebrate({ emo: "✨", title: "Rootha's pick!", sub: `You played ${GAME_NAMES[current]} today. +2 bonus stars`,
+                   spoken: `You played Rootha's pick, ${GAME_NAMES[current]}! Two bonus stars!` });
 }
 
 /* ---------- STAR MAP: twelve hidden treasures ---------- */
