@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+
+## 1.15.0 (2026-10-19)
 - 🎬 A gold "🎬 NEW" on My Spellbook (and on the movie) when Rootha has a movie she hasn't watched yet; it goes away once
   she watches it. Watched movies are kept in backups.
 - For grown-ups: "How she's doing" now lists each mini game's level (1 to 5), so you can see which games have got trickier.
