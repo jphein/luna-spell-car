@@ -931,6 +931,30 @@ async def kid_tap_targets(pg, mode):
     assert not small, f"tap targets under 52px: {small}"
 
 @test
+async def accent_button_contrast(pg, mode):
+    # White text on the green, blue and red buttons (Start/Stop, the right answer, Coloring page, Done, ✓) stays readable
+    # (at least 4.5:1) in dark mode too, where the plain accent colors turn light.
+    try:
+        for scheme in ("light", "dark"):
+            await pg.emulate_media(color_scheme=scheme)
+            bad = await pg.evaluate("""() => {
+              const lum = c => { const m = c.match(/[\\d.]+/g).map(Number), f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+                                 return 0.2126 * f(m[0]) + 0.7152 * f(m[1]) + 0.0722 * f(m[2]); };
+              const box = document.createElement('div'); box.style.cssText = 'position:fixed;left:-9999px';
+              box.innerHTML = '<button class="bigplay">a</button><button class="bigplay stop">a</button><button class="ans right">1</button>'
+                + '<div class="paint"><div class="pbar2"><button class="done">a</button></div></div><div class="orderdone"><span>a</span></div><div class="ltile done">a</div>';
+              document.body.appendChild(box);
+              const els = [...box.querySelectorAll('button, .orderdone span')].map(e => [e.className || e.parentElement.className, getComputedStyle(e)])
+                .concat([['stColor', getComputedStyle($('stColor'))], ['ltile ✓', getComputedStyle(box.querySelector('.ltile'), '::after')]]);
+              const out = {};
+              for (const [n, cs] of els){ const a = lum(cs.color), b = lum(cs.backgroundColor), r = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+                if (r < 4.5) out[n] = Math.round(r * 100) / 100; }
+              box.remove(); return out; }""")
+            assert not bad, f"{scheme}: white text on accent buttons is hard to read: {bad}"
+    finally:
+        await pg.emulate_media(color_scheme="light")
+
+@test
 async def button_contrast(pg, mode):
     # White text on filled buttons stays readable (at least 4.5:1) in every app theme, light and dark.
     try:

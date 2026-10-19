@@ -6,6 +6,8 @@
   button she taps (the ✕ still looks small). A new test checks every screen.
 - 📱 Small phones: on a 360px-wide phone the ⭐ button was pushed half off the right edge on every game screen. Now the
   game's name gets its own line under the buttons there, and a test checks every screen with big star numbers.
+- 🌙 Dark mode: white words on the green, blue and red buttons were hard to read (Rootha Says' Start was 1.9:1). Those
+  buttons now use deeper colors in both modes, and a test checks each one at 4.5:1 or better.
 
 ## 1.15.0 (2026-10-19)
 - 🎬 A gold "🎬 NEW" on My Spellbook (and on the movie) when Rootha has a movie she hasn't watched yet; it goes away once
