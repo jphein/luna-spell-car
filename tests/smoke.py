@@ -526,6 +526,7 @@ async def practice_turn_5(pg, mode):
             assert await pg.locator("#lPage .lhalf").count() == 2; await pg.click("#lPage .lhalf[data-ok]")
     await dismiss(pg); await pg.evaluate("listenMode = false"); await home(pg)
 
+@test
 async def listen_mode_all_pages(pg, mode):
     # Eyes-closed mode keeps every lesson whole: tap-only pages become spoken two-choice questions.
     await pg.evaluate("go('school', true); listenMode = true; renderSchool()")

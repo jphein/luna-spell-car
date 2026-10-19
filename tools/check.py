@@ -60,5 +60,8 @@ except Exception: _tag = None  # shallow CI checkout has no tags
 if _tag:
     _cur = _released(open(os.path.join(ROOT, "CHANGELOG.md"), encoding="utf-8").read())
     check(_cur.endswith(_old), f"released CHANGELOG sections unchanged since {_tag} (new notes go under ## Unreleased)")
+_smoke = open(os.path.join(ROOT, "tests", "smoke.py"), encoding="utf-8").read()
+_undecorated = re.findall(r"(?<!@test\n)^async def (\w+)\(pg, mode\)", _smoke, re.M)  # a lost @test silently stops a test
+check(not _undecorated, "every smoke test has @test" + (f": {_undecorated}" if _undecorated else ""))
 check(len(src) < 400_000, f"app.html source size {len(src)//1024} KB")
 print("\n" + ("All checks passed." if not fails else f"{len(fails)} check(s) failed.")); sys.exit(1 if fails else 0)
