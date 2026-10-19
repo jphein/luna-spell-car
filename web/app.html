@@ -12,6 +12,7 @@
   --bg:#EFE6FF; --bg2:#E2D2FF; --surface:#FFFFFF; --ink:#2B1650; --muted:#6E5F8F;
   --violet:#7B4BE0; --blue:#2E8FE0; --red:#EF5A31; --gold:#E9A91B; --good:#1F9D63; --line:#D6C6F6;
   --shadow:rgba(60,20,120,.18); --chip:#F3ECFF;
+  --good-fill:#1B8653; --blue-fill:#2479C9; --red-fill:#CC4420;  /* behind white text: 4.5:1 or better, so not lightened in dark mode */
   color-scheme:light; box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
@@ -120,7 +121,7 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .answers{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
 .ans{min-height:84px;border-radius:24px;background:var(--surface);font-size:40px;font-weight:700;box-shadow:0 5px 0 var(--line);border:2px solid var(--line)}
 .ans:active{transform:translateY(3px);box-shadow:0 2px 0 var(--line)}
-.ans.right{background:var(--good);color:#fff;border-color:var(--good)}
+.ans.right{background:var(--good-fill);color:#fff;border-color:var(--good-fill)}
 .ans.wrong{animation:shake .4s}
 @keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
 .vs{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center}
@@ -182,8 +183,8 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .pace{display:flex;gap:10px;justify-content:center;margin-top:10px}
 .pace button{padding:10px 18px;border-radius:99px;background:var(--chip);font-size:17px;font-weight:600}
 .pace button.on{background:var(--btn);color:#fff}
-.bigplay{width:100%;padding:20px;border-radius:999px;font-size:26px;font-weight:700;color:#fff;background:var(--good);margin-top:14px;box-shadow:0 5px 0 rgba(0,0,0,.2)}
-.bigplay.stop{background:var(--red)}
+.bigplay{width:100%;padding:20px;border-radius:999px;font-size:26px;font-weight:700;color:#fff;background:var(--good-fill);margin-top:14px;box-shadow:0 5px 0 rgba(0,0,0,.2)}
+.bigplay.stop{background:var(--red-fill)}
 
 /* spellbook */
 .sec-h{font-size:21px;margin:18px 4px 10px}
@@ -288,7 +289,7 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .paint .pbar2{display:flex;align-items:center;gap:10px}
 .paint .pbar2 h2{margin:0;font-size:22px;flex:1;text-align:center}
 .paint .pbar2 button{padding:12px 18px;border-radius:99px;font-size:18px;font-weight:700;background:var(--chip)}
-.paint .pbar2 .done{background:var(--good);color:#fff}
+.paint .pbar2 .done{background:var(--good-fill);color:#fff}
 .canvaswrap{position:relative;width:100%;max-width:720px;margin:0 auto;aspect-ratio:4/3;border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 6px 20px var(--shadow);flex:none}
 .canvaswrap img.guide{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;opacity:.16;pointer-events:none}
 .canvaswrap canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
@@ -296,7 +297,7 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 /* coloring pages */
 .canvaswrap img.lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .st-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-#stColor{background:var(--blue)}
+#stColor{background:var(--blue-fill)}
 .st-pages{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-top:12px}
 .st-pages button{background:#fff;border-radius:18px;padding:6px;box-shadow:0 4px 0 var(--line)}
 .st-pages img{width:100%;aspect-ratio:4/3;display:block}
@@ -489,7 +490,7 @@ body.theme-rainbow{--btn:#B8336F} body.theme-ocean{--btn:#176A9C} body.theme-can
 .lbig{width:100%;min-height:min(56vh,700px);border-radius:30px;background:var(--chip);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;font-size:24px;line-height:1.4;font-weight:500}
 .lbig .oe{font-size:80px;line-height:1}
 .lbig b{color:var(--violet)}
-.ltile.done::after{content:"✓";position:absolute;top:6px;right:8px;width:26px;height:26px;border-radius:50%;background:var(--good);color:#fff;font-weight:700;display:grid;place-items:center}
+.ltile.done::after{content:"✓";position:absolute;top:6px;right:8px;width:26px;height:26px;border-radius:50%;background:var(--good-fill);color:#fff;font-weight:700;display:grid;place-items:center}
 .ltile.upnext{box-shadow:0 0 0 4px var(--gold),0 4px 0 var(--line);animation:pulse 1.8s ease-in-out infinite}
 .diploma-btn{width:100%;margin-top:14px;padding:18px;border-radius:999px;font-size:21px;font-weight:700;color:#2B1650;background:linear-gradient(90deg,#FFD976,#FFC94A,#FFE9A8);box-shadow:0 5px 0 rgba(0,0,0,.18)}
 .lprog{display:flex;gap:5px;justify-content:center;margin:0 0 10px}
@@ -523,7 +524,7 @@ body.theme-rainbow{--btn:#B8336F} body.theme-ocean{--btn:#176A9C} body.theme-can
 .paypool{display:flex;gap:6px;justify-content:center;min-height:30px;margin-top:10px}
 .orderbox{display:grid;gap:10px;margin-top:10px}
 .orderdone{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;min-height:44px}
-.orderdone span{background:var(--good);color:#fff;border-radius:99px;padding:8px 12px;font-weight:700;font-size:16px}
+.orderdone span{background:var(--good-fill);color:#fff;border-radius:99px;padding:8px 12px;font-weight:700;font-size:16px}
 .orderopts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .orderopts button{padding:14px 10px;border-radius:18px;background:var(--chip);font-size:18px;font-weight:600}
 .orderopts button.used{visibility:hidden}
