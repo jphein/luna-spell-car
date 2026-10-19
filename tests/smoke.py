@@ -1226,6 +1226,30 @@ async def tablet_size_games(pg, mode):
     await home(pg)
 
 @test
+async def small_phone_top_bar(pg, mode):
+    # On a small phone (360px) the top bar fits on every screen: the ⭐ button and its level badge aren't pushed off the edge.
+    try:
+        await pg.set_viewport_size({"width": 360, "height": 640})
+        # Big numbers (888 stars, Lv 12) make the ⭐ button its widest.
+        off = await pg.evaluate("""(() => { const keep = [$('starCount').textContent, $('lvlBadge').textContent], out = [], fits = s => {
+            if (document.documentElement.scrollWidth > innerWidth + 1) out.push(`${s}: page ${document.documentElement.scrollWidth}px wide`);
+            document.querySelectorAll('.top > *').forEach(e => { const r = e.getBoundingClientRect();
+              if (r.width && r.right > innerWidth + 1) out.push(`${s}: ${e.id} ends at ${Math.round(r.right)}px`); });
+            const t = $('screenTitle').firstChild, rg = document.createRange(); let i = 0;  // no word split across two lines
+            if (t) for (const w of t.textContent.split(' ')){ rg.setStart(t, i); rg.setEnd(t, i + w.length); i += w.length + 1;
+              if (new Set([...rg.getClientRects()].map(q => Math.round(q.top))).size > 1) out.push(`${s}: "${w}" split across lines`); } };
+          $('starCount').textContent = '888'; $('lvlBadge').textContent = 'Lv 12';
+          for (const s of Object.keys(screens)){ if (s === 'lesson') continue; go(s, true); fits(s); }
+          const longest = LESSONS.reduce((a, l) => l.title.length > a.title.length ? l : a);
+          startLesson(longest.id); fits('lesson ' + longest.id);
+          [$('starCount').textContent, $('lvlBadge').textContent] = keep;
+          return [...new Set(out)]; })()""")
+        assert not off, f"top bar doesn't fit at 360px: {off}"
+    finally:
+        await pg.set_viewport_size({"width": 400, "height": 860})
+        await home(pg)
+
+@test
 async def cloud_connect(pg, mode):
     if mode != "android": return
     await pg.evaluate("document.querySelector('.grownup').open = true")

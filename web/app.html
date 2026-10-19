@@ -41,8 +41,8 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .home-btn,.icon-btn{width:52px;height:52px;border-radius:50%;background:var(--surface);box-shadow:0 3px 0 var(--line);font-size:24px;display:grid;place-items:center;flex:none;color:var(--violet)}
 .uico{width:28px;height:28px;display:block}
 #starIco .uico{width:26px;height:26px}
-.stars{display:flex;align-items:center;gap:6px;background:var(--surface);padding:8px 14px;border-radius:999px;font-weight:700;font-size:20px;box-shadow:0 3px 0 var(--line)}
-.title{font-size:22px;font-weight:700}
+.stars{flex:none;display:flex;align-items:center;gap:6px;background:var(--surface);padding:8px 14px;border-radius:999px;font-weight:700;font-size:20px;box-shadow:0 3px 0 var(--line)}
+.title{font-size:22px;font-weight:700;min-width:0;overflow-wrap:anywhere}  /* may shrink, so ⭐ never leaves a small phone */
 .tico{width:44px;height:44px;flex:none;filter:drop-shadow(0 3px 5px var(--shadow))}
 .tico:empty{display:none}
 .hidden{display:none!important}
@@ -378,7 +378,7 @@ button:focus-visible,input:focus-visible{outline:4px solid var(--gold);outline-o
 .celmedia{margin-bottom:4px}
 .bk .mv{position:absolute;bottom:26%;right:6px;background:rgba(0,0,0,.5);color:#fff;font-size:13px;border-radius:99px;padding:2px 7px}
 /* levels, shop, secrets */
-.stars .lvl{font-size:13px;background:var(--btn);color:#fff;border-radius:99px;padding:2px 8px;margin-left:2px}
+.stars .lvl{white-space:nowrap;font-size:13px;background:var(--btn);color:#fff;border-radius:99px;padding:2px 8px;margin-left:2px}
 .lvl-line{margin:8px auto 0;font-size:17px;font-weight:600;color:var(--violet)}
 .lvlbar{max-width:260px;margin:6px auto 0}
 .spark{cursor:pointer}
@@ -572,7 +572,8 @@ body.theme-rainbow{--btn:#B8336F} body.theme-ocean{--btn:#176A9C} body.theme-can
 .spk{position:absolute;width:22px;height:22px;animation:fly 1.2s ease-out forwards}
 @keyframes fly{to{transform:translate(var(--dx),var(--dy)) rotate(200deg) scale(.2);opacity:0}}
 @media (prefers-reduced-motion:reduce){.mini.ready,.says .face.talk,.stk{animation:none}.spk{display:none}.celebrate .box{animation:none}#celEmo::before{animation:none}}
-@media (max-width:420px){.mana-btn{min-height:120px}.ans{min-height:72px;font-size:34px}.game-btn{min-height:136px}}
+@media (max-width:379px){.top{flex-wrap:wrap;row-gap:4px}.title{order:9;flex-basis:100%}}  /* small phone: title gets its own line */
+@media (max-width:420px){.top{gap:8px}.tico{display:none}.title{font-size:18px}.mana-btn{min-height:120px}.ans{min-height:72px;font-size:34px}.game-btn{min-height:136px}}
 </style>
 </head>
 <body>
