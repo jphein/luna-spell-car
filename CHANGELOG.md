@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+
+## 1.15.1 (2026-10-19)
 - 👆 Bigger taps: Count the Mana's circles, "Empty my mana", the Star Shop buttons, the speed pickers in Mana Bubbles and
   Rootha Says, Print my creatures, the ⭐ button, and the ✕ and 🌟 on her paintings are now at least 52px, like every other
   button she taps (the ✕ still looks small). A new test checks every screen.
