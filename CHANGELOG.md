@@ -4,6 +4,9 @@
 - 🎬 A gold "🎬 NEW" on My Spellbook (and on the movie) when Rootha has a movie she hasn't watched yet; it goes away once
   she watches it. Watched movies are kept in backups.
 - For grown-ups: "How she's doing" now lists each mini game's level (1 to 5), so you can see which games have got trickier.
+- ✨ Rootha's pick: each day one home tile wears a gold "✨ Rootha's pick" ribbon, chosen from the mini games she has
+  played least, and home says which game it is. The first star she earns in it that day brings two bonus stars. It's
+  a gentle suggestion, so there's no streak and nothing is lost if she plays something else.
 
 ## 1.14.0 (2026-10-17)
 - 🎬 Rootha's movies: the family's own Rootha shorts (and one big movie of them all) at the top of My Spellbook. They come
