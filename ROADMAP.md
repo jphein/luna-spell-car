@@ -29,6 +29,7 @@ Reorder freely; each item should be small enough for one PR, with a clear "done 
 - [ ] Grown-up "Get voices ready for the trip" button: pre-cache lesson and game phrases (costs Azure TTS; ask first).
 - [x] Parent stats: which games she plays, how her counting accuracy changes.
 - [x] A gentle "today's game" on home (Rootha's pick: her least-played mini game, a small bonus, no streaks).
+- [x] Practice Turn 5: Rootha's trick + flyers + keeping a blocker home (Practice Turn 4 "Dragon Day" shipped in 1.13.0).
 - [ ] Rootha's pick, part 2: sometimes pick a Magic School lesson she hasn't finished, or a creature to color.
 - [x] More creature kinds (mermaid; fox was already in the shop) and backgrounds (castle, beach, space, meadow).
 - [x] Pegasus: needs a drawn winged horse (there's no pegasus emoji older tablets can show).

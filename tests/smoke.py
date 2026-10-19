@@ -501,6 +501,31 @@ async def practice_turn_3(pg, mode):
     if first: assert await pg.evaluate("stars") >= s0 + 3, "no stars for the bonus lesson"
     await pg.evaluate("go('school', true)"); assert await pg.is_visible("#diplomaBtn"), "a bonus lesson hid the diploma"
     await home(pg)
+
+@test
+async def practice_turn_5(pg, mode):
+    # The turn after Dragon Day: a spell before combat wakes Rootha's trick, the Dragon and the Elemental fly in together,
+    # and on Dad's turn Rootha (who stayed home) blocks. Playable by tapping, and eyes-closed in listen mode.
+    await pg.evaluate("go('school', true)"); tile = '[data-lesson="practice5"]'
+    assert await pg.locator(tile + ".bonus").count() == 1, "no bonus Practice Turn 5 tile"
+    s0 = await pg.evaluate("stars"); first = await pg.evaluate("!stats.lessons.practice5")
+    await pg.click(tile, force=True)
+    kinds = await pg.evaluate("lsn.l.pages.map(p => p.t)"); text = await pg.evaluate("JSON.stringify(lsn.l.pages)")
+    assert kinds.count("quiz") >= 7 and "pay" in kinds, f"Practice Turn 5 too thin: {kinds}"
+    for word in ("before combat", "Elemental", "Goldspan Dragon", "flying", "block", "tapped", "life"):
+        assert word in text, f"Practice Turn 5 never mentions {word}"
+    for _ in kinds: await solve_page(pg)
+    await dismiss(pg)
+    assert await pg.evaluate("!!stats.lessons.practice5"), "Practice Turn 5 not recorded"
+    if first: assert await pg.evaluate("stars") >= s0 + 3, "no stars for the bonus lesson"
+    await pg.evaluate("go('school', true); listenMode = true; renderSchool()"); await pg.click(tile, force=True)
+    assert await pg.evaluate("lsn.lp.every(p => p.t === 'info' || p.t === 'quiz')"), "listen mode kept a tap-only page"
+    while await pg.evaluate("current === 'lesson'"):
+        await pg.wait_for_function("current !== 'lesson' || (lsn.lp[lsn.i].t === 'quiz' && !lsn.answered)", timeout=15000)
+        if await pg.evaluate("current === 'lesson'"):
+            assert await pg.locator("#lPage .lhalf").count() == 2; await pg.click("#lPage .lhalf[data-ok]")
+    await dismiss(pg); await pg.evaluate("listenMode = false"); await home(pg)
+
 async def listen_mode_all_pages(pg, mode):
     # Eyes-closed mode keeps every lesson whole: tap-only pages become spoken two-choice questions.
     await pg.evaluate("go('school', true); listenMode = true; renderSchool()")

@@ -7,6 +7,9 @@
 - ✨ Rootha's pick: each day one home tile wears a gold "✨ Rootha's pick" ribbon, chosen from the mini games she has
   played least, and home says which game it is. The first star she earns in it that day brings two bonus stars. It's
   a gentle suggestion, so there's no streak and nothing is lost if she plays something else.
+- 🌀 Bonus lesson Practice Turn 5: Rootha's Big Turn, the turn after Dragon Day. Cast Prismari Command before combat
+  (and zap Dad's flying Faerie), Rootha makes a 3/3 Elemental, the Dragon and the Elemental fly in together, and on
+  Dad's turn Rootha, who stayed home, blocks Muddle. Works eyes-closed in listen mode too.
 
 ## 1.14.0 (2026-10-17)
 - 🎬 Rootha's movies: the family's own Rootha shorts (and one big movie of them all) at the top of My Spellbook. They come
