@@ -8,6 +8,7 @@
   game's name gets its own line under the buttons there, and a test checks every screen with big star numbers.
 - 🌙 Dark mode: white words on the green, blue and red buttons were hard to read (Rootha Says' Start was 1.9:1). Those
   buttons now use deeper colors in both modes, and a test checks each one at 4.5:1 or better.
+- 🎨 The "Level 6 · Rainbow Wizard" line on home is easier to read in every theme (it was faint in Candy and Forest).
 
 ## 1.15.0 (2026-10-19)
 - 🎬 A gold "🎬 NEW" on My Spellbook (and on the movie) when Rootha has a movie she hasn't watched yet; it goes away once

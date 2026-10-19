@@ -955,6 +955,25 @@ async def accent_button_contrast(pg, mode):
         await pg.emulate_media(color_scheme="light")
 
 @test
+async def level_line_contrast(pg, mode):
+    # The home "Level 6 · Rainbow Wizard" line is readable (at least 4.5:1 on the page) in every theme, light and dark.
+    try:
+        for scheme in ("light", "dark"):
+            await pg.emulate_media(color_scheme=scheme)
+            bad = await pg.evaluate("""() => {
+              const rgb = c => { const m = c.match(/[\\d.]+/g).map(Number); return c.startsWith('color(') ? m.map(v => v * 255) : m; };
+              const lum = c => { const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+                                 return 0.2126 * f(c[0]) + 0.7152 * f(c[1]) + 0.0722 * f(c[2]); };
+              const keep = theme, out = {}; go('home', true);
+              for (const t of Object.keys(THEMES)){ theme = t; applyTheme();
+                const a = lum(rgb(getComputedStyle($('lvlLine')).color)), b = lum(rgb(getComputedStyle(document.body).backgroundColor));
+                const r = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05); if (r < 4.5) out[t] = Math.round(r * 100) / 100; }
+              theme = keep; applyTheme(); return out; }""")
+            assert not bad, f"{scheme}: the level line is hard to read in {bad}"
+    finally:
+        await pg.emulate_media(color_scheme="light")
+
+@test
 async def button_contrast(pg, mode):
     # White text on filled buttons stays readable (at least 4.5:1) in every app theme, light and dark.
     try:
