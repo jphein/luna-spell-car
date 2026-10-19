@@ -10,6 +10,8 @@
 - 🌀 Bonus lesson Practice Turn 5: Rootha's Big Turn, the turn after Dragon Day. Cast Prismari Command before combat
   (and zap Dad's flying Faerie), Rootha makes a 3/3 Elemental, the Dragon and the Elemental fly in together, and on
   Dad's turn Rootha, who stayed home, blocks Muddle. Works eyes-closed in listen mode too.
+- Tests: the eyes-closed "every lesson page" smoke test runs again (it lost its `@test` on 2026-10-15), and
+  `tools/check.py` now fails if any smoke test is missing `@test`.
 
 ## 1.14.0 (2026-10-17)
 - 🎬 Rootha's movies: the family's own Rootha shorts (and one big movie of them all) at the top of My Spellbook. They come
