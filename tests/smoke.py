@@ -913,6 +913,24 @@ async def movie_night(pg, mode):
     await home(pg)
 
 @test
+async def kid_tap_targets(pg, mode):
+    # Every button Luna taps is at least 52px both ways, on every screen. Grown-up controls are exempt: the grown-ups
+    # panel, Backup/Restore, and Game Night (a table tool for the adults).
+    small = await pg.evaluate("""(() => { const out = [];
+      for (const s of Object.keys(screens)){
+        if (s === 'night') continue;
+        go(s, true);
+        document.querySelectorAll('button, .lopt').forEach(e => {
+          if (e.offsetParent === null || e.closest('.grownup') || ['bkSave', 'bkLoad'].includes(e.id)) return;
+          const r = e.getBoundingClientRect();
+          if (r.width && r.height && (r.width < 52 || r.height < 52)) out.push(`${s}: ${e.id || e.className || e.tagName} "${e.textContent.trim().slice(0, 20)}" ${Math.round(r.width)}x${Math.round(r.height)}`);
+        });
+      }
+      return [...new Set(out)]; })()""")
+    await home(pg)
+    assert not small, f"tap targets under 52px: {small}"
+
+@test
 async def button_contrast(pg, mode):
     # White text on filled buttons stays readable (at least 4.5:1) in every app theme, light and dark.
     try:
