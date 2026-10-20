@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- ✨ Rootha's pick sometimes picks Magic School (about one day in three, while there's a lesson left). Finishing a new
+  lesson that day brings the two bonus stars. Once every lesson is done, the pick is always a game.
 
 ## 1.15.2 (2026-10-20)
 - 💾 Backup now keeps her best scores in Spell Echo and Faerie Pop (and so her Echo Star and Faerie Star progress on the
