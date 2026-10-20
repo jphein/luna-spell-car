@@ -577,6 +577,26 @@ async def backup_has_progress(pg, mode):
     await home(pg)
 
 @test
+async def backup_keeps_best_scores(pg, mode):
+    # Her Spell Echo and Faerie Pop records ("Best: 7", and the Star Map's Echo/Faerie Star progress) survive Backup/Restore.
+    if mode != "web": return
+    keep = await pg.evaluate("[echo.best, pop.best]")
+    try:
+        await pg.evaluate("echo.best = 7; store('luna_echo_best', 7); pop.best = 21; store('luna_pop_best', 21); go('book', true)")
+        d = await fresh_backup(pg)
+        assert d.get("echoBest") == 7 and d.get("popBest") == 21, f"backup is missing her best scores: {d.get('echoBest')}, {d.get('popBest')}"
+        restore = lambda b: pg.set_input_files("#bkFile", files=[{"name": "b.json", "mimeType": "application/json", "buffer": json.dumps(b).encode()}])
+        await pg.evaluate("echo.best = 0; store('luna_echo_best', 0); pop.best = 0; store('luna_pop_best', 0)")  # a new tablet
+        await restore(d); await pg.wait_for_function("echo.best === 7 && pop.best === 21", timeout=5000)
+        assert await pg.evaluate("[load('luna_echo_best', 0), load('luna_pop_best', 0)]") == [7, 21], "restored best scores weren't saved"
+        await pg.evaluate("go('echo', true)"); assert "Best: 7" in await pg.inner_text("#echoBest"), "Spell Echo doesn't show the restored best"
+        await restore({**d, "echoBest": 3, "popBest": "lots"}); await pg.wait_for_timeout(400)
+        assert await pg.evaluate("[echo.best, pop.best]") == [7, 21], "a restore lowered a best score or took junk"
+    finally:
+        await pg.evaluate(f"echo.best = {keep[0]}; store('luna_echo_best', {keep[0]}); pop.best = {keep[1]}; store('luna_pop_best', {keep[1]})")
+        await home(pg)
+
+@test
 async def new_tags_clear(pg, mode):
     # "NEW" on a home tile goes away once Luna has opened that game, and stays gone (it's saved and backed up).
     tag = "[data-go=stars] .newtag"
