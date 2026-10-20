@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+
+## 1.15.2 (2026-10-20)
 - 💾 Backup now keeps her best scores in Spell Echo and Faerie Pop (and so her Echo Star and Faerie Star progress on the
   Star Map). Restoring keeps whichever score is higher.
 - 🎨 Restoring a backup on a new tablet brings back the colors she picked (a theme she owns). It never changes colors
