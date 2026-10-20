@@ -115,7 +115,23 @@ try:
     s2_drawing = "data:image/png;base64," + _b64.b64encode(_png(20, 20, (1, 2, 3))).decode()
 finally:
     s.close()
+def tree(pid):  # pid and every descendant, across all threads (node forks from worker threads)
+    out, todo = {pid}, [pid]
+    while todo:
+        p = todo.pop()
+        try: tids = os.listdir(f"/proc/{p}/task")
+        except OSError: continue
+        for t in tids:
+            try: kids = map(int, open(f"/proc/{p}/task/{t}/children").read().split())
+            except OSError: continue
+            for k in kids:
+                if k not in out: out.add(k); todo.append(k)
+    return out
+def alive(p):
+    try: return open(f"/proc/{p}/stat").read().rsplit(")", 1)[1].split()[0] != "Z"
+    except OSError: return False
 s = Stack(REMIXES_PER_DAY=5)
+procs = tree(s.proc.pid)
 try:
     u = s.url
     st, _, b = call(u, "/remix", {"image": s2_drawing, "subject": "painting"})
@@ -125,4 +141,8 @@ try:
 finally:
     FakeAzure.edits_ok = True
     s.close()
+left = sorted(p for p in procs | tree(s.proc.pid) if alive(p))
+check(not left, f"closing the stack stops the whole server tree, not just its launcher ({len(procs)} procs, left: {left[:5]})")
+tmps = getattr(s, "tmpdirs", [])
+check(tmps and not any(os.path.exists(d) for d in tmps), f"closing the stack removes its temp dirs (got {tmps})")
 print("\n" + (f"All {IMPL} server tests passed." if not fails else f"{len(fails)} server test(s) failed.")); sys.exit(1 if fails else 0)

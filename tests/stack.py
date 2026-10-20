@@ -1,5 +1,5 @@
 """Test helper: a fake Azure (OpenAI chat + images + Speech) and a real Spell Car server pointed at it."""
-import base64, io, json, os, socket, struct, subprocess, sys, tempfile, threading, time, urllib.request, wave, zlib
+import atexit, base64, io, json, os, shutil, signal, socket, struct, subprocess, sys, tempfile, threading, time, urllib.request, wave, zlib
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 KEY, TOKEN = "fake-azure-key", "test-token-0123456789abcdef"
@@ -73,6 +73,9 @@ class Stack:
 
     """SPELLCAR_IMPL=worker runs the Cloudflare Worker (wrangler dev, local KV/R2) instead of the Python server."""
     def __init__(self, **limits):
+        self.tmpdirs, self.proc = [], None
+        atexit.register(self.close)  # a crashed run still stops its server
+        tmp = lambda prefix: self.tmpdirs.append(tempfile.mkdtemp(prefix=prefix)) or self.tmpdirs[-1]
         self.az_port, self.port = free_port(), free_port()
         self.az = ThreadingHTTPServer(("127.0.0.1", self.az_port), FakeAzure)
         threading.Thread(target=self.az.serve_forever, daemon=True).start()
@@ -80,9 +83,9 @@ class Stack:
         env = {**os.environ, "SPELLCAR_TOKEN": TOKEN, "AZURE_OPENAI_ENDPOINT": az, "AZURE_OPENAI_KEY": KEY,
                "AZURE_OPENAI_CHAT_DEPLOYMENT": "chat", "AZURE_OPENAI_IMAGE_DEPLOYMENT": "img", "AZURE_SPEECH_KEY": KEY,
                "AZURE_SPEECH_ENDPOINT": az + "/cognitiveservices/v1", "PORT": str(self.port),
-               "GEMINI_API_KEY": KEY, "VEO_BASE": az + "/v1beta", "VEO_POLL_SECONDS": "0.3", "VIDEO_DIR": tempfile.mkdtemp(prefix="spellcar-videos-"), **{k: str(v) for k, v in limits.items()}}
+               "GEMINI_API_KEY": KEY, "VEO_BASE": az + "/v1beta", "VEO_POLL_SECONDS": "0.3", "VIDEO_DIR": tmp("spellcar-videos-"), **{k: str(v) for k, v in limits.items()}}
         # Rootha's shorts: a real list with one bad id and one entry whose movie is missing (both must be dropped).
-        shorts = env["SHORTS_DIR"] = tempfile.mkdtemp(prefix="spellcar-shorts-")
+        shorts = env["SHORTS_DIR"] = tmp("spellcar-shorts-")
         json.dump([{"id": "film", "title": "Rootha's big movie"}, {"id": "hello", "title": "Hello <b>from</b> Rootha"},
                    {"id": "../bad", "title": "Sneaky"}, {"id": "gone", "title": "Missing movie"}], open(os.path.join(shorts, "index.json"), "w"))
         for name, data in (("film.mp4", CLIP), ("film.jpg", png(32, 18)), ("hello.mp4", CLIP)):
@@ -90,7 +93,7 @@ class Stack:
         self.impl = os.environ.get("SPELLCAR_IMPL", "python")
         if self.impl == "worker":
             wd = os.path.join(ROOT, "worker"); skip = {"PORT", "VIDEO_DIR", "SHORTS_DIR", "VEO_POLL_SECONDS"}
-            persist = tempfile.mkdtemp(prefix="spellcar-wrangler-")
+            persist = tmp("spellcar-wrangler-")
             for name in sorted(os.listdir(shorts)):  # the same shorts, in the worker's local R2
                 ctype = {"json": "application/json", "jpg": "image/jpeg"}.get(name.rsplit(".", 1)[1], "video/webm")
                 subprocess.run(["npx", "wrangler", "r2", "object", "put", f"spellcar-clips/shorts/{name}", "--local", "--persist-to", persist,
@@ -101,11 +104,11 @@ class Stack:
             self.proc = subprocess.Popen(["npx", "wrangler", "dev", "--test-scheduled", "--ip", "127.0.0.1", "--port", str(self.port),
                                           "--persist-to", persist, *args],
                                          cwd=wd, env={**os.environ, "WRANGLER_SEND_METRICS": "false", "CI": "1"},
-                                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
             tries = 300
         else:
             self.proc = subprocess.Popen([sys.executable, os.path.join(ROOT, "server", "spellcar_server.py")], env=env,
-                                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
             tries = 50
         self.url = f"http://127.0.0.1:{self.port}"
         for _ in range(tries):
@@ -113,4 +116,17 @@ class Stack:
             except urllib.error.HTTPError: break
             except Exception: time.sleep(0.1)
     def close(self):
-        self.proc.terminate(); self.proc.wait(5); self.az.shutdown()
+        # npx → wrangler → workerd: terminating only npx orphans the rest (they held GBs of swap on familiar), so stop the
+        # whole process group (its own session), then remove the temp dirs. Safe to call twice.
+        if self.proc and (self.proc.poll() is None or self._group_alive()):
+            try: os.killpg(self.proc.pid, signal.SIGTERM)
+            except ProcessLookupError: pass
+            end = time.time() + 10
+            while self._group_alive() and time.time() < end: self.proc.poll(); time.sleep(0.1)
+            if self._group_alive(): os.killpg(self.proc.pid, signal.SIGKILL)
+            self.proc.wait(5)
+        if getattr(self, "az", None): self.az.shutdown(); self.az = None
+        for d in self.tmpdirs: shutil.rmtree(d, ignore_errors=True)
+    def _group_alive(self):
+        try: os.killpg(self.proc.pid, 0); return True
+        except (ProcessLookupError, PermissionError): return False
