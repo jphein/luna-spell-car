@@ -1427,7 +1427,7 @@ function go(id, quiet){
   if (id === "shop"){ renderShop(); say(`Star Shop! You have ${stars} stars to spend.`); }
   if (id === "studio"){ renderStudio(); say("Art studio! Tap new painting, or tap a painting to keep working on it."); }
   if (id === "night") openNight();
-  if (id === "home" && !quiet) say("Pick a magic game!" + (pickOpen() ? ` Rootha's pick for today is ${GAME_NAMES[todayPick()]}.` : ""));
+  if (id === "home" && !quiet) say("Pick a magic game!" + (pickOpen() ? ` Rootha's pick for today is ${pickName(todayPick())}.` : ""));
 }
 document.querySelectorAll("[data-go]").forEach(b => b.onclick = () => { bumpStat("play_" + b.dataset.go); go(b.dataset.go); });
 /* An odd game out spans its whole row instead of sitting alone in half of it (tile count changes with Story Time). */
@@ -3005,7 +3005,7 @@ function bumpStat(k, n = 1){ setStat(k, (stats[k] || 0) + n); }
 
 /* Daily hello: the first open each day, Rootha greets her for the time of day with a small gift. No streaks to lose.
    The date is a number in stats, so backups carry it and restore keeps the later one. */
-const todayNum = () => { const d = new Date(); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); };
+const todayNum = () => { if (window.__today) return window.__today; const d = new Date(); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); };
 function helloFor(h){
   const [emo, part] = h < 5 ? ["🌙", "evening"] : h < 12 ? ["🌞", "morning"] : h < 17 ? ["🌤️", "afternoon"] : ["🌙", "evening"];
   return { emo, title: `Good ${part}, Luna!` };
@@ -3021,14 +3021,18 @@ function dailyHello(){
 /* Rootha's pick: one gentle suggestion on home, the mini game she has played least, fixed for the day (ties broken by
    the date). The first star she earns in it today brings two bonus stars; ignoring it costs nothing, and there's no streak.
    Stored as numbers in stats (day * 100 + game index), so Restore's keep-the-larger merge keeps day and game together. */
-const PICK_GAMES = Object.keys(GAME_NAMES);
+const PICK_GAMES = Object.keys(GAME_NAMES), PICKS = [...PICK_GAMES, "school"];
+const pickName = id => GAME_NAMES[id] || "Magic School";
 function todayPick(){
   const t = todayNum();
   if (Math.floor((stats.pickDay || 0) / 100) !== t){
-    const n = g => stats["play_" + g] || 0, low = Math.min(...PICK_GAMES.map(n)), least = PICK_GAMES.filter(g => n(g) === low);
-    setStat("pickDay", t * 100 + PICK_GAMES.indexOf(least[Math.floor(seeded("pick" + t)() * least.length)]));
+    // about one day in three, while a Magic School lesson is left, Rootha suggests a lesson instead of a game
+    let pick = CORE.some(l => !stats.lessons[l.id]) && seeded("pickschool" + t)() < 1 / 3 ? "school" : null;
+    if (!pick){ const n = g => stats["play_" + g] || 0, low = Math.min(...PICK_GAMES.map(n)), least = PICK_GAMES.filter(g => n(g) === low);
+      pick = least[Math.floor(seeded("pick" + t)() * least.length)]; }
+    setStat("pickDay", t * 100 + PICKS.indexOf(pick));
   }
-  return PICK_GAMES[stats.pickDay % 100];
+  return PICKS[stats.pickDay % 100];
 }
 const pickOpen = () => (stats.pickDone || 0) < todayNum();
 function renderPick(){
@@ -3037,10 +3041,10 @@ function renderPick(){
   if (b){ b.classList.add("picked"); b.insertAdjacentHTML("afterbegin", `<span class="picktag">✨ Rootha's pick</span>`); }
 }
 function pickBonus(){
-  if (!GAME_NAMES[current] || current !== todayPick() || !pickOpen()) return;
-  setStat("pickDone", todayNum()); stars += 2;
-  queueCelebrate({ emo: "✨", title: "Rootha's pick!", sub: `You played ${GAME_NAMES[current]} today. +2 bonus stars`,
-                   spoken: `You played Rootha's pick, ${GAME_NAMES[current]}! Two bonus stars!` });
+  if (!PICKS.includes(current) || current !== todayPick() || !pickOpen()) return;  // school: a newly finished lesson
+  setStat("pickDone", todayNum()); stars += 2; const nm = pickName(current), did = current === "school" ? "learned in" : "played";
+  queueCelebrate({ emo: "✨", title: "Rootha's pick!", sub: `You ${did} ${nm} today. +2 bonus stars`,
+                   spoken: `You ${did} Rootha's pick, ${nm}! Two bonus stars!` });
 }
 
 /* ---------- STAR MAP: twelve hidden treasures ---------- */

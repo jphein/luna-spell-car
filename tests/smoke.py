@@ -773,6 +773,8 @@ async def todays_pick(pg, mode):
     games = await pg.evaluate("Object.keys(GAME_NAMES)")
     keep = await pg.evaluate("JSON.stringify({ xp, stars, plays: Object.fromEntries(Object.keys(GAME_NAMES).map(g => [g, stats['play_' + g]])) })")
     plays = "; ".join(f"stats.play_{g} = {0 if g == 'memory' else 5}" for g in games)
+    # a day when the pick is a game, not Magic School (todays_pick_school covers those days)
+    await pg.evaluate("(() => { const t0 = todayNum(); for (let d = t0; ; d++) if (seeded('pickschool' + d)() >= 1 / 3){ window.__today = d; break; } })()")
     await pg.evaluate(f"{plays}; stats.pickDay = 0; stats.pickDone = 0; store('luna_stats', stats); go('home', true)")
     assert await pg.evaluate("todayPick()") == "memory", "the pick isn't the least-played game"
     assert await pg.is_visible('[data-go="memory"] .picktag'), "no Rootha's pick tag on the least-played game"
@@ -793,11 +795,37 @@ async def todays_pick(pg, mode):
         assert await pg.evaluate("stars") == s0 + 1, "pick bonus paid twice in one day"
     finally:
         # put back the stars and play counts, so later tests' sticker and level-up timing doesn't shift
-        await pg.evaluate(f"say = __say; window.__quietCelebrations = true; const k = {keep}; xp = k.xp; stars = k.stars; "
+        await pg.evaluate(f"say = __say; delete window.__today; window.__quietCelebrations = true; const k = {keep}; xp = k.xp; stars = k.stars; "
                           "Object.entries(k.plays).forEach(([g, n]) => { if (n == null) delete stats['play_' + g]; else stats['play_' + g] = n; }); "
                           "store('luna_xp', xp); store('luna_stars', stars); store('luna_stats', stats); renderStars()")
     await home(pg)
     assert not await pg.is_visible('[data-go="memory"] .picktag'), "the pick tag stays after she played it"
+
+@test
+async def todays_pick_school(pg, mode):
+    # Rootha's pick, part 2: on some days (while a Magic School lesson is left) the pick is Magic School; finishing a new
+    # lesson that day brings the two bonus stars. Once every lesson is done, the pick is always a game.
+    keep = await pg.evaluate("JSON.stringify({ xp, stars, lessons: stats.lessons, pickDay: stats.pickDay || 0, pickDone: stats.pickDone || 0 })")
+    try:
+        day = await pg.evaluate("""(() => { const t0 = todayNum(); for (let d = t0; d < t0 + 60; d++) if (seeded('pickschool' + d)() < 1 / 3) return d; })()""")
+        lid = await pg.evaluate("CORE[CORE.length - 1].id")
+        await pg.evaluate(f"window.__today = {day}; delete stats.lessons['{lid}']; stats.pickDay = 0; stats.pickDone = 0; go('home', true)")
+        assert await pg.evaluate("todayPick()") == "school", "no Magic School pick on a school day with a lesson left"
+        assert await pg.is_visible('[data-go="school"] .picktag'), "no Rootha's pick tag on Magic School"
+        await pg.evaluate("window.__s = []; window.__keepSay = say; say = t => __s.push(String(t)); go('home')")
+        assert "Magic School" in " ".join(await pg.evaluate("__s")), "home doesn't say the Magic School pick"
+        await pg.evaluate("say = __keepSay; true")  # (a bare function result would be called)
+        s0 = await pg.evaluate("stars"); await pg.evaluate(f"startLesson('{lid}'); finishLesson()")
+        assert await pg.evaluate("stars") == s0 + 5, "finishing a new lesson on a school-pick day didn't add the two bonus stars"
+        await dismiss(pg)
+        days = await pg.evaluate(f"""(() => {{ CORE.forEach(l => stats.lessons[l.id] = stats.lessons[l.id] || 1); const out = []; for (let d = {day}; d < {day} + 30; d++){{ window.__today = d; stats.pickDay = 0;
+                                     stats.pickDone = 0; out.push(todayPick()); }} return out; }})()""")
+        assert "school" not in days, "Magic School was picked after every lesson was done"
+    finally:
+        await pg.evaluate(f"delete window.__today; const k = {keep}; xp = k.xp; stars = k.stars; stats.lessons = k.lessons;"
+                          " stats.pickDay = k.pickDay; stats.pickDone = k.pickDone; store('luna_xp', xp); store('luna_stars', stars);"
+                          " store('luna_stats', stats); renderStars()")
+        await home(pg)
 
 @test
 async def weekly_challenge(pg, mode):
