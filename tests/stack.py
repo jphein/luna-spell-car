@@ -22,8 +22,11 @@ class FakeAzure(BaseHTTPRequestHandler):
     edits_ok = True
     def log_message(self, *a): pass
     def send(self, code, body, ctype="application/json"):
+        # Connection: close. This is an HTTP/1.0 server, and without the header workerd sometimes reuses a socket we're
+        # closing ("Network connection lost"): the worker cron/story flake, 21/600 clips under stress, 0/600 with it.
         data = body if isinstance(body, bytes) else json.dumps(body).encode()
-        self.send_response(code); self.send_header("Content-Type", ctype); self.send_header("Content-Length", str(len(data))); self.end_headers(); self.wfile.write(data)
+        self.send_response(code); self.send_header("Content-Type", ctype); self.send_header("Content-Length", str(len(data)))
+        self.send_header("Connection", "close"); self.end_headers(); self.wfile.write(data)
     def do_POST(self):
         body = self.rfile.read(int(self.headers.get("Content-Length") or 0)); FakeAzure.seen.append((self.path, body))
         if ":predictLongRunning" in self.path:
