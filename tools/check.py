@@ -30,6 +30,16 @@ check(gos <= screens, "every home tile has a screen" + (f": {sorted(gos - screen
 check(all(f'<section id="{g}"' in src for g in gos), "every screen has a <section>")
 stored = set(re.findall(r'store\("(luna_\w+)"', script)); loaded = set(re.findall(r'load\("(luna_\w+)"', script))
 check(stored <= loaded, "every saved key is loaded back" + (f": {sorted(stored - loaded)}" if stored - loaded else ""))
+# CLAUDE.md: new kinds of data go in Backup/Restore. Each saved key is in the backup (and read back on restore), or is
+# listed here as per-device/in-the-moment state on purpose. (#36: her best scores had been missed.)
+DEVICE_ONLY = {"luna_bubspeed", "luna_clipjobs", "luna_clipsound", "luna_cloud", "luna_night", "luna_pool", "luna_quiet",
+               "luna_rate", "luna_voice2", "luna_voicename"}
+_bk = re.search(r'\$\("bkSave"\)\.onclick[\s\S]*?JSON\.stringify\(\{(.*?)\}\)', script).group(1)
+_fields = set(re.findall(r"(?:^|,)\s*(\w+)", _bk))
+_restore = script[script.index('$("bkFile").onchange'):]
+_camel = lambda k: re.sub(r"_(\w)", lambda m: m.group(1).upper(), k[5:])
+_missing = sorted(k for k in stored - DEVICE_ONLY if _camel(k) not in _fields or not re.search(r'd\.%s\b|"%s"' % ((_camel(k),) * 2), _restore))
+check(not _missing, "every saved key is in Backup and Restore, or listed as device-only" + (f": {_missing}" if _missing else ""))
 css = re.sub(r"/\*.*?\*/", "", src[src.index("<style>"):src.index("</style>")], flags=re.S)  # comments aren't selectors ("CLAUDE.md", "4.5:1")
 standalone = set(re.findall(r"(?:^|[},])\s*\.([\w-]+)\s*(?=[{:,])", css, re.M))
 nested = re.findall(r"\.([\w-]+)[^{},]*?\s\.([\w-]+)\b[^{]*\{", css)

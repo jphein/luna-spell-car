@@ -3,6 +3,8 @@
 ## Unreleased
 - 💾 Backup now keeps her best scores in Spell Echo and Faerie Pop (and so her Echo Star and Faerie Star progress on the
   Star Map). Restoring keeps whichever score is higher.
+- 🎨 Restoring a backup on a new tablet brings back the colors she picked (a theme she owns). It never changes colors
+  already picked on that tablet. A new check makes sure every kind of saved data is in Backup and Restore.
 - 📖 My Spellbook says hello now (it was the only quiet screen): "You have 3 stickers and 2 creatures. 4 more stars to
   your next sticker!" A new test checks that every screen speaks when she opens it.
 - 🫧 Calmer with "reduce motion" on: the pulsing next lesson, the twinkling Star Map sky, the Star Shop's "Tap again!"

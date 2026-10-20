@@ -3963,6 +3963,8 @@ $("bkFile").onchange = () => {
     store("luna_treasures", treasures);
     if (d.owned && typeof d.owned === "object") Object.keys(d.owned).forEach(k => { if (SHOP.some(i => i.id === k)) owned[k] = owned[k] || Date.now(); });
     store("luna_owned", owned);
+    // her colors on a new tablet: only a theme she owns, and only while this tablet is still on the default
+    if (theme === "night" && typeof d.theme === "string" && THEMES[d.theme] && owned["theme:" + d.theme]){ theme = d.theme; store("luna_theme", theme); applyTheme(); }
     if (d.eggs && typeof d.eggs === "object") Object.keys(d.eggs).forEach(k => { if (EGGS.some(e => e.id === k)) eggs[k] = eggs[k] || Date.now(); });
     if (d.seen && typeof d.seen === "object") Object.keys(d.seen).forEach(k => { if (screens[k] !== undefined || /^short:[a-z0-9-]{1,32}$/.test(k)) seenGames[k] = seenGames[k] || Date.now(); });
     store("luna_seen", seenGames); renderNewTags();
