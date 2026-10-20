@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- 📖 My Spellbook says hello now (it was the only quiet screen): "You have 3 stickers and 2 creatures. 4 more stars to
+  your next sticker!" A new test checks that every screen speaks when she opens it.
 - 🫧 Calmer with "reduce motion" on: the pulsing next lesson, the twinkling Star Map sky, the Star Shop's "Tap again!"
   button, Game Night's Next turn, "Painting with magic", and the treasure gem now hold still (they keep their gold glow).
 
