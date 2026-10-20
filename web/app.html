@@ -3918,7 +3918,7 @@ $("scOpen").onclick = () => go("scene");
 // Restored ids end up in markup and clip keys: keep only plain ids, give anything else a fresh one.
 const safeId = (v, n) => /^[A-Za-z0-9_-]{1,40}$/.test(String(v ?? "")) ? String(v) : Date.now().toString(36) + "r" + n + Math.random().toString(36).slice(2, 8);
 $("bkSave").onclick = async () => {
-  const data = JSON.stringify({ app: "luna-spell-car", v: 4, at: new Date().toISOString(), stars, xp, owned, eggs, theme, stats, treasures, cast, pets, stories, scene, drawings, seen: seenGames, week, badges });
+  const data = JSON.stringify({ app: "luna-spell-car", v: 4, at: new Date().toISOString(), stars, xp, owned, eggs, theme, stats, treasures, cast, pets, stories, scene, drawings, seen: seenGames, week, badges, echoBest: echo.best, popBest: pop.best });
   const name = `luna-spellbook-${new Date().toISOString().slice(0, 10)}.json`;
   try {
     if (downloadsCap) await downloadsCap.save({ filename: name, data: new Blob([data], { type: "application/json" }) });
@@ -3952,6 +3952,8 @@ $("bkFile").onchange = () => {
       d.stories.filter(s => s && typeof s.title === "string" && typeof s.body === "string").forEach(s => { if (!seen.has(s.title + s.at)) stories.push({ title: s.title.slice(0, 120), body: s.body.slice(0, 4000), place: s.place, who: String(s.who || "").slice(0, 80), at: s.at || 0 }); });
       stories.sort((a, b) => (b.at || 0) - (a.at || 0)); stories = stories.slice(0, 30); store("luna_stories", stories); }
     if (Number.isFinite(d.xp) && d.xp > xp){ xp = Math.floor(d.xp); store("luna_xp", xp); }
+    [["echoBest", echo, "luna_echo_best"], ["popBest", pop, "luna_pop_best"]].forEach(([k, g, key]) => {  // her game records: keep the higher
+      if (Number.isFinite(d[k]) && d[k] > g.best && d[k] <= 999){ g.best = Math.floor(d[k]); store(key, g.best); } });
     if (d.stats && typeof d.stats === "object"){
       Object.entries(d.stats).forEach(([k, v]) => { if (Number.isFinite(v) && v > (stats[k] || 0)) stats[k] = v; });
       if (d.stats.lessons && typeof d.stats.lessons === "object") Object.keys(d.stats.lessons).forEach(k => { if (LESSONS.some(l => l.id === k)) stats.lessons[k] = stats.lessons[k] || Date.now(); });
