@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- 🫧 Calmer with "reduce motion" on: the pulsing next lesson, the twinkling Star Map sky, the Star Shop's "Tap again!"
+  button, Game Night's Next turn, "Painting with magic", and the treasure gem now hold still (they keep their gold glow).
 
 ## 1.15.1 (2026-10-19)
 - 👆 Bigger taps: Count the Mana's circles, "Empty my mana", the Star Shop buttons, the speed pickers in Mana Bubbles and
