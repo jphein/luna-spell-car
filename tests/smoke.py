@@ -597,6 +597,29 @@ async def backup_keeps_best_scores(pg, mode):
         await home(pg)
 
 @test
+async def restore_brings_back_theme(pg, mode):
+    # On a new tablet, Restore brings back the colors she picked (if she owns them), but never overrides a theme already
+    # chosen on this tablet.
+    if mode != "web": return
+    keep = await pg.evaluate("[theme, owned['theme:ocean'] || 0]")
+    try:
+        await pg.evaluate("owned['theme:ocean'] = 1; store('luna_owned', owned); theme = 'ocean'; store('luna_theme', theme); go('book', true)")
+        d = await fresh_backup(pg); assert d.get("theme") == "ocean", "backup is missing her theme"
+        restore = lambda b: pg.set_input_files("#bkFile", files=[{"name": "b.json", "mimeType": "application/json", "buffer": json.dumps(b).encode()}])
+        await pg.evaluate("theme = 'night'; store('luna_theme', theme); applyTheme()")  # a new tablet
+        await restore(d); await pg.wait_for_function("theme === 'ocean'", timeout=5000)
+        assert await pg.evaluate("load('luna_theme') === 'ocean' && document.body.classList.contains('theme-ocean')"), "restored theme not saved or shown"
+        await pg.evaluate("owned['theme:candy'] = 1; theme = 'candy'; store('luna_theme', theme); applyTheme()")  # chosen here already
+        await restore(d); await pg.wait_for_timeout(400)
+        assert await pg.evaluate("theme") == "candy", "restore overrode a theme picked on this tablet"
+        await pg.evaluate("theme = 'night'; applyTheme()"); await restore({**d, "theme": "nope"}); await pg.wait_for_timeout(400)
+        assert await pg.evaluate("theme") == "night", "restore took a theme that doesn't exist"
+    finally:
+        await pg.evaluate(f"theme = {json.dumps(keep[0])}; store('luna_theme', theme); applyTheme(); delete owned['theme:candy'];"
+                          f" if (!{keep[1]}) delete owned['theme:ocean']; store('luna_owned', owned)")
+        await home(pg)
+
+@test
 async def new_tags_clear(pg, mode):
     # "NEW" on a home tile goes away once Luna has opened that game, and stays gone (it's saved and backed up).
     tag = "[data-go=stars] .newtag"
