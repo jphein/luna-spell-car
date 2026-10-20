@@ -955,6 +955,28 @@ async def accent_button_contrast(pg, mode):
         await pg.emulate_media(color_scheme="light")
 
 @test
+async def reduced_motion_calm(pg, mode):
+    # With "reduce motion" on, nothing decorative loops forever (pulses, glows, twinkles), on any screen or mid-play state.
+    try:
+        await pg.emulate_media(reduced_motion="reduce")
+        loops = await pg.evaluate("""(() => { const out = new Set(), scan = s => document.getAnimations().forEach(a => {
+              if (a.playState === 'running' && a.effect.getTiming().iterations === Infinity){ const t = a.effect.target;
+                out.add(`${s}: ${a.animationName} on ${t.id || t.className}${a.effect.pseudoElement || ''}`); } });
+          for (const s of Object.keys(screens)){ if (s === 'lesson') continue; go(s, true); scan(s); }
+          const flip = (el, cls, s) => { el.classList.add(cls); scan(s); el.classList.remove(cls); };
+          go('shop', true); flip(document.querySelector('.shopitem button'), 'armed', 'shop armed');
+          go('night', true); $('ntSetup').classList.add('hidden'); $('ntGame').classList.remove('hidden');
+          flip($('ntNextTurn'), 'go', 'night turn'); $('ntGame').classList.add('hidden'); $('ntSetup').classList.remove('hidden');
+          go('maker', true); flip(document.querySelector('.preview-wrap'), 'painting', 'maker painting');
+          $('celebrate').classList.remove('hidden'); $('celEmo').classList.remove('hidden');
+          flip(document.querySelector('#celebrate .box'), 'treasure', 'treasure'); $('celEmo').classList.add('hidden'); $('celebrate').classList.add('hidden');
+          return [...out]; })()""")
+        assert not loops, f"still looping with reduce motion on: {loops}"
+    finally:
+        await pg.emulate_media(reduced_motion="no-preference")
+        await home(pg)
+
+@test
 async def level_line_contrast(pg, mode):
     # The home "Level 6 · Rainbow Wizard" line is readable (at least 4.5:1 on the page) in every theme, light and dark.
     try:
