@@ -774,7 +774,7 @@ async def todays_pick(pg, mode):
     keep = await pg.evaluate("JSON.stringify({ xp, stars, plays: Object.fromEntries(Object.keys(GAME_NAMES).map(g => [g, stats['play_' + g]])) })")
     plays = "; ".join(f"stats.play_{g} = {0 if g == 'memory' else 5}" for g in games)
     # a day when the pick is a game, not Magic School (todays_pick_school covers those days)
-    await pg.evaluate("(() => { const t0 = todayNum(); for (let d = t0; ; d++) if (seeded('pickschool' + d)() >= 1 / 3){ window.__today = d; break; } })()")
+    await pg.evaluate("(() => { const t0 = todayNum(); for (let d = t0; ; d++) if (seeded('pickschool' + d)() >= 1 / 3 && seeded('pickstudio' + d)() >= 1 / 4){ window.__today = d; break; } })()")
     await pg.evaluate(f"{plays}; stats.pickDay = 0; stats.pickDone = 0; store('luna_stats', stats); go('home', true)")
     assert await pg.evaluate("todayPick()") == "memory", "the pick isn't the least-played game"
     assert await pg.is_visible('[data-go="memory"] .picktag'), "no Rootha's pick tag on the least-played game"
@@ -823,6 +823,33 @@ async def todays_pick_school(pg, mode):
         assert "school" not in days, "Magic School was picked after every lesson was done"
     finally:
         await pg.evaluate(f"delete window.__today; const k = {keep}; xp = k.xp; stars = k.stars; stats.lessons = k.lessons;"
+                          " stats.pickDay = k.pickDay; stats.pickDone = k.pickDone; store('luna_xp', xp); store('luna_stars', stars);"
+                          " store('luna_stats', stats); renderStars()")
+        await home(pg)
+
+@test
+async def todays_pick_studio(pg, mode):
+    # Rootha's pick, part 3: on some days (when she has a creature) the pick is Art Studio, to color one of her creatures;
+    # her first new painting that day brings the two bonus stars. With no creatures, Art Studio is never the pick.
+    keep = await pg.evaluate("JSON.stringify({ xp, stars, lessons: stats.lessons, pickDay: stats.pickDay || 0, pickDone: stats.pickDone || 0, pets })")
+    try:
+        await pg.evaluate("CORE.forEach(l => stats.lessons[l.id] = stats.lessons[l.id] || 1); if (!pets.length) pets.push({ id: 'pk', kind: 'unicorn', color: 'P', p: 1, t: 1, power: 'fly', name: 'Pick' })")
+        day = await pg.evaluate("(() => { const t0 = todayNum(); for (let d = t0; d < t0 + 90; d++) if (seeded('pickstudio' + d)() < 1 / 4) return d; })()")
+        await pg.evaluate(f"window.__today = {day}; stats.pickDay = 0; stats.pickDone = 0; go('home', true)")
+        assert await pg.evaluate("todayPick()") == "studio", "no Art Studio pick on a studio day"
+        assert await pg.is_visible('[data-go="studio"] .picktag'), "no Rootha's pick tag on Art Studio"
+        await pg.evaluate("window.__s = []; window.__keepSay = say; say = t => __s.push(String(t)); go('home')")
+        said = " ".join(await pg.evaluate("__s")); await pg.evaluate("say = __keepSay; true")
+        assert "Art Studio" in said and "creature" in said, f"home doesn't say the Art Studio pick: {said}"
+        await pg.evaluate("go('count', true)"); s0 = await pg.evaluate("stars"); await pg.evaluate("addStar(1)")
+        assert await pg.evaluate("stars") == s0 + 1, "a star elsewhere paid the Art Studio pick bonus"
+        await pg.evaluate("go('studio', true)"); s0 = await pg.evaluate("stars"); await pg.evaluate("addStar(1)")
+        assert await pg.evaluate("stars") == s0 + 3, "a new painting on a studio-pick day didn't add the two bonus stars"
+        picks = await pg.evaluate(f"""(() => {{ pets = []; const out = []; for (let d = {day}; d < {day} + 40; d++){{ window.__today = d; stats.pickDay = 0;
+                                      stats.pickDone = 0; out.push(todayPick()); }} return out; }})()""")
+        assert "studio" not in picks, "Art Studio was picked with no creatures to color"
+    finally:
+        await pg.evaluate(f"delete window.__today; const k = {keep}; xp = k.xp; stars = k.stars; stats.lessons = k.lessons; pets = k.pets;"
                           " stats.pickDay = k.pickDay; stats.pickDone = k.pickDone; store('luna_xp', xp); store('luna_stars', stars);"
                           " store('luna_stats', stats); renderStars()")
         await home(pg)

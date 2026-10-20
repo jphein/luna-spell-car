@@ -1427,7 +1427,7 @@ function go(id, quiet){
   if (id === "shop"){ renderShop(); say(`Star Shop! You have ${stars} stars to spend.`); }
   if (id === "studio"){ renderStudio(); say("Art studio! Tap new painting, or tap a painting to keep working on it."); }
   if (id === "night") openNight();
-  if (id === "home" && !quiet) say("Pick a magic game!" + (pickOpen() ? ` Rootha's pick for today is ${pickName(todayPick())}.` : ""));
+  if (id === "home" && !quiet) say("Pick a magic game!" + (pickOpen() ? ` Rootha's pick for today is ${pickName(todayPick())}.${todayPick() === "studio" ? " Color one of your creatures!" : ""}` : ""));
 }
 document.querySelectorAll("[data-go]").forEach(b => b.onclick = () => { bumpStat("play_" + b.dataset.go); go(b.dataset.go); });
 /* An odd game out spans its whole row instead of sitting alone in half of it (tile count changes with Story Time). */
@@ -3021,13 +3021,14 @@ function dailyHello(){
 /* Rootha's pick: one gentle suggestion on home, the mini game she has played least, fixed for the day (ties broken by
    the date). The first star she earns in it today brings two bonus stars; ignoring it costs nothing, and there's no streak.
    Stored as numbers in stats (day * 100 + game index), so Restore's keep-the-larger merge keeps day and game together. */
-const PICK_GAMES = Object.keys(GAME_NAMES), PICKS = [...PICK_GAMES, "school"];
-const pickName = id => GAME_NAMES[id] || "Magic School";
+const PICK_GAMES = Object.keys(GAME_NAMES), PICKS = [...PICK_GAMES, "school", "studio"];  // append only: stored picks are indices
+const pickName = id => GAME_NAMES[id] || { school: "Magic School", studio: "Art Studio" }[id];
 function todayPick(){
   const t = todayNum();
   if (Math.floor((stats.pickDay || 0) / 100) !== t){
     // about one day in three, while a Magic School lesson is left, Rootha suggests a lesson instead of a game
     let pick = CORE.some(l => !stats.lessons[l.id]) && seeded("pickschool" + t)() < 1 / 3 ? "school" : null;
+    if (!pick && pets.length && seeded("pickstudio" + t)() < 1 / 4) pick = "studio";  // color one of her creatures
     if (!pick){ const n = g => stats["play_" + g] || 0, low = Math.min(...PICK_GAMES.map(n)), least = PICK_GAMES.filter(g => n(g) === low);
       pick = least[Math.floor(seeded("pick" + t)() * least.length)]; }
     setStat("pickDay", t * 100 + PICKS.indexOf(pick));
@@ -3042,7 +3043,7 @@ function renderPick(){
 }
 function pickBonus(){
   if (!PICKS.includes(current) || current !== todayPick() || !pickOpen()) return;  // school: a newly finished lesson
-  setStat("pickDone", todayNum()); stars += 2; const nm = pickName(current), did = current === "school" ? "learned in" : "played";
+  setStat("pickDone", todayNum()); stars += 2; const nm = pickName(current), did = { school: "learned in", studio: "painted in" }[current] || "played";
   queueCelebrate({ emo: "✨", title: "Rootha's pick!", sub: `You ${did} ${nm} today. +2 bonus stars`,
                    spoken: `You ${did} Rootha's pick, ${nm}! Two bonus stars!` });
 }
