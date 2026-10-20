@@ -1415,7 +1415,7 @@ function go(id, quiet){
   if (id === "count") newCount();
   if (id === "battle") newBattle();
   if (id === "says") say("Rootha says, let's play! Do what Rootha says. But if Rootha doesn't say it, don't move! Tap start.");
-  if (id === "book") renderBook();
+  if (id === "book"){ renderBook(); if (!quiet) bookHello(); }
   if (id === "scene") openScene();
   if (id === "bubbles") newBubbles();
   if (id === "echo"){ echo.seq = []; renderEchoTop(); $("echoGo").textContent = "Start ▶"; $("echoGo").classList.remove("hidden"); say("Spell Echo! Watch the colors light up, then tap them in the same order. Tap start!"); }
@@ -1707,6 +1707,10 @@ document.querySelectorAll("[data-pace]").forEach(b => b.onclick = () => {
 });
 
 /* ---------- SPELLBOOK ---------- */
+function bookHello(){
+  const n = Math.floor(xp / 10), left = 10 - (xp % 10), pl = (k, w) => `${k} ${w}${k > 1 ? "s" : ""}`;
+  say(`My Spellbook! ${n ? `You have ${pl(n, "sticker")}` : "Here are your stickers"}${pets.length ? ` and ${pl(pets.length, "creature")}` : ""}. ${pl(left, "more star")} to your next sticker!`);
+}
 function renderBook(){
   const earned = Math.floor(xp / 10), st = $("stickers"); st.innerHTML = "";
   for (let i = 0; i < Math.max(earned + 1, 8); i++){
@@ -1752,7 +1756,7 @@ if (window.AndroidBridge){
 window.__back = () => {
   if (!$("ask").classList.contains("hidden")){ askDone(null); return "stay"; }
   if (current === "lesson"){ go("school"); return "stay"; }
-  if (current === "scene"){ go("book"); return "stay"; }
+  if (current === "scene"){ go("book", true); return "stay"; }
   if (!$("theater").classList.contains("hidden")){ closeTheater(); return "stay"; }
   if (!$("viewer").classList.contains("hidden")){ $("vClose").click(); return "stay"; }
   if (!$("paint").classList.contains("hidden")){ $("pCancel").click(); return "stay"; }

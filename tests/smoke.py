@@ -955,6 +955,20 @@ async def accent_button_contrast(pg, mode):
         await pg.emulate_media(color_scheme="light")
 
 @test
+async def every_screen_speaks(pg, mode):
+    # Luna can't read yet: every screen says out loud what it is and what to do when she opens it.
+    try:
+        silent = await pg.evaluate("""(() => { window.__keepSay = say; let said = []; say = (t, f) => { said.push(String(t)); };
+          const out = [];
+          for (const s of Object.keys(screens)){ if (s === 'lesson' || s === 'home') continue; go('home', true); said = []; go(s); if (!said.length) out.push(s); }
+          go('book'); window.__bookSaid = said.join(' ');
+          return out; })()""")
+        assert not silent, f"these screens open without a word: {silent}"
+        assert "sticker" in (await pg.evaluate("__bookSaid")).lower(), "My Spellbook doesn't mention her stickers"
+    finally:
+        await pg.evaluate("say = window.__keepSay; delete window.__keepSay"); await home(pg)
+
+@test
 async def reduced_motion_calm(pg, mode):
     # With "reduce motion" on, nothing decorative loops forever (pulses, glows, twinkles), on any screen or mid-play state.
     try:
